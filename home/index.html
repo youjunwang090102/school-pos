@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>園遊會 POS 系統 (測試版)</title>
+  <!-- 引入 Tailwind CSS 加速切版，不需額外寫太多 CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入 FontAwesome 圖示 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 避免手機雙擊放大 */
+    body { touch-action: manipulation; }
+    /* 隱藏捲軸但保持可滾動 */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col md:flex-row overflow-hidden text-gray-800 font-sans">
+
+  <!-- 左側：商品選單區 -->
+  <div class="flex-1 flex flex-col h-full bg-white md:w-2/3">
+    
+    <!-- 頂部資訊列 -->
+    <header class="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md z-10">
+      <div>
+        <h1 class="text-xl font-bold"><i class="fa-solid fa-store mr-2"></i>園遊會 POS 系統</h1>
+        <p class="text-sm text-blue-200" id="current-group">目前登入：第一組 (飲料組)</p>
+      </div>
+      <div class="text-right">
+        <p class="text-sm font-semibold">組長模式</p>
+        <button onclick="resetSystem()" class="text-xs bg-blue-800 hover:bg-blue-900 px-3 py-1 rounded mt-1 transition">換班 / 登出</button>
+      </div>
+    </header>
+
+    <!-- 分類標籤區 -->
+    <div class="bg-gray-50 border-b p-3 flex space-x-2 overflow-x-auto no-scrollbar shadow-sm">
+      <button class="px-6 py-2 bg-blue-100 text-blue-700 rounded-full font-bold whitespace-nowrap" onclick="filterCategory('all')">全部商品</button>
+      <button class="px-6 py-2 bg-white border text-gray-600 rounded-full font-bold whitespace-nowrap hover:bg-gray-100" onclick="filterCategory('drink')">飲料</button>
+      <button class="px-6 py-2 bg-white border text-gray-600 rounded-full font-bold whitespace-nowrap hover:bg-gray-100" onclick="filterCategory('food')">熱食</button>
+    </div>
+
+    <!-- 商品網格區 -->
+    <div class="flex-1 p-4 overflow-y-auto bg-gray-100">
+      <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- 這裡會由 JavaScript 動態生成商品按鈕 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 右側：購物車與結帳區 -->
+  <div class="w-full md:w-1/3 lg:w-96 bg-white border-l flex flex-col h-full shadow-2xl z-20">
+    
+    <!-- 購物車標題 -->
+    <div class="bg-gray-800 text-white p-4 flex justify-between items-center">
+      <h2 class="text-lg font-bold"><i class="fa-solid fa-cart-shopping mr-2"></i>當前訂單</h2>
+      <button onclick="clearCart()" class="text-red-400 hover:text-red-300 text-sm"><i class="fa-solid fa-trash mr-1"></i>清空</button>
+    </div>
+
+    <!-- 購物車明細清單 -->
+    <div id="cart-items" class="flex-1 p-4 overflow-y-auto">
+      <!-- 這裡會由 JavaScript 動態生成購物車內容 -->
+      <div class="flex h-full items-center justify-center text-gray-400 flex-col">
+        <i class="fa-solid fa-cash-register text-4xl mb-2"></i>
+        <p>請點擊左側商品加入訂單</p>
+      </div>
+    </div>
+
+    <!-- 結算區 (固定在底部) -->
+    <div class="border-t bg-gray-50 p-4 pb-6 md:pb-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+      
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-gray-600 font-bold text-lg">總計</span>
+        <span class="text-3xl font-extrabold text-blue-600">NT$ <span id="cart-total">0</span></span>
+      </div>
+
+      <!-- 快速收現按鈕 (找零計算) -->
+      <div class="mb-4">
+        <label class="block text-sm text-gray-600 font-bold mb-2">實收金額 (點擊快速帶入)：</label>
+        <div class="flex space-x-2 mb-2">
+          <button onclick="setReceived(100)" class="flex-1 bg-white border border-gray-300 rounded py-2 font-bold text-gray-700 hover:bg-green-50 focus:ring-2 focus:ring-green-500">$100</button>
+          <button onclick="setReceived(500)" class="flex-1 bg-white border border-gray-300 rounded py-2 font-bold text-gray-700 hover:bg-green-50 focus:ring-2 focus:ring-green-500">$500</button>
+          <button onclick="setReceived(1000)" class="flex-1 bg-white border border-gray-300 rounded py-2 font-bold text-gray-700 hover:bg-green-50 focus:ring-2 focus:ring-green-500">$1000</button>
+        </div>
+        <input type="number" id="received-amount" placeholder="或手動輸入實收金額" oninput="calculateChange()" class="w-full border-2 border-gray-300 rounded-lg p-3 text-lg font-bold focus:outline-none focus:border-blue-500 text-center">
+      </div>
+
+      <!-- 找零顯示 -->
+      <div class="bg-blue-100 text-blue-800 rounded-lg p-3 flex justify-between items-center mb-4">
+        <span class="font-bold">應找零</span>
+        <span class="text-2xl font-bold" id="change-amount">$ 0</span>
+      </div>
+
+      <!-- 結帳按鈕 -->
+      <button onclick="checkout()" id="checkout-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold text-xl py-4 rounded-xl shadow-lg transform transition active:scale-95 disabled:bg-gray-400 disabled:transform-none">
+        <i class="fa-solid fa-check-circle mr-2"></i>確認結帳
+      </button>
+
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. 模擬資料庫 (Mock Data)
+    // ==========================================
+    const productsData = [
+      { id: 'p1', name: '招牌珍珠奶茶', price: 45, stock: 50, category: 'drink', color: 'bg-yellow-50' },
+      { id: 'p2', name: '冰檸檬紅茶', price: 35, stock: 40, category: 'drink', color: 'bg-red-50' },
+      { id: 'p3', name: '古早味冬瓜茶', price: 30, stock: 30, category: 'drink', color: 'bg-orange-50' },
+      { id: 'p4', name: '香酥炸雞排', price: 75, stock: 20, category: 'food', color: 'bg-amber-100' },
+      { id: 'p5', name: '黃金脆薯', price: 40, stock: 15, category: 'food', color: 'bg-yellow-100' },
+      { id: 'p6', name: '熱狗', price: 35, stock: 5, category: 'food', color: 'bg-red-100' }, // 低庫存測試
+    ];
+
+    // ==========================================
+    // 2. 應用程式狀態 (State)
+    // ==========================================
+    let cart = []; // 購物車陣列
+    let currentFilter = 'all';
+
+    // ==========================================
+    // 3. 核心邏輯與畫面渲染
+    // ==========================================
+
+    // 初始化畫面
+    function init() {
+      renderProducts();
+      updateCartUI();
+    }
+
+    // 渲染商品按鈕
+    function renderProducts() {
+      const grid = document.getElementById('product-grid');
+      grid.innerHTML = ''; // 清空現有商品
+
+      productsData.forEach(p => {
+        // 分類過濾
+        if (currentFilter !== 'all' && p.category !== currentFilter) return;
+
+        // 庫存警告樣式
+        let stockColor = p.stock > 10 ? 'text-gray-500' : 'text-red-500 font-bold';
+        let isSoldOut = p.stock <= 0;
+        let opacity = isSoldOut ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg hover:-translate-y-1 transform transition';
+
+        const btnHTML = `
+          <div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" 
+               class="border rounded-xl p-4 flex flex-col justify-between h-32 ${p.color} ${opacity} shadow-sm border-gray-200">
+            <div>
+              <h3 class="font-bold text-gray-800 text-lg leading-tight">${p.name}</h3>
+              <p class="text-blue-600 font-extrabold mt-1">$${p.price}</p>
+            </div>
+            <div class="text-right text-sm ${stockColor}">
+              ${isSoldOut ? '售完' : `剩餘: ${p.stock}`}
+            </div>
+          </div>
+        `;
+        grid.innerHTML += btnHTML;
+      });
+    }
+
+    // 分類按鈕切換
+    function filterCategory(category) {
+      currentFilter = category;
+      renderProducts();
+    }
+
+    // 加入購物車
+    function addToCart(productId) {
+      const product = productsData.find(p => p.id === productId);
+      const existingItem = cart.find(item => item.id === productId);
+
+      // 檢查庫存 (包含購物車內已有的數量)
+      const currentQtyInCart = existingItem ? existingItem.qty : 0;
+      if (currentQtyInCart >= product.stock) {
+        alert('庫存不足！');
+        return;
+      }
+
+      if (existingItem) {
+        existingItem.qty += 1;
+      } else {
+        cart.push({ ...product, qty: 1 });
+      }
+
+      updateCartUI();
+    }
+
+    // 增減購物車數量
+    function changeQty(productId, delta) {
+      const item = cart.find(i => i.id === productId);
+      const product = productsData.find(p => p.id === productId);
+
+      if (!item) return;
+
+      if (delta > 0 && item.qty >= product.stock) {
+         alert('已達庫存上限！');
+         return;
+      }
+
+      item.qty += delta;
+
+      // 如果數量小於等於 0，移出購物車
+      if (item.qty <= 0) {
+        cart = cart.filter(i => i.id !== productId);
+      }
+
+      updateCartUI();
+    }
+
+    // 更新購物車畫面與總金額
+    function updateCartUI() {
+      const cartContainer = document.getElementById('cart-items');
+      const totalSpan = document.getElementById('cart-total');
+      const checkoutBtn = document.getElementById('checkout-btn');
+
+      if (cart.length === 0) {
+        cartContainer.innerHTML = `
+          <div class="flex h-full items-center justify-center text-gray-400 flex-col">
+            <i class="fa-solid fa-cash-register text-4xl mb-2"></i>
+            <p>請點擊左側商品加入訂單</p>
+          </div>
+        `;
+        totalSpan.innerText = '0';
+        checkoutBtn.disabled = true;
+        document.getElementById('received-amount').value = '';
+        document.getElementById('change-amount').innerText = '$ 0';
+        return;
+      }
+
+      checkoutBtn.disabled = false;
+      let total = 0;
+      cartContainer.innerHTML = '';
+
+      cart.forEach(item => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+
+        cartContainer.innerHTML += `
+          <div class="flex justify-between items-center mb-3 bg-white border p-3 rounded-lg shadow-sm">
+            <div class="flex-1">
+              <h4 class="font-bold text-gray-800">${item.name}</h4>
+              <p class="text-sm text-gray-500">$${item.price}</p>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 font-bold hover:bg-gray-300">-</button>
+              <span class="font-bold text-lg w-6 text-center">${item.qty}</span>
+              <button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold hover:bg-blue-200">+</button>
+            </div>
+            
+            <div class="w-16 text-right font-bold text-blue-600">
+              $${itemTotal}
+            </div>
+          </div>
+        `;
+      });
+
+      totalSpan.innerText = total;
+      calculateChange(); // 每次更新購物車重新計算找零
+    }
+
+    // 清空購物車
+    function clearCart() {
+      if(confirm('確定要清空當前訂單嗎？')){
+        cart = [];
+        updateCartUI();
+      }
+    }
+
+    // 快速設定實收金額
+    function setReceived(amount) {
+      document.getElementById('received-amount').value = amount;
+      calculateChange();
+    }
+
+    // 計算找零
+    function calculateChange() {
+      const totalText = document.getElementById('cart-total').innerText;
+      const total = parseInt(totalText) || 0;
+      const receivedInput = document.getElementById('received-amount').value;
+      const received = parseInt(receivedInput) || 0;
+
+      const changeDisplay = document.getElementById('change-amount');
+      const checkoutBtn = document.getElementById('checkout-btn');
+
+      if (receivedInput === '') {
+        changeDisplay.innerText = '$ 0';
+        changeDisplay.className = 'text-2xl font-bold text-blue-800';
+        checkoutBtn.disabled = false; // 允許未輸入收現金額直接結帳(防呆較寬鬆)
+      } else if (received >= total) {
+        changeDisplay.innerText = '$ ' + (received - total);
+        changeDisplay.className = 'text-2xl font-bold text-green-600';
+        checkoutBtn.disabled = false;
+      } else {
+        changeDisplay.innerText = '金額不足';
+        changeDisplay.className = 'text-xl font-bold text-red-500';
+        checkoutBtn.disabled = true; // 金額不足鎖定結帳
+      }
+    }
+
+    // 執行結帳 (模擬扣庫存)
+    function checkout() {
+      if(cart.length === 0) return;
+
+      const total = document.getElementById('cart-total').innerText;
+      
+      // 這裡未來會接上 Firebase 的 updateDoc(increment)
+      // 目前在前端模擬扣除本地 stock
+      cart.forEach(cartItem => {
+         const productIndex = productsData.findIndex(p => p.id === cartItem.id);
+         if(productIndex > -1) {
+            productsData[productIndex].stock -= cartItem.qty;
+         }
+      });
+
+      alert(`結帳成功！\n總金額：$${total}\n(未來將寫入資料庫並同步庫存)`);
+      
+      // 結帳後清空
+      cart = [];
+      updateCartUI();
+      renderProducts(); // 重新渲染以更新庫存顯示
+    }
+
+    // 模擬重新整理
+    function resetSystem() {
+      if(confirm('要重新載入系統嗎？')) {
+        location.reload();
+      }
+    }
+
+    // 啟動
+    init();
+
+  </script>
+</body>
+</html>
