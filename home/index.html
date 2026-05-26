@@ -3,120 +3,147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>POS 收銀台 (專業版)</title>
+  <title>ClassPOS 旗艦一體機</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { touch-action: none; user-select: none; -webkit-user-select: none; overflow: hidden; }
+    body { touch-action: none; user-select: none; overflow: hidden; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
-    /* 擬真收據邊緣效果 */
     .receipt-edge { background-image: radial-gradient(circle at 10px 0, transparent 10px, white 11px); background-size: 20px 20px; background-repeat: repeat-x; }
   </style>
 </head>
 <body class="bg-slate-100 h-screen w-screen flex font-sans text-slate-800">
 
-  <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center transition-opacity duration-300">
+  <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-300">
     <div class="bg-white p-10 rounded-[2rem] shadow-2xl w-[400px] text-center">
       <div class="w-24 h-24 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-        <i class="fa-solid fa-lock text-4xl"></i>
+        <i class="fa-solid fa-fingerprint text-4xl"></i>
       </div>
       <h2 class="text-3xl font-black mb-2 text-slate-800 tracking-widest">系統登入</h2>
-      <p class="text-slate-500 mb-8 font-medium">請輸入小組授權帳號</p>
+      <p class="text-slate-500 mb-6 font-medium text-sm">店長密碼: 0000 | 收銀密碼: 1234</p>
       
-      <input type="text" id="login-username" placeholder="帳號 (預設: group1)" class="w-full mb-4 bg-slate-50 border border-slate-200 p-4 rounded-xl focus:border-blue-500 focus:bg-white outline-none text-center font-bold text-xl transition">
-      <input type="password" id="login-pin" placeholder="密碼 (預設: 1234)" class="w-full mb-8 bg-slate-50 border border-slate-200 p-4 rounded-xl focus:border-blue-500 focus:bg-white outline-none text-center font-bold text-xl transition">
+      <input type="text" id="login-username" placeholder="帳號 (預設: group1)" class="w-full mb-4 bg-slate-50 border border-slate-200 p-4 rounded-xl focus:border-blue-500 outline-none text-center font-bold text-xl">
+      <input type="password" id="login-pin" placeholder="請輸入 PIN 碼" class="w-full mb-8 bg-slate-50 border border-slate-200 p-4 rounded-xl focus:border-blue-500 outline-none text-center font-bold text-xl">
       
-      <button onclick="performLogin()" id="login-btn" class="w-full bg-blue-600 text-white font-black text-xl py-4 rounded-xl hover:bg-blue-700 active:scale-95 transition shadow-lg shadow-blue-600/30">
-        登入系統
+      <button onclick="performLogin()" id="login-btn" class="w-full bg-blue-600 text-white font-black text-xl py-4 rounded-xl hover:bg-blue-700 active:scale-95 transition shadow-lg">
+        驗證權限
       </button>
     </div>
   </div>
 
-  <nav class="w-24 bg-slate-900 flex flex-col items-center py-6 shadow-xl z-20 shrink-0">
+  <nav class="w-24 bg-slate-900 flex flex-col items-center py-6 shadow-xl z-20 shrink-0 relative">
     <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-8 shadow-inner">
       <i class="fa-solid fa-cash-register text-2xl"></i>
     </div>
     
-    <div class="flex-1 w-full flex flex-col items-center space-y-6">
-      <button onclick="switchTab('pos')" id="nav-pos" class="w-16 h-16 rounded-2xl bg-blue-500/20 text-blue-400 flex flex-col items-center justify-center transition">
-        <i class="fa-solid fa-border-all text-2xl mb-1"></i>
-        <span class="text-[10px] font-bold">點餐</span>
+    <div class="flex-1 w-full flex flex-col items-center space-y-4">
+      <button onclick="switchTab('pos')" id="nav-pos" class="nav-btn w-16 h-16 rounded-2xl bg-blue-500/20 text-blue-400 flex flex-col items-center justify-center transition">
+        <i class="fa-solid fa-border-all text-2xl mb-1"></i><span class="text-[10px] font-bold">點餐</span>
       </button>
-      
-      <button onclick="switchTab('history')" id="nav-history" class="w-16 h-16 rounded-2xl text-slate-500 hover:text-slate-300 hover:bg-slate-800 flex flex-col items-center justify-center transition">
-        <i class="fa-solid fa-receipt text-2xl mb-1"></i>
-        <span class="text-[10px] font-bold">單據</span>
+      <button onclick="switchTab('history')" id="nav-history" class="nav-btn w-16 h-16 rounded-2xl text-slate-500 hover:text-slate-300 hover:bg-slate-800 flex flex-col items-center justify-center transition">
+        <i class="fa-solid fa-receipt text-2xl mb-1"></i><span class="text-[10px] font-bold">單據</span>
       </button>
 
-      <button onclick="switchTab('settings')" id="nav-settings" class="w-16 h-16 rounded-2xl text-slate-500 hover:text-slate-300 hover:bg-slate-800 flex flex-col items-center justify-center transition">
-        <i class="fa-solid fa-gear text-2xl mb-1"></i>
-        <span class="text-[10px] font-bold">設定</span>
-      </button>
+      <div id="admin-menu" class="w-full flex flex-col items-center space-y-4 pt-4 border-t border-slate-700 hidden">
+        <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn w-16 h-16 rounded-2xl text-orange-500 hover:text-orange-300 hover:bg-slate-800 flex flex-col items-center justify-center transition">
+          <i class="fa-solid fa-boxes-stacked text-2xl mb-1"></i><span class="text-[10px] font-bold">進銷存</span>
+        </button>
+        <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn w-16 h-16 rounded-2xl text-emerald-500 hover:text-emerald-300 hover:bg-slate-800 flex flex-col items-center justify-center transition">
+          <i class="fa-solid fa-chart-pie text-2xl mb-1"></i><span class="text-[10px] font-bold">報表</span>
+        </button>
+        <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-16 h-16 rounded-2xl text-slate-500 hover:text-slate-300 hover:bg-slate-800 flex flex-col items-center justify-center transition">
+          <i class="fa-solid fa-gear text-2xl mb-1"></i><span class="text-[10px] font-bold">設定</span>
+        </button>
+      </div>
     </div>
 
     <div class="w-full flex flex-col items-center">
-      <div id="current-user-display" class="text-xs font-bold text-emerald-400 mb-4 bg-emerald-400/10 px-2 py-1 rounded-md text-center">未登入</div>
+      <div id="role-badge" class="text-[10px] font-black tracking-widest mb-2 px-2 py-1 rounded border"></div>
       <button onclick="location.reload()" class="w-14 h-14 rounded-full bg-slate-800 text-slate-400 hover:text-rose-400 hover:bg-slate-700 transition flex items-center justify-center">
-        <i class="fa-solid fa-arrow-right-from-bracket text-xl"></i>
+        <i class="fa-solid fa-power-off text-xl"></i>
       </button>
     </div>
   </nav>
 
   <main class="flex-1 bg-slate-100 flex relative overflow-hidden">
     
-    <div id="view-pos" class="w-full h-full flex flex-col absolute inset-0 transition-opacity duration-300">
-      <div class="bg-white px-6 py-4 border-b border-slate-200 flex space-x-3 shadow-sm z-10 shrink-0">
-        <button class="bg-slate-800 text-white px-6 py-2 rounded-full font-bold shadow-md">全部商品</button>
-        <button class="bg-white border border-slate-300 text-slate-600 px-6 py-2 rounded-full font-bold hover:bg-slate-50">熱門</button>
-      </div>
-      <div class="flex-1 p-6 overflow-y-auto no-scrollbar">
-        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-20"></div>
+    <div id="view-pos" class="w-full h-full flex flex-col absolute inset-0 transition-opacity duration-300 bg-slate-50">
+      <div class="p-6 overflow-y-auto no-scrollbar flex-1">
+        <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20"></div>
       </div>
     </div>
 
     <div id="view-history" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
-      <div class="p-8 border-b border-slate-200 shrink-0 flex justify-between items-center">
-        <h2 class="text-3xl font-black text-slate-800 tracking-wider">歷史銷貨紀錄</h2>
-        <button onclick="fetchHistory()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold transition"><i class="fa-solid fa-rotate-right mr-2"></i>重新整理</button>
+      <div class="p-6 border-b border-slate-200 shrink-0 flex justify-between items-center bg-slate-50">
+        <h2 class="text-2xl font-black text-slate-800 tracking-wider">今日銷貨單據</h2>
+        <button onclick="fetchHistory()" class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg font-bold"><i class="fa-solid fa-rotate-right mr-2"></i>重整</button>
       </div>
-      <div class="flex-1 p-8 bg-slate-50 overflow-y-auto no-scrollbar">
-        <div id="history-list" class="max-w-4xl mx-auto space-y-4">
-          <div class="text-center text-slate-400 py-20 font-bold tracking-widest animate-pulse">載入中...</div>
+      <div class="flex-1 p-6 overflow-y-auto no-scrollbar"><div id="history-list" class="max-w-4xl mx-auto space-y-3"></div></div>
+    </div>
+
+    <div id="view-inventory" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
+      <div class="p-6 border-b border-slate-200 shrink-0 bg-slate-50">
+        <h2 class="text-2xl font-black text-slate-800 tracking-wider text-orange-600"><i class="fa-solid fa-boxes-stacked mr-2"></i>進銷存管理</h2>
+      </div>
+      <div class="flex-1 p-6 overflow-y-auto no-scrollbar">
+        <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <table class="w-full text-left">
+            <thead class="bg-slate-100 border-b border-slate-200">
+              <tr>
+                <th class="p-4 font-bold text-slate-600">商品名稱</th>
+                <th class="p-4 font-bold text-slate-600 text-center">售價</th>
+                <th class="p-4 font-bold text-slate-600 text-center">當前庫存</th>
+                <th class="p-4 font-bold text-slate-600 text-right">快速操作</th>
+              </tr>
+            </thead>
+            <tbody id="inventory-list" class="divide-y divide-slate-100"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <div id="view-settings" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
-      <div class="p-8 border-b border-slate-200 shrink-0">
-        <h2 class="text-3xl font-black text-slate-800 tracking-wider">系統設定</h2>
+    <div id="view-reports" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-slate-50">
+      <div class="p-6 border-b border-slate-200 shrink-0 flex justify-between items-center bg-white">
+        <h2 class="text-2xl font-black text-slate-800 tracking-wider text-emerald-600"><i class="fa-solid fa-chart-pie mr-2"></i>營業數據與報表</h2>
+        <button onclick="exportCSV()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-lg font-bold shadow-md transition"><i class="fa-solid fa-download mr-2"></i>匯出 Excel (CSV)</button>
       </div>
-      <div class="flex-1 p-8 bg-slate-50 overflow-y-auto">
-        <div class="max-w-2xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
+      <div class="flex-1 p-8 overflow-y-auto no-scrollbar">
+        <div class="max-w-5xl mx-auto grid grid-cols-2 gap-6 mb-8">
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div><p class="text-slate-500 font-bold mb-1">今日總營收</p><p class="text-5xl font-black text-blue-600">$<span id="report-revenue">0</span></p></div>
+            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 text-2xl"><i class="fa-solid fa-sack-dollar"></i></div>
+          </div>
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between">
+            <div><p class="text-slate-500 font-bold mb-1">總成交單數</p><p class="text-5xl font-black text-emerald-600"><span id="report-orders">0</span><span class="text-xl text-slate-400 ml-2">單</span></p></div>
+            <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 text-2xl"><i class="fa-solid fa-receipt"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-settings" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-slate-50">
+      <div class="p-6 border-b border-slate-200 shrink-0 bg-white"><h2 class="text-2xl font-black text-slate-800 tracking-wider"><i class="fa-solid fa-gear mr-2"></i>系統設定</h2></div>
+      <div class="flex-1 p-8">
+        <div class="max-w-2xl bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
           <h3 class="text-xl font-bold text-slate-800 mb-2 border-b pb-2"><i class="fa-solid fa-ticket mr-2"></i>單號管理</h3>
-          <p class="text-slate-500 mb-6 text-sm">重置後，下一筆訂單的取餐號碼將從 001 重新開始。建議每日開店前執行。</p>
-          <button onclick="resetOrderCounter()" id="btn-reset-counter" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-6 rounded-xl shadow-md active:scale-95 transition">
-            <i class="fa-solid fa-rotate-left mr-2"></i>重置流水號至 000
-          </button>
+          <p class="text-slate-500 mb-6 text-sm">重置後，下一筆取餐號碼將從 001 重新開始。</p>
+          <button onclick="resetOrderCounter()" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 px-6 rounded-xl shadow-md active:scale-95 transition"><i class="fa-solid fa-rotate-left mr-2"></i>重置流水號至 000</button>
         </div>
       </div>
     </div>
   </main>
 
-  <aside id="checkout-sidebar" class="w-[420px] bg-slate-50 border-l border-slate-200 flex flex-col shadow-2xl z-20 shrink-0 transition-transform duration-300">
-    
+  <aside id="checkout-sidebar" class="w-[400px] bg-slate-100 border-l border-slate-200 flex flex-col shadow-2xl z-20 shrink-0 transition-transform duration-300">
     <div class="flex-1 flex flex-col bg-white m-3 rounded-t-xl shadow-sm border border-slate-200 relative overflow-hidden">
       <div class="absolute -top-3 left-0 right-0 h-4 receipt-edge"></div>
-      
       <div class="p-4 border-b-2 border-dashed border-slate-300 flex justify-between items-center bg-white z-10 pt-6">
         <h3 class="font-black text-slate-700 tracking-widest text-lg">購物明細</h3>
-        <button onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 hover:bg-rose-100 px-3 py-1 rounded-md transition text-sm">清空</button>
+        <button onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-3 py-1 rounded-md text-sm">清空</button>
       </div>
-      
       <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3 bg-white z-10"></div>
-      
       <div class="p-4 bg-white border-t-2 border-dashed border-slate-300 z-10">
         <div class="flex justify-between items-end">
-          <span class="text-slate-500 font-bold text-sm">總計金額</span>
+          <span class="text-slate-500 font-bold text-sm">總金額</span>
           <span class="text-4xl font-black text-blue-600 tracking-tighter">NT$ <span id="total-ui">0</span></span>
         </div>
       </div>
@@ -130,29 +157,26 @@
           <span class="text-2xl font-black text-emerald-400" id="change-amount">$0</span>
         </div>
       </div>
-
       <input type="hidden" id="received-amount">
-
       <div class="grid grid-cols-4 gap-1 mb-3">
-        <button onclick="numpadInput(1)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">1</button>
-        <button onclick="numpadInput(2)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">2</button>
-        <button onclick="numpadInput(3)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">3</button>
-        <button onclick="setReceived(100)" class="bg-blue-600/30 text-blue-400 hover:bg-blue-600/50 rounded-md py-4 text-lg font-bold active:scale-95 transition">$100</button>
-        <button onclick="numpadInput(4)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">4</button>
-        <button onclick="numpadInput(5)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">5</button>
-        <button onclick="numpadInput(6)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">6</button>
-        <button onclick="setReceived(500)" class="bg-blue-600/30 text-blue-400 hover:bg-blue-600/50 rounded-md py-4 text-lg font-bold active:scale-95 transition">$500</button>
-        <button onclick="numpadInput(7)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">7</button>
-        <button onclick="numpadInput(8)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">8</button>
-        <button onclick="numpadInput(9)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">9</button>
-        <button onclick="setReceived(1000)" class="bg-blue-600/30 text-blue-400 hover:bg-blue-600/50 rounded-md py-4 text-lg font-bold active:scale-95 transition">$1k</button>
-        <button onclick="numpadClear()" class="bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 rounded-md py-4 text-xl font-bold active:scale-95 transition">C</button>
-        <button onclick="numpadInput(0)" class="bg-slate-700 hover:bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95 transition">0</button>
-        <button onclick="numpadBackspace()" class="bg-slate-600 hover:bg-slate-500 rounded-md py-4 text-xl font-bold active:scale-95 transition"><i class="fa-solid fa-delete-left"></i></button>
-        <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/40 rounded-md py-4 text-lg font-bold active:scale-95 transition">剛好</button>
+        <button onclick="numpadInput(1)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">1</button>
+        <button onclick="numpadInput(2)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">2</button>
+        <button onclick="numpadInput(3)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">3</button>
+        <button onclick="setReceived(100)" class="bg-blue-600/30 text-blue-400 rounded-md py-4 text-lg font-bold active:scale-95">$100</button>
+        <button onclick="numpadInput(4)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">4</button>
+        <button onclick="numpadInput(5)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">5</button>
+        <button onclick="numpadInput(6)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">6</button>
+        <button onclick="setReceived(500)" class="bg-blue-600/30 text-blue-400 rounded-md py-4 text-lg font-bold active:scale-95">$500</button>
+        <button onclick="numpadInput(7)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">7</button>
+        <button onclick="numpadInput(8)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">8</button>
+        <button onclick="numpadInput(9)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">9</button>
+        <button onclick="setReceived(1000)" class="bg-blue-600/30 text-blue-400 rounded-md py-4 text-lg font-bold active:scale-95">$1k</button>
+        <button onclick="numpadClear()" class="bg-rose-500/20 text-rose-400 rounded-md py-4 text-xl font-bold active:scale-95">C</button>
+        <button onclick="numpadInput(0)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">0</button>
+        <button onclick="numpadBackspace()" class="bg-slate-600 rounded-md py-4 text-xl font-bold active:scale-95"><i class="fa-solid fa-delete-left"></i></button>
+        <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-500/20 text-emerald-400 rounded-md py-4 text-lg font-bold active:scale-95">剛好</button>
       </div>
-
-      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-4 rounded-xl text-2xl font-black shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-400 active:scale-[0.98] disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none transition duration-200 flex justify-center items-center">
+      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-4 rounded-xl text-2xl font-black shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-400 active:scale-[0.98] disabled:bg-slate-700 disabled:text-slate-500 transition">
         收款結帳
       </button>
     </div>
@@ -160,88 +184,107 @@
 
   <script type="module">
     import { db, doc, setDoc, onSnapshot, collection, serverTimestamp } from './firebase-config.js';
-    import { writeBatch, increment, getDoc, getDocs, runTransaction, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { writeBatch, increment, getDoc, getDocs, runTransaction, query, orderBy, limit, updateDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     let currentUser = null;
     let products = [];
     let cart = [];
     let total = 0;
+    let allOrders = []; // 給報表用的全域變數
 
     // --- 介面切換邏輯 ---
     window.switchTab = function(tabName) {
-      // 樣式重置
-      ['pos', 'history', 'settings'].forEach(tab => {
-        const btn = document.getElementById(`nav-${tab}`);
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.replace('bg-blue-500/20', 'bg-transparent');
+        btn.classList.replace('text-blue-400', 'text-slate-500');
+      });
+      const activeBtn = document.getElementById(`nav-${tabName}`);
+      activeBtn.classList.replace('text-slate-500', 'text-blue-400');
+      activeBtn.classList.add('bg-blue-500/20');
+
+      ['pos', 'history', 'inventory', 'reports', 'settings'].forEach(tab => {
         const view = document.getElementById(`view-${tab}`);
-        
-        if (tab === tabName) {
-          btn.className = "w-16 h-16 rounded-2xl bg-blue-500/20 text-blue-400 flex flex-col items-center justify-center transition";
-          view.classList.remove('opacity-0', 'pointer-events-none');
-        } else {
-          btn.className = "w-16 h-16 rounded-2xl text-slate-500 hover:text-slate-300 hover:bg-slate-800 flex flex-col items-center justify-center transition";
-          view.classList.add('opacity-0', 'pointer-events-none');
+        if(view) {
+          if (tab === tabName) view.classList.remove('opacity-0', 'pointer-events-none');
+          else view.classList.add('opacity-0', 'pointer-events-none');
         }
       });
 
-      // 收銀側邊欄僅在 POS 模式顯示
       const sidebar = document.getElementById('checkout-sidebar');
-      if(tabName === 'pos') {
-        sidebar.classList.remove('translate-x-full', 'hidden');
-      } else {
-        sidebar.classList.add('translate-x-full');
-      }
+      tabName === 'pos' ? sidebar.classList.remove('translate-x-full', 'hidden') : sidebar.classList.add('translate-x-full');
 
       if(tabName === 'history') fetchHistory();
+      if(tabName === 'reports') generateReports();
     };
 
-    // --- 登入邏輯 ---
+    // --- 權限與登入邏輯 ---
     window.performLogin = async function() {
       const user = document.getElementById('login-username').value.trim() || 'group1';
-      const pin = document.getElementById('login-pin').value.trim() || '1234';
+      const pin = document.getElementById('login-pin').value.trim();
       const btn = document.getElementById('login-btn');
       btn.innerText = "驗證中...";
       
       try {
-        const accountsSnap = await getDocs(collection(db, "accounts"));
-        if (accountsSnap.empty) await setDoc(doc(db, "accounts", "group1"), { pin: "1234", name: "第一組" });
+        const accountsRef = collection(db, "accounts");
+        const accountsSnap = await getDocs(accountsRef);
         
-        const userDoc = await getDoc(doc(db, "accounts", user));
-        if (userDoc.exists() && userDoc.data().pin === pin) {
-          currentUser = { id: userDoc.id, name: userDoc.data().name };
-          document.getElementById('current-user-display').innerText = currentUser.name;
+        // 自動初始化測試帳號 (區分身分)
+        if (accountsSnap.empty) {
+          await setDoc(doc(accountsRef, "admin"), { pin: "0000", name: "店長", role: "admin" });
+          await setDoc(doc(accountsRef, "group1"), { pin: "1234", name: "第一組", role: "cashier" });
+        }
+        
+        const userDoc = await getDoc(doc(db, "accounts", user === 'group1' && pin === '0000' ? 'admin' : user));
+        
+        if (userDoc.exists() && userDoc.data().pin === (pin || "1234")) {
+          currentUser = { id: userDoc.id, ...userDoc.data() };
+          
+          // 根據權限解鎖 UI
+          const badge = document.getElementById('role-badge');
+          if(currentUser.role === 'admin') {
+            document.getElementById('admin-menu').classList.remove('hidden');
+            badge.innerText = '店長模式';
+            badge.className = 'text-[10px] font-black tracking-widest mb-2 px-2 py-1 rounded border border-orange-500/50 text-orange-400 bg-orange-500/10';
+          } else {
+            badge.innerText = '收銀模式';
+            badge.className = 'text-[10px] font-black tracking-widest mb-2 px-2 py-1 rounded border border-blue-500/50 text-blue-400 bg-blue-500/10';
+          }
+          
           document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
           initPOS();
         } else {
-          alert("帳號或密碼錯誤！"); btn.innerText = "登入系統";
+          alert("帳號或密碼錯誤！\n測試店長: 0000\n測試收銀: 1234"); btn.innerText = "驗證權限";
         }
-      } catch (e) { alert("連線失敗"); btn.innerText = "登入系統"; }
+      } catch (e) { alert("連線失敗"); btn.innerText = "驗證權限"; }
     };
 
-    // --- 商品與購物車 ---
+    // --- 商品載入 (POS 與 進銷存 共用) ---
     function initPOS() {
       onSnapshot(collection(db, "products"), (snapshot) => {
         products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderProducts();
+        renderPOSProducts();
+        if(currentUser.role === 'admin') renderInventory();
+      });
+      // 背景載入所有訂單供報表使用
+      onSnapshot(collection(db, "orders"), (snapshot) => {
+        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       });
     }
 
-    function renderProducts() {
+    function renderPOSProducts() {
       document.getElementById('product-grid').innerHTML = products.map(p => {
         const isSoldOut = p.stock <= 0;
-        const opacity = isSoldOut ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1 active:scale-95 hover:shadow-xl transition-all duration-200';
+        const opacity = isSoldOut ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1 active:scale-95 hover:shadow-xl transition';
         return `
-          <div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="bg-white border border-slate-200 rounded-3xl p-5 flex flex-col justify-between aspect-square ${opacity} shadow-sm relative overflow-hidden group">
+          <div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="bg-white border border-slate-200 rounded-3xl p-5 flex flex-col justify-between aspect-square ${opacity} shadow-sm relative overflow-hidden">
             ${isSoldOut ? '<div class="absolute inset-0 bg-slate-900/10 z-10 flex items-center justify-center"><span class="bg-slate-800 text-white px-3 py-1 rounded-full font-bold transform -rotate-12">售完</span></div>' : ''}
-            <div>
-              <h3 class="font-bold text-slate-700 text-xl leading-tight mb-2">${p.name}</h3>
-              <p class="text-blue-600 font-black text-2xl">$${p.price}</p>
-            </div>
-            <div class="text-right text-sm font-bold text-slate-400 group-hover:text-slate-600 transition">庫存: ${p.stock}</div>
-          </div>
-        `;
+            <div><h3 class="font-bold text-slate-700 text-lg leading-tight mb-1">${p.name}</h3><p class="text-blue-600 font-black text-2xl">$${p.price}</p></div>
+            <div class="text-right text-sm font-bold ${p.stock > 10 ? 'text-slate-400' : 'text-rose-500'}">庫存: ${p.stock}</div>
+          </div>`;
       }).join('');
     }
 
+    // --- 🛒 購物車與結帳邏輯 (精簡版，保持原有核心) ---
     window.addToCart = function(id) {
       const p = products.find(p => p.id === id);
       const ex = cart.find(i => i.id === id);
@@ -249,7 +292,6 @@
       if (ex) ex.qty += 1; else cart.push({ ...p, qty: 1 });
       updateCartUI();
     };
-
     window.changeQty = function(id, delta) {
       const item = cart.find(i => i.id === id);
       if (delta > 0 && item.qty >= products.find(p => p.id === id).stock) return;
@@ -257,40 +299,21 @@
       if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
       updateCartUI();
     };
-
     window.clearCart = function() { cart = []; document.getElementById('received-amount').value = ''; updateCartUI(); };
 
     async function updateCartUI() {
       total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
       document.getElementById('total-ui').innerText = total;
       document.getElementById('btn-exact').innerText = total > 0 ? `剛好 $${total}` : '剛好';
-      
       const ui = document.getElementById('cart-ui');
-      if (cart.length === 0) {
-        ui.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-receipt text-5xl mb-4 opacity-50"></i><p class="font-bold tracking-widest">尚未點餐</p></div>`;
-      } else {
-        ui.innerHTML = cart.map(item => `
-          <div class="flex flex-col border-b border-slate-100 pb-2 mb-2">
-            <div class="flex justify-between font-bold text-slate-700 text-lg mb-2">
-              <span>${item.name}</span>
-              <span>$${item.price * item.qty}</span>
-            </div>
-            <div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border border-slate-200">
-              <button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 bg-white rounded shadow-sm font-bold text-slate-600">-</button>
-              <span class="w-6 text-center font-bold text-slate-800">${item.qty}</span>
-              <button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 bg-slate-200 text-slate-700 rounded shadow-sm font-bold">+</button>
-            </div>
-          </div>
-        `).join('');
-      }
+      ui.innerHTML = cart.length === 0 ? `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-receipt text-5xl mb-4 opacity-50"></i><p class="font-bold tracking-widest">尚未點餐</p></div>` 
+        : cart.map(item => `<div class="flex flex-col border-b border-slate-100 pb-2 mb-2"><div class="flex justify-between font-bold text-slate-700 text-lg mb-2"><span>${item.name}</span><span>$${item.price * item.qty}</span></div><div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border border-slate-200"><button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 bg-white rounded shadow-sm font-bold">-</button><span class="w-6 text-center font-bold">${item.qty}</span><button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 bg-slate-200 rounded shadow-sm font-bold">+</button></div></div>`).join('');
       calculateChange();
       try { await setDoc(doc(db, "active_sessions", "station_1"), { cartItems: cart, totalAmount: total, status: "ordering" }); } catch (e) {}
     }
 
-    // --- 數字鍵盤 ---
     const inputField = document.getElementById('received-amount');
     const displayReceived = document.getElementById('display-received');
-    
     window.numpadInput = function(num) { inputField.value = inputField.value === '0' ? num : inputField.value + num; calculateChange(); };
     window.setReceived = function(amount) { inputField.value = amount; calculateChange(); };
     window.setExactAmount = function() { if (total > 0) setReceived(total); };
@@ -302,115 +325,112 @@
       displayReceived.innerText = `$${received}`;
       const display = document.getElementById('change-amount');
       const btn = document.getElementById('checkout-btn');
-      
       if (cart.length === 0) { display.innerText = '$0'; btn.disabled = true; return; }
-      if (inputField.value === '') { display.innerText = '$0'; display.classList.replace('text-emerald-400', 'text-slate-500'); display.classList.replace('text-rose-400', 'text-slate-500'); btn.disabled = false;
-      } else if (received >= total) { display.innerText = '$' + (received - total); display.classList.replace('text-slate-500', 'text-emerald-400'); display.classList.replace('text-rose-400', 'text-emerald-400'); btn.disabled = false;
-      } else { display.innerText = '不足'; display.classList.replace('text-slate-500', 'text-rose-400'); display.classList.replace('text-emerald-400', 'text-rose-400'); btn.disabled = true; }
+      if (inputField.value === '') { display.innerText = '$0'; display.className = 'text-2xl font-black text-slate-500'; btn.disabled = false;
+      } else if (received >= total) { display.innerText = '$' + (received - total); display.className = 'text-2xl font-black text-emerald-400'; btn.disabled = false;
+      } else { display.innerText = '不足'; display.className = 'text-2xl font-black text-rose-400'; btn.disabled = true; }
     }
 
-    // --- 結帳寫入 ---
     window.checkout = async function() {
       if (cart.length === 0) return;
       const received = parseInt(inputField.value) || total;
       const change = received - total;
-
       const btn = document.getElementById('checkout-btn');
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
-      btn.disabled = true;
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; btn.disabled = true;
 
       try {
-        const counterRef = doc(db, "counters", "daily_order");
-        const orderNoNum = await runTransaction(db, async (transaction) => {
-          const counterDoc = await transaction.get(counterRef);
-          let newCount = 1;
-          if (counterDoc.exists()) newCount = counterDoc.data().count + 1;
-          transaction.set(counterRef, { count: newCount }, { merge: true });
-          return newCount;
+        const orderNoNum = await runTransaction(db, async (t) => {
+          const cRef = doc(db, "counters", "daily_order");
+          const cDoc = await t.get(cRef);
+          let nc = 1; if (cDoc.exists()) nc = cDoc.data().count + 1;
+          t.set(cRef, { count: nc }, { merge: true }); return nc;
         });
 
         const orderNo = String(orderNoNum).padStart(3, '0');
         const batch = writeBatch(db);
-        const orderRef = doc(collection(db, "orders"));
         
-        batch.set(orderRef, {
-          orderNumber: orderNo, items: cart, total: total, received: received, change: change,
-          operatorId: currentUser.id, status: "pending", timestamp: serverTimestamp()
+        batch.set(doc(collection(db, "orders")), {
+          orderNumber: orderNo, items: cart, total, received, change,
+          operatorId: currentUser.name, status: "pending", timestamp: serverTimestamp()
         });
 
-        cart.forEach(item => { batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) }); });
-        batch.set(doc(db, "active_sessions", "station_1"), { cartItems: [], totalAmount: 0, status: "completed", change: change, orderNumber: orderNo });
+        cart.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) }));
+        batch.set(doc(db, "active_sessions", "station_1"), { cartItems: [], totalAmount: 0, status: "completed", change, orderNumber: orderNo });
 
         await batch.commit();
-
         cart = []; total = 0; inputField.value = ''; updateCartUI();
-
-      } catch (e) { alert("結帳失敗，網路異常！"); } 
-      finally { btn.innerHTML = `收款結帳`; btn.disabled = false; }
+      } catch (e) { alert("結帳失敗！"); } finally { btn.innerHTML = `收款結帳`; btn.disabled = false; }
     };
 
-    // --- ✨ 新功能 1：調閱歷史單據 ---
+    // --- 📄 歷史單據 ---
     window.fetchHistory = async function() {
       const list = document.getElementById('history-list');
-      list.innerHTML = `<div class="text-center text-slate-400 py-20 font-bold tracking-widest animate-pulse">撈取資料中...</div>`;
-      
       try {
-        const q = query(collection(db, "orders"), orderBy("timestamp", "desc"), limit(50));
+        const q = query(collection(db, "orders"), orderBy("timestamp", "desc"), limit(30));
         const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          list.innerHTML = `<div class="text-center text-slate-400 py-20 font-bold tracking-widest">目前尚無交易紀錄</div>`;
-          return;
-        }
-
-        list.innerHTML = snapshot.docs.map(docSnap => {
-          const data = docSnap.data();
-          const timeStr = data.timestamp ? data.timestamp.toDate().toLocaleString('zh-TW') : '剛剛';
-          const itemsStr = data.items.map(i => `${i.name} x${i.qty}`).join(', ');
-          
-          let statusBadge = '';
-          if(data.status === 'pending') statusBadge = '<span class="bg-orange-100 text-orange-600 px-2 py-1 rounded text-xs font-bold">待出餐</span>';
-          else if(data.status === 'ready') statusBadge = '<span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded text-xs font-bold">待取餐</span>';
-          else statusBadge = `<span class="bg-slate-100 text-slate-500 px-2 py-1 rounded text-xs font-bold">${data.status || '已完成'}</span>`;
-
-          return `
-            <div class="bg-white border border-slate-200 rounded-2xl p-5 flex justify-between items-center shadow-sm hover:shadow-md transition">
-              <div>
-                <div class="flex items-center space-x-3 mb-2">
-                  <span class="text-2xl font-black text-slate-800">#${data.orderNumber}</span>
-                  ${statusBadge}
-                  <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${timeStr}</span>
-                </div>
-                <div class="text-slate-500 font-medium text-sm">${itemsStr}</div>
-              </div>
-              <div class="text-right">
-                <div class="text-xs text-slate-400 mb-1">總計</div>
-                <div class="text-3xl font-black text-blue-600">$${data.total}</div>
-              </div>
-            </div>
-          `;
+        list.innerHTML = snapshot.empty ? `<div class="text-center text-slate-400 py-20 font-bold tracking-widest">尚無紀錄</div>` : snapshot.docs.map(docSnap => {
+          const d = docSnap.data();
+          const t = d.timestamp ? d.timestamp.toDate().toLocaleTimeString('zh-TW') : '';
+          return `<div class="bg-white border border-slate-200 rounded-2xl p-5 flex justify-between items-center shadow-sm">
+              <div><div class="font-black text-xl text-slate-800 mb-1">#${d.orderNumber} <span class="text-sm font-normal text-slate-400 ml-2">${t}</span></div><div class="text-slate-500 text-sm">${d.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</div></div>
+              <div class="text-2xl font-black text-blue-600">$${d.total}</div>
+            </div>`;
         }).join('');
-      } catch (e) {
-        console.error(e);
-        list.innerHTML = `<div class="text-center text-rose-500 py-20 font-bold">讀取失敗，請檢查權限或網路</div>`;
-      }
+      } catch (e) { list.innerHTML = `<div class="text-center text-rose-500 py-20 font-bold">讀取失敗</div>`; }
     };
 
-    // --- ✨ 新功能 2：重置流水單號 ---
+    // --- 📦 進銷存模組 (Admin) ---
+    function renderInventory() {
+      document.getElementById('inventory-list').innerHTML = products.map(p => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-4 font-bold text-slate-800">${p.name}</td>
+          <td class="p-4 text-center font-mono text-blue-600">$${p.price}</td>
+          <td class="p-4 text-center font-bold ${p.stock < 10 ? 'text-rose-500' : 'text-emerald-600'}">${p.stock}</td>
+          <td class="p-4 text-right">
+            <button onclick="addStock('${p.id}', 20)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1 rounded text-sm font-bold transition mr-2">+20</button>
+            <button onclick="addStock('${p.id}', 50)" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-700 px-3 py-1 rounded text-sm font-bold transition">+50</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.addStock = async function(id, amount) {
+      try { await updateDoc(doc(db, "products", id), { stock: increment(amount) }); } 
+      catch (e) { alert("補貨失敗"); }
+    };
+
+    // --- 📊 報表與 CSV 匯出 (Admin) ---
+    window.generateReports = function() {
+      const totalRev = allOrders.reduce((sum, order) => sum + order.total, 0);
+      document.getElementById('report-revenue').innerText = totalRev;
+      document.getElementById('report-orders').innerText = allOrders.length;
+    };
+
+    window.exportCSV = function() {
+      if(allOrders.length === 0) return alert("無資料可匯出");
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // 加上 BOM 避免 Excel 亂碼
+      csvContent += "單號,結帳時間,收銀員,訂單狀態,總金額,實收,找零,商品明細\n";
+      
+      allOrders.forEach(order => {
+        const time = order.timestamp ? order.timestamp.toDate().toLocaleString('zh-TW') : '';
+        const items = order.items.map(i => `${i.name}x${i.qty}`).join(';');
+        csvContent += `${order.orderNumber},${time},${order.operatorId},${order.status},${order.total},${order.received},${order.change},${items}\n`;
+      });
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `營業報表_${new Date().toLocaleDateString('zh-TW')}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    // --- ⚙️ 設定模組 (Admin) ---
     window.resetOrderCounter = async function() {
-      if(confirm("⚠️ 警告：確定要將取餐單號重置嗎？\n這通常只在每天早上開園前執行。\n\n重置後，下一筆訂單將從 001 開始。")) {
-        const btn = document.getElementById('btn-reset-counter');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>重置中...`;
-        
-        try {
-          await setDoc(doc(db, "counters", "daily_order"), { count: 0 });
-          alert("✅ 單號已成功重置！下一筆結帳將為 #001");
-        } catch(e) {
-          alert("❌ 重置失敗，請檢查網路連線");
-        } finally {
-          btn.innerHTML = originalText;
-        }
+      if(confirm("確定重置取餐單號？下一筆將從 001 開始。")) {
+        try { await setDoc(doc(db, "counters", "daily_order"), { count: 0 }); alert("單號已重置！"); } 
+        catch(e) { alert("重置失敗"); }
       }
     };
   </script>
