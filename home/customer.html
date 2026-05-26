@@ -92,7 +92,7 @@
 
   <script type="module">
     import { db, doc, onSnapshot, collection } from './firebase-config.js';
-    import { query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { query, where } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     // --- 左半邊結帳動畫邏輯 ---
     const sessionRef = doc(db, "active_sessions", "station_1");
@@ -131,31 +131,49 @@
       }
     });
 
-    // --- 右半邊監聽邏輯 ---
+    // --- 右半邊叫號邏輯 (純 where + 前端 JS 排序) ---
     const ordersRef = collection(db, "orders");
     
     // 監聽 pending (準備中)
-    onSnapshot(query(ordersRef, where("status", "==", "pending"), orderBy("timestamp", "asc")), (snapshot) => {
+    onSnapshot(query(ordersRef, where("status", "==", "pending")), (snapshot) => {
       const grid = document.getElementById('pending-orders-grid');
-      grid.innerHTML = snapshot.empty 
-        ? `<div class="col-span-4 text-center text-slate-500 mt-10 text-lg font-bold tracking-widest">目前無準備中餐點</div>`
-        : snapshot.docs.map(doc => `
-          <div class="bg-slate-700/50 border border-slate-600 rounded-2xl py-5 flex justify-center items-center shadow-inner animate-pop-in">
-            <span class="text-4xl font-black text-slate-300 tracking-tighter">${doc.data().orderNumber}</span>
-          </div>
-        `).join('');
+      if (snapshot.empty) {
+        grid.innerHTML = `<div class="col-span-4 text-center text-slate-500 mt-10 text-lg font-bold tracking-widest">目前無準備中餐點</div>`;
+        return;
+      }
+      
+      const sortedDocs = snapshot.docs.sort((a, b) => {
+        const timeA = a.data().timestamp?.toMillis() || 0;
+        const timeB = b.data().timestamp?.toMillis() || 0;
+        return timeA - timeB;
+      });
+
+      grid.innerHTML = sortedDocs.map(docSnap => `
+        <div class="bg-slate-700/50 border border-slate-600 rounded-2xl py-5 flex justify-center items-center shadow-inner animate-pop-in">
+          <span class="text-4xl font-black text-slate-300 tracking-tighter">${docSnap.data().orderNumber}</span>
+        </div>
+      `).join('');
     });
 
     // 監聽 ready (請取餐)
-    onSnapshot(query(ordersRef, where("status", "==", "ready"), orderBy("timestamp", "asc")), (snapshot) => {
+    onSnapshot(query(ordersRef, where("status", "==", "ready")), (snapshot) => {
       const grid = document.getElementById('ready-orders-grid');
-      grid.innerHTML = snapshot.empty 
-        ? `<div class="col-span-3 text-center text-emerald-900 mt-10 text-lg font-bold tracking-widest">目前無待取餐點</div>`
-        : snapshot.docs.map(doc => `
-          <div class="bg-emerald-900/80 border-2 border-emerald-500/50 rounded-3xl py-8 flex justify-center items-center shadow-[0_0_20px_rgba(16,185,129,0.3)] animate-pop-in">
-            <span class="text-6xl font-black text-emerald-400 tracking-tighter drop-shadow-lg">${doc.data().orderNumber}</span>
-          </div>
-        `).join('');
+      if (snapshot.empty) {
+        grid.innerHTML = `<div class="col-span-3 text-center text-emerald-900 mt-10 text-lg font-bold tracking-widest">目前無待取餐點</div>`;
+        return;
+      }
+
+      const sortedDocs = snapshot.docs.sort((a, b) => {
+        const timeA = a.data().timestamp?.toMillis() || 0;
+        const timeB = b.data().timestamp?.toMillis() || 0;
+        return timeA - timeB;
+      });
+
+      grid.innerHTML = sortedDocs.map(docSnap => `
+        <div class="bg-emerald-900/80 border-2 border-emerald-500/50 rounded-3xl py-8 flex justify-center items-center shadow-[0_0_20px_rgba(16,185,129,0.3)] animate-pop-in">
+          <span class="text-6xl font-black text-emerald-400 tracking-tighter drop-shadow-lg">${docSnap.data().orderNumber}</span>
+        </div>
+      `).join('');
     });
   </script>
 </body>
