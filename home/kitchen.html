@@ -60,14 +60,14 @@
 
   <script type="module">
     import { db, collection } from './firebase-config.js';
-    import { query, where, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     const ordersRef = collection(db, "orders");
 
     // ----------------------------------------
-    // 功能 1：監聽「待製作」訂單 (Pending)
+    // 功能 1：監聽「待製作」訂單 (Pending) - 使用前端排序
     // ----------------------------------------
-    onSnapshot(query(ordersRef, where("status", "==", "pending"), orderBy("timestamp", "asc")), (snapshot) => {
+    onSnapshot(query(ordersRef, where("status", "==", "pending")), (snapshot) => {
       document.getElementById('pending-count').innerText = snapshot.size;
       const list = document.getElementById('pending-list');
       
@@ -80,7 +80,14 @@
         return;
       }
 
-      list.innerHTML = snapshot.docs.map((docSnap, index) => {
+      // 前端依照時間排序 (舊到新)
+      const sortedDocs = snapshot.docs.sort((a, b) => {
+        const timeA = a.data().timestamp?.toMillis() || 0;
+        const timeB = b.data().timestamp?.toMillis() || 0;
+        return timeA - timeB;
+      });
+
+      list.innerHTML = sortedDocs.map((docSnap, index) => {
         const order = docSnap.data();
         const timeStr = order.timestamp ? order.timestamp.toDate().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}) : '剛剛';
         const itemsHtml = order.items.map(item => `
@@ -108,9 +115,9 @@
     });
 
     // ----------------------------------------
-    // 功能 2：監聽「待取餐」訂單 (Ready)
+    // 功能 2：監聽「待取餐」訂單 (Ready) - 使用前端排序
     // ----------------------------------------
-    onSnapshot(query(ordersRef, where("status", "==", "ready"), orderBy("timestamp", "asc")), (snapshot) => {
+    onSnapshot(query(ordersRef, where("status", "==", "ready")), (snapshot) => {
       document.getElementById('ready-count').innerText = snapshot.size;
       const list = document.getElementById('ready-list');
       
@@ -123,7 +130,14 @@
         return;
       }
 
-      list.innerHTML = snapshot.docs.map((docSnap, index) => {
+      // 前端依照時間排序 (舊到新)
+      const sortedDocs = snapshot.docs.sort((a, b) => {
+        const timeA = a.data().timestamp?.toMillis() || 0;
+        const timeB = b.data().timestamp?.toMillis() || 0;
+        return timeA - timeB;
+      });
+
+      list.innerHTML = sortedDocs.map((docSnap, index) => {
         const order = docSnap.data();
         const itemsBrief = order.items.map(item => `${item.name} x${item.qty}`).join(', ');
 
