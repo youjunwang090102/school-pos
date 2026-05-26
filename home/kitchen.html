@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>後廚出餐系統 (KDS)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 h-screen w-screen overflow-hidden flex flex-col font-sans text-slate-100">
+
+  <header class="bg-slate-950 p-4 flex justify-between items-center shadow-md border-b border-slate-800 shrink-0">
+    <div class="flex items-center space-x-3">
+      <i class="fa-solid fa-fire-burner text-orange-500 text-3xl"></i>
+      <h1 class="text-2xl font-black tracking-widest text-slate-200">後廚看板 <span class="text-sm font-normal text-slate-500 ml-2">Kitchen Display System</span></h1>
+    </div>
+    <div class="text-emerald-400 font-bold animate-pulse"><i class="fa-solid fa-satellite-dish mr-2"></i>即時接收中</div>
+  </header>
+
+  <main class="flex-1 p-6 overflow-y-auto">
+    <div id="kitchen-orders-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div class="col-span-full text-center py-20 text-slate-500 text-2xl font-bold tracking-widest">
+        目前無待製作訂單，稍微休息一下吧！
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { db, collection } from './firebase-config.js';
+    import { query, where, orderBy, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    // 監聽狀態為 pending (待製作) 的訂單
+    const ordersRef = collection(db, "orders");
+    const q = query(ordersRef, where("status", "==", "pending"), orderBy("timestamp", "asc"));
+
+    onSnapshot(q, (snapshot) => {
+      const grid = document.getElementById('kitchen-orders-grid');
+      
+      if (snapshot.empty) {
+        grid.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500 text-2xl font-bold tracking-widest"><i class="fa-solid fa-mug-hot text-6xl mb-4 block opacity-50"></i>目前無待製作訂單</div>`;
+        return;
+      }
+
+      grid.innerHTML = snapshot.docs.map(docSnap => {
+        const order = docSnap.data();
+        const orderId = docSnap.id;
+        const timeStr = order.timestamp ? order.timestamp.toDate().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}) : '剛剛';
+        
+        // 渲染商品清單
+        const itemsHtml = order.items.map(item => `
+          <div class="flex justify-between items-center bg-slate-800 p-3 rounded-lg mb-2">
+            <span class="font-bold text-lg text-slate-200">${item.name}</span>
+            <span class="text-orange-400 font-black text-xl">x ${item.qty}</span>
+          </div>
+        `).join('');
+
+        return `
+          <div class="bg-slate-800/80 border border-slate-700 rounded-2xl flex flex-col overflow-hidden shadow-xl">
+            <div class="bg-slate-700 p-4 flex justify-between items-center border-b border-slate-600 shrink-0">
+              <span class="text-3xl font-black text-white tracking-tighter">#${order.orderNumber}</span>
+              <span class="text-slate-400 font-bold"><i class="fa-regular fa-clock mr-1"></i>${timeStr}</span>
+            </div>
+            <div class="p-4 flex-1 overflow-y-auto">
+              ${itemsHtml}
+            </div>
+            <div class="p-4 bg-slate-800 border-t border-slate-700 shrink-0">
+              <button onclick="markAsReady('${orderId}')" class="w-full bg-orange-600 hover:bg-orange-500 text-white font-black text-xl py-4 rounded-xl shadow-lg active:scale-95 transition">
+                <i class="fa-solid fa-bell-concierge mr-2"></i>完成出餐
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    });
+
+    // 點擊「完成出餐」後，將狀態改為 ready (請取餐)
+    window.markAsReady = async function(orderId) {
+      try {
+        await updateDoc(doc(db, "orders", orderId), { status: "ready" });
+      } catch (e) {
+        alert("更新失敗，請檢查網路連線！");
+      }
+    };
+  </script>
+</body>
+</html>
