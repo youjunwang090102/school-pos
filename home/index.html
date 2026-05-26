@@ -3,28 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>POS 收銀台 (含權限登入)</title>
+  <title>POS 收銀台 (旗艦版)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { touch-action: none; user-select: none; }
+    body { touch-action: none; user-select: none; -webkit-user-select: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
   </style>
 </head>
-<body class="bg-slate-100 h-screen w-screen overflow-hidden flex flex-col font-sans text-slate-800">
+<body class="bg-slate-100 h-screen w-screen overflow-hidden flex flex-col font-sans text-slate-800 relative">
 
-  <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center transition-opacity duration-300">
-    <div class="bg-white p-8 rounded-3xl shadow-2xl w-96 text-center">
-      <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
+  <div id="login-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-96 text-center transform transition-transform">
+      <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
         <i class="fa-solid fa-lock text-3xl"></i>
       </div>
-      <h2 class="text-2xl font-black mb-2 text-slate-800">系統登入</h2>
-      <p class="text-slate-500 mb-6 text-sm">請輸入店長配發的小組帳號</p>
+      <h2 class="text-2xl font-black mb-2 text-slate-800 tracking-wider">系統登入</h2>
+      <p class="text-slate-500 mb-6 text-sm">請輸入小組專屬帳號與密碼</p>
       
-      <input type="text" id="login-username" placeholder="帳號 (預設: group1)" class="w-full mb-4 border-2 border-slate-200 p-3 rounded-xl focus:border-blue-500 outline-none text-center font-bold text-lg">
-      <input type="password" id="login-pin" placeholder="密碼 (預設: 1234)" class="w-full mb-6 border-2 border-slate-200 p-3 rounded-xl focus:border-blue-500 outline-none text-center font-bold text-lg">
+      <input type="text" id="login-username" placeholder="帳號 (預設: group1)" class="w-full mb-4 border-2 border-slate-200 bg-slate-50 p-3 rounded-xl focus:border-blue-500 focus:bg-white outline-none text-center font-bold text-lg transition">
+      <input type="password" id="login-pin" placeholder="密碼 (預設: 1234)" class="w-full mb-6 border-2 border-slate-200 bg-slate-50 p-3 rounded-xl focus:border-blue-500 focus:bg-white outline-none text-center font-bold text-lg transition">
       
-      <button onclick="performLogin()" id="login-btn" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg active:scale-95 transition">
+      <button onclick="performLogin()" id="login-btn" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl hover:bg-blue-700 shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] active:scale-95 transition">
         驗證並登入
       </button>
     </div>
@@ -32,19 +32,19 @@
 
   <header class="bg-slate-900 text-white p-3 flex justify-between items-center shrink-0 z-20 shadow-md">
     <div class="flex items-center space-x-3">
-      <div class="bg-blue-600 p-2 rounded-lg"><i class="fa-solid fa-cash-register"></i></div>
+      <div class="bg-blue-600 p-2 rounded-lg shadow-inner"><i class="fa-solid fa-cash-register"></i></div>
       <h1 class="text-lg font-bold tracking-wider">ClassPOS</h1>
       <span id="live-clock" class="ml-4 text-sm font-mono text-slate-400">載入中...</span>
     </div>
     <div class="flex items-center space-x-4 text-sm font-semibold">
       <span class="text-emerald-400"><i class="fa-solid fa-wifi mr-1"></i>已連線</span>
-      <div class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700" id="current-user-display">尚未登入</div>
+      <div class="bg-slate-800 px-4 py-1.5 rounded-full border border-slate-700 shadow-inner" id="current-user-display">尚未登入</div>
     </div>
   </header>
 
   <main class="flex-1 flex overflow-hidden">
     <section class="flex-1 flex flex-col border-r border-slate-200 bg-slate-50">
-      <div class="p-4 bg-white border-b border-slate-200 shadow-sm z-10 shrink-0">
+      <div class="p-4 bg-white border-b border-slate-200 shadow-sm z-10 shrink-0 flex justify-between items-center">
         <h2 class="text-xl font-bold text-slate-700"><i class="fa-solid fa-mug-hot mr-2"></i>商品選單</h2>
       </div>
       <div class="flex-1 p-4 overflow-y-auto no-scrollbar">
@@ -55,47 +55,47 @@
     <section class="w-full md:w-[400px] flex flex-col bg-white shadow-2xl z-20 shrink-0">
       <div class="bg-slate-50 border-b border-slate-200 p-3 flex justify-between items-center shrink-0">
         <h2 class="font-bold text-slate-700">當前訂單</h2>
-        <button onclick="clearCart()" class="text-rose-500 hover:text-rose-600 text-sm font-bold bg-rose-50 px-3 py-1 rounded-full"><i class="fa-solid fa-trash-can mr-1"></i>清空</button>
+        <button onclick="clearCart()" class="text-rose-500 hover:text-rose-600 text-sm font-bold bg-rose-50 hover:bg-rose-100 px-3 py-1 rounded-full transition"><i class="fa-solid fa-trash-can mr-1"></i>清空</button>
       </div>
       
-      <div id="cart-ui" class="flex-1 p-3 overflow-y-auto no-scrollbar space-y-2"></div>
+      <div id="cart-ui" class="flex-1 p-3 overflow-y-auto no-scrollbar space-y-2 bg-slate-50/50"></div>
 
       <div class="border-t border-slate-200 bg-slate-50 p-4 shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
         <div class="flex justify-between items-end mb-3">
           <span class="text-slate-500 font-bold text-sm">總計金額</span>
-          <span class="text-3xl font-black text-blue-600">NT$ <span id="total-ui">0</span></span>
+          <span class="text-3xl font-black text-blue-600 tracking-tight">NT$ <span id="total-ui">0</span></span>
         </div>
         
-        <input type="text" id="received-amount" readonly placeholder="實收金額" class="w-full bg-white border-2 border-slate-300 rounded-xl p-3 text-2xl font-bold text-center text-slate-800 mb-3 shadow-inner">
+        <input type="text" id="received-amount" readonly placeholder="實收金額" class="w-full bg-white border-2 border-slate-300 rounded-xl p-3 text-2xl font-bold text-center text-slate-800 mb-3 shadow-inner focus:outline-none">
 
         <div class="grid grid-cols-4 gap-2 mb-3">
-          <button onclick="numpadInput(1)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">1</button>
-          <button onclick="numpadInput(2)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">2</button>
-          <button onclick="numpadInput(3)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">3</button>
-          <button onclick="setReceived(100)" class="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg py-3 text-lg font-bold active:scale-95">$100</button>
+          <button onclick="numpadInput(1)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">1</button>
+          <button onclick="numpadInput(2)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">2</button>
+          <button onclick="numpadInput(3)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">3</button>
+          <button onclick="setReceived(100)" class="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg py-3 text-lg font-bold active:scale-95 transition shadow-sm">$100</button>
           
-          <button onclick="numpadInput(4)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">4</button>
-          <button onclick="numpadInput(5)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">5</button>
-          <button onclick="numpadInput(6)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">6</button>
-          <button onclick="setReceived(500)" class="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg py-3 text-lg font-bold active:scale-95">$500</button>
+          <button onclick="numpadInput(4)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">4</button>
+          <button onclick="numpadInput(5)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">5</button>
+          <button onclick="numpadInput(6)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">6</button>
+          <button onclick="setReceived(500)" class="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg py-3 text-lg font-bold active:scale-95 transition shadow-sm">$500</button>
           
-          <button onclick="numpadInput(7)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">7</button>
-          <button onclick="numpadInput(8)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">8</button>
-          <button onclick="numpadInput(9)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">9</button>
-          <button onclick="setReceived(1000)" class="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg py-3 text-lg font-bold active:scale-95">$1000</button>
+          <button onclick="numpadInput(7)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">7</button>
+          <button onclick="numpadInput(8)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">8</button>
+          <button onclick="numpadInput(9)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">9</button>
+          <button onclick="setReceived(1000)" class="bg-blue-50 border border-blue-200 text-blue-700 rounded-lg py-3 text-lg font-bold active:scale-95 transition shadow-sm">$1000</button>
           
-          <button onclick="numpadClear()" class="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg py-3 text-xl font-bold active:scale-95">C</button>
-          <button onclick="numpadInput(0)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold active:scale-95">0</button>
-          <button onclick="numpadBackspace()" class="bg-slate-200 border border-slate-300 rounded-lg py-3 text-xl font-bold active:scale-95"><i class="fa-solid fa-delete-left"></i></button>
-          <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg py-3 text-lg font-bold active:scale-95">剛好</button>
+          <button onclick="numpadClear()" class="bg-rose-50 border border-rose-200 text-rose-600 rounded-lg py-3 text-xl font-bold active:scale-95 transition shadow-sm">C</button>
+          <button onclick="numpadInput(0)" class="bg-white border border-slate-200 rounded-lg py-3 text-xl font-bold text-slate-700 active:scale-95 transition shadow-sm">0</button>
+          <button onclick="numpadBackspace()" class="bg-slate-200 border border-slate-300 text-slate-700 rounded-lg py-3 text-xl font-bold active:scale-95 transition shadow-sm"><i class="fa-solid fa-delete-left"></i></button>
+          <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg py-3 text-lg font-bold active:scale-95 transition shadow-sm">剛好</button>
         </div>
 
         <div class="bg-blue-900 text-white rounded-xl flex justify-between items-center p-3 mb-3 shadow-inner">
           <span class="font-bold text-blue-200 text-sm">應找零</span>
-          <span class="text-2xl font-black" id="change-amount">$ 0</span>
+          <span class="text-2xl font-black tracking-wider" id="change-amount">$ 0</span>
         </div>
 
-        <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-4 rounded-xl text-xl font-bold shadow-lg hover:bg-emerald-600 active:scale-95 disabled:bg-slate-300 transition flex justify-center items-center">
+        <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-4 rounded-xl text-xl font-bold shadow-[0_4px_14px_0_rgba(16,185,129,0.39)] hover:bg-emerald-600 hover:shadow-[0_6px_20px_rgba(16,185,129,0.23)] active:scale-[0.98] disabled:bg-slate-300 disabled:shadow-none transition duration-200 flex justify-center items-center">
           <i class="fa-solid fa-check-circle mr-2"></i> 確認結帳
         </button>
       </div>
@@ -104,7 +104,7 @@
 
   <script type="module">
     import { db, doc, setDoc, onSnapshot, collection, serverTimestamp } from './firebase-config.js';
-    import { writeBatch, increment, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+    import { writeBatch, increment, getDoc, getDocs, runTransaction } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     let currentUser = null;
     let products = [];
@@ -113,34 +113,26 @@
 
     setInterval(() => { document.getElementById('live-clock').innerText = new Date().toLocaleString('zh-TW', { hour12: false }); }, 1000);
 
-    // ==========================================
-    // 0. 登入系統邏輯
-    // ==========================================
+    // --- 登入邏輯 ---
     window.performLogin = async function() {
-      const user = document.getElementById('login-username').value.trim();
-      const pin = document.getElementById('login-pin').value.trim();
-      if(!user || !pin) return alert("請輸入帳號密碼");
-
+      const user = document.getElementById('login-username').value.trim() || 'group1';
+      const pin = document.getElementById('login-pin').value.trim() || '1234';
       const btn = document.getElementById('login-btn');
       btn.innerText = "驗證中...";
       
       try {
-        const accountsRef = collection(db, "accounts");
-        const accountsSnap = await getDocs(accountsRef);
-        
-        // 如果資料庫是空的，自動建立一組預設帳號
+        const accountsSnap = await getDocs(collection(db, "accounts"));
         if (accountsSnap.empty) {
-           await setDoc(doc(db, "accounts", "group1"), { pin: "1234", name: "第一組" });
-           if(user === "group1" && pin === "1234") {
-             loginSuccess("group1", "第一組");
-             return;
-           }
+          await setDoc(doc(db, "accounts", "group1"), { pin: "1234", name: "第一組" });
         }
-
-        // 驗證帳號密碼
+        
         const userDoc = await getDoc(doc(db, "accounts", user));
         if (userDoc.exists() && userDoc.data().pin === pin) {
-          loginSuccess(user, userDoc.data().name);
+          currentUser = { id: userDoc.id, name: userDoc.data().name };
+          document.getElementById('current-user-display').innerText = currentUser.name;
+          document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
+          setTimeout(() => document.getElementById('login-modal').classList.add('hidden'), 300);
+          initPOS();
         } else {
           alert("帳號或密碼錯誤！");
           btn.innerText = "驗證並登入";
@@ -152,17 +144,7 @@
       }
     };
 
-    function loginSuccess(userId, userName) {
-      currentUser = { id: userId, name: userName };
-      document.getElementById('current-user-display').innerText = userName;
-      document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
-      setTimeout(() => document.getElementById('login-modal').classList.add('hidden'), 300);
-      initPOS();
-    }
-
-    // ==========================================
-    // 1. 系統初始化與購物車
-    // ==========================================
+    // --- 系統初始化與商品載入 ---
     function initPOS() {
       onSnapshot(collection(db, "products"), (snapshot) => {
         products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -171,17 +153,16 @@
     }
 
     function renderProducts() {
-      const grid = document.getElementById('product-grid');
-      grid.innerHTML = products.map(p => {
+      document.getElementById('product-grid').innerHTML = products.map(p => {
         const isSoldOut = p.stock <= 0;
-        const opacity = isSoldOut ? 'opacity-50 grayscale' : 'cursor-pointer hover:-translate-y-1 active:scale-95 shadow-sm transition';
+        const opacity = isSoldOut ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer hover:-translate-y-1 active:scale-95 hover:shadow-lg transition-all';
         return `
-          <div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="border border-slate-200 rounded-2xl p-4 flex flex-col justify-between h-36 ${p.color || 'bg-white'} ${opacity}">
-            <div>
-              <h3 class="font-bold text-slate-800 text-lg">${p.name}</h3>
+          <div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="relative border border-slate-200 rounded-2xl p-4 flex flex-col justify-between h-36 ${p.color || 'bg-white'} ${opacity} shadow-sm overflow-hidden">
+            <div class="relative z-10">
+              <h3 class="font-bold text-slate-800 text-lg leading-tight">${p.name}</h3>
               <p class="text-blue-700 font-black mt-1 text-xl">$${p.price}</p>
             </div>
-            <div class="text-right text-sm font-bold ${p.stock > 10 ? 'text-slate-500' : 'text-rose-600 bg-rose-100 px-2 rounded-lg inline-block'}">
+            <div class="relative z-10 text-right text-sm font-bold ${p.stock > 10 ? 'text-slate-500' : 'text-rose-600 bg-rose-100 px-2 rounded-lg inline-block'}">
               ${isSoldOut ? '已售完' : `庫存: ${p.stock}`}
             </div>
           </div>
@@ -189,6 +170,7 @@
       }).join('');
     }
 
+    // --- 購物車操作 ---
     window.addToCart = function(id) {
       const p = products.find(p => p.id === id);
       const ex = cart.find(i => i.id === id);
@@ -199,14 +181,15 @@
 
     window.changeQty = function(id, delta) {
       const item = cart.find(i => i.id === id);
-      const product = products.find(p => p.id === id);
-      if (delta > 0 && item.qty >= product.stock) return;
+      if (delta > 0 && item.qty >= products.find(p => p.id === id).stock) return;
       item.qty += delta;
       if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
       updateCartUI();
     };
 
-    window.clearCart = function() { cart = []; document.getElementById('received-amount').value = ''; updateCartUI(); };
+    window.clearCart = function() {
+      cart = []; document.getElementById('received-amount').value = ''; updateCartUI();
+    };
 
     async function updateCartUI() {
       total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -215,32 +198,28 @@
       
       const ui = document.getElementById('cart-ui');
       if (cart.length === 0) {
-        ui.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-300"><p>請點擊商品</p></div>`;
+        ui.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-basket-shopping text-4xl mb-2"></i><p>請點擊商品開始點餐</p></div>`;
       } else {
         ui.innerHTML = cart.map(item => `
-          <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200">
-            <div class="flex-1 font-bold">${item.name}</div>
-            <div class="flex items-center space-x-2 bg-slate-100 rounded-lg p-1">
-              <button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 bg-white rounded font-bold">-</button>
-              <span class="w-6 text-center font-bold">${item.qty}</span>
-              <button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 bg-blue-100 text-blue-700 rounded font-bold">+</button>
+          <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+            <div class="flex-1 font-bold text-slate-700">${item.name}</div>
+            <div class="flex items-center space-x-2 bg-slate-100 rounded-lg p-1 border border-slate-200">
+              <button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 bg-white rounded shadow-sm font-bold text-slate-600">-</button>
+              <span class="w-6 text-center font-bold text-slate-800">${item.qty}</span>
+              <button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 bg-blue-100 text-blue-700 rounded shadow-sm font-bold">+</button>
             </div>
-            <div class="w-16 text-right font-black text-blue-600">$${item.price * item.qty}</div>
-          </div>`).join('');
+            <div class="w-16 text-right font-black text-blue-600 text-lg">$${item.price * item.qty}</div>
+          </div>
+        `).join('');
       }
       calculateChange();
 
-      // 推送給顧客螢幕左半邊
       try {
-        await setDoc(doc(db, "active_sessions", "station_1"), { 
-          cartItems: cart, totalAmount: total, status: "ordering" 
-        });
-      } catch (e) {}
+        await setDoc(doc(db, "active_sessions", "station_1"), { cartItems: cart, totalAmount: total, status: "ordering" });
+      } catch (e) { console.error("同步顧客螢幕失敗", e); }
     }
 
-    // ==========================================
-    // 2. 數字鍵盤
-    // ==========================================
+    // --- 數字鍵盤 ---
     const inputField = document.getElementById('received-amount');
     window.numpadInput = function(num) { inputField.value = inputField.value === '0' ? num : inputField.value + num; calculateChange(); };
     window.setReceived = function(amount) { inputField.value = amount; calculateChange(); };
@@ -250,61 +229,82 @@
 
     function calculateChange() {
       const received = parseInt(inputField.value) || 0;
-      const changeDisplay = document.getElementById('change-amount');
-      const checkoutBtn = document.getElementById('checkout-btn');
-
-      if (cart.length === 0) { changeDisplay.innerText = '$ 0'; checkoutBtn.disabled = true; return; }
+      const display = document.getElementById('change-amount');
+      const btn = document.getElementById('checkout-btn');
+      
+      if (cart.length === 0) {
+        display.innerText = '$ 0'; btn.disabled = true; return;
+      }
       if (inputField.value === '') {
-        changeDisplay.innerText = '$ 0'; changeDisplay.className = 'text-2xl font-black text-blue-200'; checkoutBtn.disabled = false;
+        display.innerText = '$ 0'; display.className = 'text-2xl font-black tracking-wider text-blue-200'; btn.disabled = false;
       } else if (received >= total) {
-        changeDisplay.innerText = '$ ' + (received - total); changeDisplay.className = 'text-2xl font-black text-emerald-400'; checkoutBtn.disabled = false;
+        display.innerText = '$ ' + (received - total); display.className = 'text-2xl font-black tracking-wider text-emerald-400'; btn.disabled = false;
       } else {
-        changeDisplay.innerText = '不足'; changeDisplay.className = 'text-2xl font-black text-rose-400'; checkoutBtn.disabled = true;
+        display.innerText = '不足'; display.className = 'text-2xl font-black tracking-wider text-rose-400'; btn.disabled = true;
       }
     }
 
-    // ==========================================
-    // 3. 結帳與號碼牌寫入
-    // ==========================================
+    // --- 結帳與號碼牌邏輯 ---
     window.checkout = async function() {
       if (cart.length === 0) return;
       const received = parseInt(inputField.value) || total;
       const change = received - total;
-      const orderNo = Math.floor(Math.random() * 900) + 100;
+
+      const btn = document.getElementById('checkout-btn');
+      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> 處理中...`;
+      btn.disabled = true;
 
       try {
-        const batch = writeBatch(db);
+        const counterRef = doc(db, "counters", "daily_order");
+        
+        const orderNoNum = await runTransaction(db, async (transaction) => {
+          const counterDoc = await transaction.get(counterRef);
+          let newCount = 1;
+          if (counterDoc.exists()) newCount = counterDoc.data().count + 1;
+          transaction.set(counterRef, { count: newCount }, { merge: true });
+          return newCount;
+        });
 
-        // ✨ 紀錄訂單，標記 status 為 pending (待取餐)
+        // 產生 001, 002 格式的單號
+        const orderNo = String(orderNoNum).padStart(3, '0');
+        const batch = writeBatch(db);
         const orderRef = doc(collection(db, "orders"));
+        
         batch.set(orderRef, {
           orderNumber: orderNo,
           items: cart,
           total: total,
           received: received,
           change: change,
-          operatorId: currentUser.id, // 紀錄是誰結帳的
-          status: "pending", 
+          operatorId: currentUser.id,
+          status: "pending", // 寫入待出餐狀態
           timestamp: serverTimestamp()
         });
 
         cart.forEach(item => {
-          const pRef = doc(db, "products", item.id);
-          batch.update(pRef, { stock: increment(-item.qty) });
+          batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) });
         });
 
-        const sessionRef = doc(db, "active_sessions", "station_1");
-        batch.set(sessionRef, { cartItems: [], totalAmount: 0, status: "completed", change: change, orderNumber: orderNo });
+        batch.set(doc(db, "active_sessions", "station_1"), { 
+          cartItems: [], totalAmount: 0, status: "completed", change: change, orderNumber: orderNo 
+        });
 
         await batch.commit();
 
+        // 結帳後重置本地狀態，保留顧客螢幕的成功畫面
         cart = []; total = 0; inputField.value = '';
         document.getElementById('total-ui').innerText = '0';
         document.getElementById('btn-exact').innerText = '剛好';
-        document.getElementById('cart-ui').innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-300"><p>請點擊商品</p></div>`;
+        document.getElementById('cart-ui').innerHTML = `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-basket-shopping text-4xl mb-2"></i><p>請點擊商品開始點餐</p></div>`;
         calculateChange();
 
-      } catch (e) { alert("結帳失敗，請檢查網路！"); }
+      } catch (e) {
+        console.error("結帳失敗：", e);
+        alert("結帳失敗，請檢查網路連線！");
+      } finally {
+        btn.innerHTML = `<i class="fa-solid fa-check-circle mr-2"></i> 確認結帳`;
+        btn.disabled = false;
+      }
     };
   </script>
 </body>
