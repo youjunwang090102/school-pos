@@ -3,413 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>園遊會進階 POS 系統 (內建數字鍵盤)</title>
+  <title>POS 收銀台</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body { touch-action: manipulation; user-select: none; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    @media print {
-      body * { visibility: hidden; }
-      #receipt-print-area, #receipt-print-area * { visibility: visible; }
-      #receipt-print-area {
-        position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; box-shadow: none;
-      }
-      .no-print { display: none !important; }
-    }
-
-    /* 數字鍵盤按鈕點擊效果 */
-    .numpad-btn:active { transform: scale(0.95); background-color: #e5e7eb; }
-  </style>
 </head>
-<body class="bg-gray-100 h-screen flex flex-col overflow-hidden text-gray-800 font-sans">
-
-  <header class="bg-blue-800 text-white p-3 flex justify-between items-center shadow-md z-20 shrink-0">
-    <div class="flex items-center space-x-4">
-      <h1 class="text-xl font-bold"><i class="fa-solid fa-store mr-2"></i>園遊會 POS</h1>
-      <span class="bg-blue-900 px-3 py-1 rounded text-sm font-mono tracking-widest shadow-inner" id="live-clock">載入中...</span>
+<body class="bg-gray-100 p-8 flex flex-col md:flex-row gap-8 font-sans">
+  <div class="flex-1">
+    <h2 class="text-2xl font-bold mb-4">收銀點餐區</h2>
+    <div class="grid grid-cols-2 gap-4">
+      <button onclick="addToCart('珍奶', 45)" class="bg-blue-100 hover:bg-blue-200 p-6 rounded-xl font-bold text-xl shadow">珍珠奶茶 $45</button>
+      <button onclick="addToCart('雞排', 75)" class="bg-orange-100 hover:bg-orange-200 p-6 rounded-xl font-bold text-xl shadow">香酥雞排 $75</button>
+      <button onclick="addToCart('薯條', 40)" class="bg-yellow-100 hover:bg-yellow-200 p-6 rounded-xl font-bold text-xl shadow">黃金脆薯 $40</button>
     </div>
-    <div class="flex items-center space-x-4 text-sm">
-      <p id="current-group">第一組 (組長模式)</p>
-    </div>
-  </header>
-
-  <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
-    
-    <!-- 左欄：商品點選區 -->
-    <section class="flex-1 flex flex-col bg-white md:w-5/12 border-r">
-      <div class="bg-gray-50 border-b p-2 flex space-x-2 overflow-x-auto shadow-sm">
-        <button class="px-5 py-2 bg-blue-100 text-blue-700 rounded-full font-bold whitespace-nowrap text-sm" onclick="filterCategory('all')">全部商品</button>
-        <button class="px-5 py-2 bg-white border text-gray-600 rounded-full font-bold whitespace-nowrap text-sm hover:bg-gray-100" onclick="filterCategory('drink')">飲料</button>
-        <button class="px-5 py-2 bg-white border text-gray-600 rounded-full font-bold whitespace-nowrap text-sm hover:bg-gray-100" onclick="filterCategory('food')">熱食</button>
-      </div>
-      <div class="flex-1 p-4 overflow-y-auto bg-gray-100">
-        <div id="product-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3"></div>
-      </div>
-    </section>
-
-    <!-- 中欄：店員結帳與數字鍵盤區 -->
-    <section class="w-full md:w-4/12 lg:w-4/12 bg-white border-r flex flex-col shadow-lg z-10">
-      <div class="bg-gray-800 text-white p-2 flex justify-between items-center shrink-0">
-        <h2 class="font-bold text-sm"><i class="fa-solid fa-cart-shopping mr-2"></i>當前訂單</h2>
-        <button onclick="clearCart()" class="text-red-400 hover:text-red-300 text-sm"><i class="fa-solid fa-trash"></i> 清空</button>
-      </div>
-      
-      <!-- 購物車列表 -->
-      <div id="cart-items" class="flex-1 p-2 overflow-y-auto bg-gray-50 max-h-48 md:max-h-none"></div>
-      
-      <!-- 結算與輸入區 (緊湊配置) -->
-      <div class="border-t bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] shrink-0">
-        <div class="flex justify-between items-end mb-2">
-          <span class="text-gray-600 font-bold text-sm">總計</span>
-          <span class="text-2xl font-extrabold text-blue-600 leading-none">NT$ <span id="cart-total">0</span></span>
-        </div>
-        
-        <!-- 實收金額顯示框 (readonly 禁用原生鍵盤) -->
-        <input type="text" id="received-amount" readonly placeholder="請點擊下方數字鍵盤" class="w-full border-2 border-gray-300 bg-gray-50 rounded p-2 text-xl font-bold text-center focus:outline-none focus:border-blue-500 mb-2 text-blue-800 tracking-wider">
-
-        <!-- 快速金額按鈕 -->
-        <div class="grid grid-cols-4 gap-2 mb-2">
-          <button id="btn-exact" onclick="setExactAmount()" class="bg-blue-100 border border-blue-300 rounded py-2 font-bold text-blue-800 hover:bg-blue-200 text-sm shadow-sm">剛好</button>
-          <button onclick="setReceived(100)" class="bg-gray-100 border border-gray-300 rounded py-2 font-bold text-gray-700 hover:bg-gray-200 text-sm shadow-sm">$100</button>
-          <button onclick="setReceived(500)" class="bg-gray-100 border border-gray-300 rounded py-2 font-bold text-gray-700 hover:bg-gray-200 text-sm shadow-sm">$500</button>
-          <button onclick="setReceived(1000)" class="bg-gray-100 border border-gray-300 rounded py-2 font-bold text-gray-700 hover:bg-gray-200 text-sm shadow-sm">$1000</button>
-        </div>
-
-        <!-- 內建數字鍵盤 -->
-        <div class="grid grid-cols-3 gap-2 mb-3">
-          <button onclick="numpadInput(1)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">1</button>
-          <button onclick="numpadInput(2)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">2</button>
-          <button onclick="numpadInput(3)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">3</button>
-          <button onclick="numpadInput(4)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">4</button>
-          <button onclick="numpadInput(5)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">5</button>
-          <button onclick="numpadInput(6)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">6</button>
-          <button onclick="numpadInput(7)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">7</button>
-          <button onclick="numpadInput(8)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">8</button>
-          <button onclick="numpadInput(9)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">9</button>
-          <button onclick="numpadClear()" class="numpad-btn bg-red-100 border-2 border-red-200 rounded-lg py-2 font-bold text-xl text-red-600 shadow-sm">C</button>
-          <button onclick="numpadInput(0)" class="numpad-btn bg-white border-2 border-gray-200 rounded-lg py-2 font-bold text-xl text-gray-800 shadow-sm">0</button>
-          <button onclick="numpadBackspace()" class="numpad-btn bg-gray-200 border-2 border-gray-300 rounded-lg py-2 font-bold text-xl text-gray-700 shadow-sm"><i class="fa-solid fa-delete-left"></i></button>
-        </div>
-
-        <div class="bg-blue-50 text-blue-800 rounded flex justify-between items-center mb-2 px-3 py-1 border border-blue-100">
-          <span class="font-bold text-sm">應找零</span>
-          <span class="text-lg font-bold" id="change-amount">$ 0</span>
-        </div>
-
-        <!-- 雙結帳按鈕 -->
-        <div class="flex space-x-2">
-          <button onclick="checkout(false)" id="checkout-btn-save" class="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 rounded-lg shadow disabled:bg-gray-300 text-sm">存檔</button>
-          <button onclick="checkout(true)" id="checkout-btn-print" class="flex-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg shadow disabled:bg-gray-300 text-sm w-3/5"><i class="fa-solid fa-print mr-1"></i>結帳印單</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- 右欄：顧客螢幕與歷史報表 (保持不變) -->
-    <section class="w-full md:w-3/12 lg:w-4/12 bg-gray-800 flex flex-col relative text-white">
-      <div class="flex border-b border-gray-700 text-sm bg-gray-900 font-bold shrink-0">
-        <button onclick="switchRightTab('customer')" id="tab-customer" class="flex-1 py-3 text-center bg-gray-800 text-blue-400 border-t-2 border-blue-500">
-          顧客螢幕
-        </button>
-        <button onclick="switchRightTab('history')" id="tab-history" class="flex-1 py-3 text-center text-gray-400 hover:bg-gray-800 border-t-2 border-transparent">
-          歷史報表
-        </button>
-      </div>
-
-      <div id="view-customer" class="flex-1 flex flex-col p-6 overflow-y-auto">
-        <h3 class="text-xl text-center text-gray-300 font-bold mb-6 border-b border-gray-600 pb-2">請確認餐點</h3>
-        <div id="customer-display-items" class="flex-1 space-y-4"></div>
-        <div class="mt-4 pt-4 border-t border-gray-600">
-          <div class="flex justify-between items-end">
-            <span class="text-gray-400 text-lg">總計</span>
-            <span class="text-5xl font-mono text-yellow-400 font-bold" id="customer-display-total">$0</span>
-          </div>
-        </div>
-      </div>
-
-      <div id="view-history" class="flex-1 p-4 overflow-y-auto hidden bg-gray-100 text-gray-800">
-        <h3 class="font-bold text-lg mb-3">今日交易紀錄</h3>
-        <div id="history-list" class="space-y-2"></div>
-      </div>
-    </section>
-  </main>
-
-  <!-- 浮動收據與列印 Modal (保持不變) -->
-  <div id="receipt-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-sm mx-4 flex flex-col max-h-[90vh]">
-      <div id="receipt-print-area" class="flex-1 overflow-y-auto bg-white text-black p-4 font-mono text-sm border-2 border-dashed border-gray-300 rounded">
-        <div class="text-center mb-4">
-          <h2 class="text-xl font-bold mb-1">校慶園遊會</h2>
-          <p>第一組</p><p class="text-xs mt-1">=============</p>
-        </div>
-        <div class="mb-3 text-xs">
-          <p>單號：<span id="receipt-id">ORD</span></p>
-          <p>時間：<span id="receipt-time">Time</span></p>
-        </div>
-        <table class="w-full text-left mb-3 border-b border-dashed border-gray-400 pb-2">
-          <thead><tr class="border-b border-dashed border-gray-400"><th class="pb-1 w-1/2">品名</th><th class="pb-1 text-center">數量</th><th class="pb-1 text-right">小計</th></tr></thead>
-          <tbody id="receipt-items"></tbody>
-        </table>
-        <div class="flex justify-between font-bold text-base mb-1"><span>總計：</span><span id="receipt-total">$0</span></div>
-        <div class="flex justify-between text-xs mb-1"><span>實收：</span><span id="receipt-received">$0</span></div>
-        <div class="flex justify-between text-xs mb-4"><span>找零：</span><span id="receipt-change">$0</span></div>
-        <div class="text-center text-xs mt-4 pt-4 border-t border-dashed border-gray-400"><p>謝謝光臨！</p></div>
-      </div>
-      <div class="mt-4 flex space-x-3 no-print shrink-0">
-        <button onclick="closeReceipt()" class="flex-1 py-2 border border-gray-300 rounded font-bold text-gray-600 hover:bg-gray-100">關閉</button>
-        <button onclick="printReceipt()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-bold"><i class="fa-solid fa-print mr-1"></i>印單</button>
-      </div>
-    </div>
+    <button onclick="clearCart()" class="mt-8 bg-red-500 text-white px-6 py-3 rounded-lg font-bold shadow hover:bg-red-600">清空訂單</button>
+  </div>
+  <div class="w-full md:w-1/3 bg-white p-6 rounded-xl shadow-lg border">
+    <h2 class="text-xl font-bold mb-4 border-b pb-2">當前購物車</h2>
+    <div id="cart-ui" class="min-h-[200px] mb-4 space-y-2"></div>
+    <div class="text-2xl font-bold text-blue-600 border-t pt-4">總計: $<span id="total-ui">0</span></div>
   </div>
 
-  <script>
-    const productsData = [
-      { id: 'p1', name: '招牌珍珠奶茶', price: 45, stock: 50, category: 'drink', color: 'bg-yellow-50' },
-      { id: 'p2', name: '冰檸檬紅茶', price: 35, stock: 40, category: 'drink', color: 'bg-red-50' },
-      { id: 'p3', name: '古早味冬瓜茶', price: 30, stock: 30, category: 'drink', color: 'bg-orange-50' },
-      { id: 'p4', name: '香酥炸雞排', price: 75, stock: 20, category: 'food', color: 'bg-amber-100' },
-      { id: 'p5', name: '黃金脆薯', price: 40, stock: 15, category: 'food', color: 'bg-yellow-100' },
-    ];
+  <script type="module">
+    import { db, doc, setDoc } from './firebase-config.js';
+    let cart = [];
+    let total = 0;
 
-    let cart = []; 
-    let orderHistory = []; 
-    let currentFilter = 'all';
+    window.addToCart = function(name, price) {
+      const existing = cart.find(item => item.name === name);
+      if (existing) existing.qty += 1;
+      else cart.push({ name, price, qty: 1 });
+      updateUIAndDatabase();
+    };
 
-    function init() {
-      startClock();
-      renderProducts();
-      updateCartUI();
-    }
+    window.clearCart = function() {
+      cart = [];
+      updateUIAndDatabase();
+    };
 
-    function startClock() {
-      setInterval(() => {
-        document.getElementById('live-clock').innerText = new Date().toLocaleString('zh-TW', { hour12: false });
-      }, 1000);
-    }
+    async function updateUIAndDatabase() {
+      total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      document.getElementById('total-ui').innerText = total;
+      document.getElementById('cart-ui').innerHTML = cart.map(item => 
+        `<div class="flex justify-between border-b py-2">
+          <span>${item.name} x ${item.qty}</span>
+          <span class="font-bold">$${item.price * item.qty}</span>
+         </div>`
+      ).join('');
 
-    function renderProducts() {
-      const grid = document.getElementById('product-grid');
-      grid.innerHTML = ''; 
-      productsData.forEach(p => {
-        if (currentFilter !== 'all' && p.category !== currentFilter) return;
-        let isSoldOut = p.stock <= 0;
-        let opacity = isSoldOut ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-md active:scale-95';
-        grid.innerHTML += `
-          <div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="border rounded-xl p-3 flex flex-col justify-between h-28 ${p.color} ${opacity}">
-            <div>
-              <h3 class="font-bold text-gray-800 text-sm">${p.name}</h3>
-              <p class="text-blue-700 font-extrabold mt-1 text-lg">$${p.price}</p>
-            </div>
-            <div class="text-right text-xs ${p.stock > 10 ? 'text-gray-500' : 'text-red-500 font-bold'}">${isSoldOut ? '售完' : `剩餘: ${p.stock}`}</div>
-          </div>
-        `;
-      });
-    }
-
-    function filterCategory(category) { currentFilter = category; renderProducts(); }
-
-    function addToCart(productId) {
-      const product = productsData.find(p => p.id === productId);
-      const existingItem = cart.find(item => item.id === productId);
-      if ((existingItem ? existingItem.qty : 0) >= product.stock) return alert('庫存不足！');
-      if (existingItem) existingItem.qty += 1; else cart.push({ ...product, qty: 1 });
-      updateCartUI();
-    }
-
-    function changeQty(productId, delta) {
-      const item = cart.find(i => i.id === productId);
-      const product = productsData.find(p => p.id === productId);
-      if (!item) return;
-      if (delta > 0 && item.qty >= product.stock) return alert('已達庫存上限！');
-      item.qty += delta;
-      if (item.qty <= 0) cart = cart.filter(i => i.id !== productId);
-      updateCartUI();
-    }
-
-    function clearCart() {
-      if(cart.length > 0 && confirm('清空當前訂單？')) { cart = []; updateCartUI(); }
-    }
-
-    function updateCartUI() {
-      const cartContainer = document.getElementById('cart-items');
-      const totalSpan = document.getElementById('cart-total');
-      const btnExact = document.getElementById('btn-exact');
-      
-      let total = 0;
-      cartContainer.innerHTML = '';
-      
-      cart.forEach(item => {
-        const itemTotal = item.price * item.qty;
-        total += itemTotal;
-        cartContainer.innerHTML += `
-          <div class="flex justify-between items-center mb-2 bg-white p-2 rounded border text-sm">
-            <div class="flex-1 font-bold">${item.name}</div>
-            <div class="flex items-center space-x-2 mx-2">
-              <button onclick="changeQty('${item.id}', -1)" class="w-6 h-6 bg-gray-200 rounded font-bold">-</button>
-              <span class="w-4 text-center">${item.qty}</span>
-              <button onclick="changeQty('${item.id}', 1)" class="w-6 h-6 bg-blue-100 text-blue-700 rounded font-bold">+</button>
-            </div>
-            <div class="w-12 text-right font-bold text-blue-600">$${itemTotal}</div>
-          </div>
-        `;
-      });
-
-      totalSpan.innerText = total;
-      btnExact.innerText = `剛好 $${total}`; // 動態更新剛好金額按鈕
-      
-      updateCustomerDisplay(total);
-      
-      if (cart.length === 0) {
-        cartContainer.innerHTML = `<p class="text-center text-gray-400 mt-4 text-sm">請點擊左側商品</p>`;
-        document.getElementById('received-amount').value = '';
-      }
-      
-      calculateChange(); 
-    }
-
-    function updateCustomerDisplay(total) {
-      const displayContainer = document.getElementById('customer-display-items');
-      document.getElementById('customer-display-total').innerText = `$${total}`;
-      if (cart.length === 0) {
-        displayContainer.innerHTML = `<p class="text-center text-gray-500 mt-10 tracking-widest animate-pulse">等待點餐中...</p>`;
-        return;
-      }
-      displayContainer.innerHTML = cart.map(item => `
-        <div class="flex justify-between items-center bg-gray-700 p-4 rounded-xl text-xl">
-          <div class="flex-1 text-white font-bold">${item.name}</div>
-          <div class="text-gray-400 mx-6">x <span class="text-white font-bold">${item.qty}</span></div>
-          <div class="w-20 text-right text-yellow-300 font-mono">$${item.price * item.qty}</div>
-        </div>
-      `).join('');
-    }
-
-    // --- 數字鍵盤相關邏輯 ---
-    const inputField = document.getElementById('received-amount');
-
-    function setExactAmount() {
-      const total = parseInt(document.getElementById('cart-total').innerText) || 0;
-      if (total > 0) setReceived(total);
-    }
-
-    function setReceived(amount) {
-      inputField.value = amount;
-      calculateChange();
-    }
-
-    function numpadInput(num) {
-      if (inputField.value === '0') inputField.value = num; // 避免開頭為0
-      else inputField.value += num;
-      calculateChange();
-    }
-
-    function numpadBackspace() {
-      inputField.value = inputField.value.slice(0, -1);
-      calculateChange();
-    }
-
-    function numpadClear() {
-      inputField.value = '';
-      calculateChange();
-    }
-
-    function calculateChange() {
-      const total = parseInt(document.getElementById('cart-total').innerText) || 0;
-      const received = parseInt(inputField.value) || 0;
-      const changeDisplay = document.getElementById('change-amount');
-      const btnSave = document.getElementById('checkout-btn-save');
-      const btnPrint = document.getElementById('checkout-btn-print');
-
-      if (cart.length === 0) {
-         changeDisplay.innerText = '$ 0';
-         btnSave.disabled = true; btnPrint.disabled = true;
-         return;
-      }
-
-      if (inputField.value === '') {
-        changeDisplay.innerText = '$ 0';
-        changeDisplay.className = 'text-lg font-bold text-blue-800';
-        btnSave.disabled = false; btnPrint.disabled = false;
-      } else if (received >= total) {
-        changeDisplay.innerText = '$ ' + (received - total);
-        changeDisplay.className = 'text-lg font-bold text-green-600';
-        btnSave.disabled = false; btnPrint.disabled = false;
-      } else {
-        changeDisplay.innerText = '不足';
-        changeDisplay.className = 'text-lg font-bold text-red-500';
-        btnSave.disabled = true; btnPrint.disabled = true;
+      try {
+        const sessionRef = doc(db, "active_sessions", "station_1");
+        await setDoc(sessionRef, { cartItems: cart, totalAmount: total, timestamp: new Date() });
+      } catch (e) {
+        console.error("同步失敗：", e);
       }
     }
-
-    function checkout(shouldPrint) {
-      if(cart.length === 0) return;
-      const total = parseInt(document.getElementById('cart-total').innerText);
-      const received = parseInt(inputField.value) || total;
-      const change = received - total;
-
-      const orderId = 'ORD' + Date.now().toString().slice(-6);
-      const timestamp = new Date();
-      const newOrder = { id: orderId, timeStr: timestamp.toLocaleString('zh-TW', { hour12: false }), items: [...cart], total, received, change };
-
-      cart.forEach(cartItem => {
-         const p = productsData.find(p => p.id === cartItem.id);
-         if(p) p.stock -= cartItem.qty;
-      });
-
-      orderHistory.unshift(newOrder); 
-      renderHistory(); 
-      cart = []; updateCartUI(); renderProducts(); 
-      numpadClear(); // 結帳後清空數字鍵盤
-
-      if(shouldPrint) openReceipt(newOrder);
-      else alert(`結帳成功！單號 ${orderId}`);
-    }
-
-    // --- 歷史紀錄與報表邏輯 ---
-    function switchRightTab(tab) {
-      document.getElementById('view-customer').classList.toggle('hidden', tab !== 'customer');
-      document.getElementById('view-history').classList.toggle('hidden', tab !== 'history');
-      document.getElementById('tab-customer').classList.toggle('text-blue-400', tab === 'customer');
-      document.getElementById('tab-customer').classList.toggle('border-blue-500', tab === 'customer');
-      document.getElementById('tab-history').classList.toggle('text-blue-400', tab === 'history');
-      document.getElementById('tab-history').classList.toggle('border-blue-500', tab === 'history');
-    }
-
-    function renderHistory() {
-      const list = document.getElementById('history-list');
-      if (orderHistory.length === 0) return list.innerHTML = `<p class="text-gray-500 text-center py-4 text-sm">無紀錄</p>`;
-      
-      list.innerHTML = orderHistory.map(order => `
-        <div class="bg-white p-2 rounded shadow-sm border border-gray-200 flex justify-between items-center text-sm">
-          <div>
-            <div class="text-xs text-gray-500">${order.timeStr}</div>
-            <div class="font-bold">${order.id}</div>
-          </div>
-          <div class="text-right flex items-center space-x-3">
-            <div class="font-bold text-blue-600">$${order.total}</div>
-            <button onclick='openReceipt(${JSON.stringify(order)})' class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-1 px-2 rounded border">明細</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function openReceipt(order) {
-      document.getElementById('receipt-id').innerText = order.id;
-      document.getElementById('receipt-time').innerText = order.timeStr;
-      document.getElementById('receipt-items').innerHTML = order.items.map(item => `
-        <tr><td class="py-1">${item.name}</td><td class="py-1 text-center">${item.qty}</td><td class="py-1 text-right">$${item.price * item.qty}</td></tr>
-      `).join('');
-      document.getElementById('receipt-total').innerText = `$${order.total}`;
-      document.getElementById('receipt-received').innerText = `$${order.received}`;
-      document.getElementById('receipt-change').innerText = `$${order.change}`;
-      document.getElementById('receipt-modal').classList.remove('hidden');
-    }
-
-    function closeReceipt() { document.getElementById('receipt-modal').classList.add('hidden'); }
-    function printReceipt() { window.print(); }
-
-    init();
   </script>
 </body>
 </html>
