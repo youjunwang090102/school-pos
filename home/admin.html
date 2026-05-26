@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>店長管理後台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8 font-sans">
+  
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-gray-800">📊 店長管理後台 - 即時戰情室</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-blue-500 flex items-center justify-between">
+        <div>
+          <h3 class="text-gray-500 font-bold mb-1">今日總營業額</h3>
+          <p class="text-5xl font-extrabold text-blue-600">$<span id="admin-total-revenue">0</span></p>
+        </div>
+      </div>
+      
+      <div class="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-green-500 flex items-center justify-between">
+        <div>
+          <h3 class="text-gray-500 font-bold mb-1">成功結帳單數</h3>
+          <p class="text-5xl font-extrabold text-green-600"><span id="admin-total-orders">0</span> <span class="text-2xl text-gray-400">筆</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+      <h2 class="text-xl font-bold mb-4 border-b pb-4 text-gray-700">即時歷史訂單紀錄</h2>
+      <div id="admin-order-list" class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+        <p class="text-gray-500 text-center py-10 animate-pulse">連線中或尚無訂單...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db, collection, query, orderBy, onSnapshot } from './firebase-config.js';
+
+    // 監聽 orders 集合，並依照時間由新到舊排序
+    const q = query(collection(db, "orders"), orderBy("timestamp", "desc"));
+    
+    onSnapshot(q, (snapshot) => {
+      let totalRevenue = 0;
+      let html = '';
+      
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        totalRevenue += data.total || 0;
+        
+        // 將 Firebase 伺服器時間轉換為人類可讀格式
+        const timeString = data.timestamp ? data.timestamp.toDate().toLocaleTimeString('zh-TW') : '剛剛寫入...';
+        
+        // 將購物車陣列轉換為文字 (例如: 珍奶x2, 雞排x1)
+        const itemsString = data.items.map(item => `${item.name} x ${item.qty}`).join(' <span class="text-gray-300">|</span> ');
+
+        html += `
+          <div class="flex justify-between items-center border border-gray-200 p-4 rounded-xl hover:bg-gray-50 transition">
+            <div>
+              <span class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded mb-2 inline-block">${timeString}</span>
+              <div class="font-bold text-gray-800">${itemsString}</div>
+            </div>
+            <div class="text-2xl font-black text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">$${data.total}</div>
+          </div>
+        `;
+      });
+
+      // 更新畫面
+      document.getElementById('admin-total-revenue').innerText = totalRevenue;
+      document.getElementById('admin-total-orders').innerText = snapshot.size;
+      document.getElementById('admin-order-list').innerHTML = html || '<p class="text-gray-500 text-center py-10">尚無訂單</p>';
+    });
+  </script>
+</body>
+</html>
