@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>顧客確認螢幕</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white h-screen flex flex-col items-center justify-center font-sans p-8">
+  <div class="w-full max-w-2xl bg-gray-800 rounded-3xl p-10 shadow-2xl border border-gray-700">
+    <h1 class="text-3xl font-bold text-center mb-8 text-gray-300">請確認您的餐點</h1>
+    <div id="customer-list" class="space-y-4 min-h-[300px]">
+      <div class="text-center text-gray-500 text-2xl mt-20 animate-pulse">歡迎光臨，等待點餐中...</div>
+    </div>
+    <div class="border-t border-gray-600 mt-8 pt-6 flex justify-between items-end">
+      <span class="text-2xl text-gray-400">總計金額</span>
+      <span class="text-6xl font-mono font-bold text-yellow-400">$<span id="customer-total">0</span></span>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db, doc, onSnapshot } from './firebase-config.js';
+    const sessionRef = doc(db, "active_sessions", "station_1");
+    
+    onSnapshot(sessionRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const cart = data.cartItems || [];
+        const total = data.totalAmount || 0;
+
+        document.getElementById('customer-total').innerText = total;
+
+        if (cart.length === 0) {
+          document.getElementById('customer-list').innerHTML = `<div class="text-center text-gray-500 text-2xl mt-20 animate-pulse">歡迎光臨，等待點餐中...</div>`;
+        } else {
+          document.getElementById('customer-list').innerHTML = cart.map(item => 
+            `<div class="flex justify-between items-center bg-gray-700 p-6 rounded-xl text-2xl">
+              <span class="font-bold">${item.name}</span>
+              <span class="text-gray-400 mx-4">x ${item.qty}</span>
+              <span class="font-mono text-yellow-300">$${item.price * item.qty}</span>
+             </div>`
+          ).join('');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
