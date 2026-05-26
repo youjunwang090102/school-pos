@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ClassPOS 終極全能旗艦機</title>
+  <title>204園遊會 POS 系統</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -17,323 +17,384 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 h-screen w-screen flex font-sans text-slate-800">
+<body class="bg-slate-200 h-screen w-screen flex flex-col font-sans text-slate-800">
 
+  <!-- 🔒 觸控密碼盤登入 -->
   <div id="login-modal" class="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300">
     <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-[360px] text-center flex flex-col items-center">
       <div class="w-20 h-20 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-inner"><i class="fa-solid fa-fingerprint text-4xl"></i></div>
       <h2 class="text-2xl font-black mb-1 text-slate-800 tracking-widest">系統解鎖</h2>
       <p class="text-slate-400 mb-6 font-medium text-xs">店長預設:0000 | 收銀預設:1234</p>
-      
-      <div class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-4 mb-6 flex justify-center items-center h-16 shadow-inner">
-        <div id="login-pin-display" class="text-4xl font-black tracking-[0.5em] text-slate-800 flex space-x-2"></div>
-      </div>
+      <div class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-4 mb-6 flex justify-center items-center h-16 shadow-inner"><div id="login-pin-display" class="text-4xl font-black tracking-[0.5em] text-slate-800 flex space-x-2"></div></div>
       <input type="hidden" id="login-pin-value">
-
       <div class="grid grid-cols-3 gap-3 w-full mb-6">
-        <button onclick="loginNumpad(1)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">1</button>
-        <button onclick="loginNumpad(2)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">2</button>
-        <button onclick="loginNumpad(3)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">3</button>
-        <button onclick="loginNumpad(4)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">4</button>
-        <button onclick="loginNumpad(5)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">5</button>
-        <button onclick="loginNumpad(6)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">6</button>
-        <button onclick="loginNumpad(7)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">7</button>
-        <button onclick="loginNumpad(8)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">8</button>
-        <button onclick="loginNumpad(9)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">9</button>
+        <button onclick="loginNumpad(1)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">1</button>
+        <button onclick="loginNumpad(2)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">2</button>
+        <button onclick="loginNumpad(3)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">3</button>
+        <button onclick="loginNumpad(4)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">4</button>
+        <button onclick="loginNumpad(5)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">5</button>
+        <button onclick="loginNumpad(6)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">6</button>
+        <button onclick="loginNumpad(7)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">7</button>
+        <button onclick="loginNumpad(8)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">8</button>
+        <button onclick="loginNumpad(9)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">9</button>
         <button onclick="loginClear()" class="bg-rose-50 text-rose-500 hover:bg-rose-100 rounded-xl py-4 text-xl font-bold">清除</button>
-        <button onclick="loginNumpad(0)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold active:scale-95 transition">0</button>
-        <button onclick="loginBackspace()" class="bg-slate-200 text-slate-600 rounded-xl py-4 text-xl font-bold active:scale-95 transition"><i class="fa-solid fa-delete-left"></i></button>
+        <button onclick="loginNumpad(0)" class="bg-slate-100 hover:bg-slate-200 rounded-xl py-4 text-2xl font-bold transition">0</button>
+        <button onclick="loginBackspace()" class="bg-slate-200 text-slate-600 rounded-xl py-4 text-xl font-bold transition"><i class="fa-solid fa-delete-left"></i></button>
       </div>
       <button onclick="performLogin()" id="login-btn" class="w-full bg-blue-600 text-white font-black text-xl py-4 rounded-xl shadow-lg">解鎖系統</button>
     </div>
   </div>
 
-  <div id="discount-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
-    <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-[360px] text-center">
-      <h2 class="text-2xl font-black mb-4 text-slate-800">自訂金額折讓</h2>
-      <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-4 mb-6 text-3xl font-black text-rose-500">- $<span id="discount-input-display">0</span></div>
-      <input type="hidden" id="discount-input-value" value="0">
+  <!-- 💸 自訂快捷折扣視窗 -->
+  <div id="discount-modal" class="fixed inset-0 z-[55] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-[380px] text-center">
+      <h2 class="text-2xl font-black mb-6 text-slate-800">快速全單折扣/折讓</h2>
+      
+      <div class="text-left mb-2 text-sm font-bold text-slate-500"><i class="fa-solid fa-coins mr-1"></i>固定金額折抵</div>
       <div class="grid grid-cols-3 gap-3 w-full mb-6">
-        <button onclick="discNumpad(1)" class="bg-slate-100 py-4 text-2xl font-bold">1</button>
-        <button onclick="discNumpad(2)" class="bg-slate-100 py-4 text-2xl font-bold">2</button>
-        <button onclick="discNumpad(3)" class="bg-slate-100 py-4 text-2xl font-bold">3</button>
-        <button onclick="discNumpad(4)" class="bg-slate-100 py-4 text-2xl font-bold">4</button>
-        <button onclick="discNumpad(5)" class="bg-slate-100 py-4 text-2xl font-bold">5</button>
-        <button onclick="discNumpad(6)" class="bg-slate-100 py-4 text-2xl font-bold">6</button>
-        <button onclick="discNumpad(7)" class="bg-slate-100 py-4 text-2xl font-bold">7</button>
-        <button onclick="discNumpad(8)" class="bg-slate-100 py-4 text-2xl font-bold">8</button>
-        <button onclick="discNumpad(9)" class="bg-slate-100 py-4 text-2xl font-bold">9</button>
-        <button onclick="discClear()" class="bg-slate-200 rounded-xl py-4 text-xl font-bold">C</button>
-        <button onclick="discNumpad(0)" class="bg-slate-100 py-4 text-2xl font-bold">0</button>
-        <button onclick="discBackspace()" class="bg-slate-200 py-4 text-xl font-bold"><i class="fa-solid fa-delete-left"></i></button>
+        <button onclick="setDiscount('amount', 5)" class="bg-slate-100 hover:bg-slate-200 py-4 rounded-xl text-xl font-bold text-slate-700 transition">-$5</button>
+        <button onclick="setDiscount('amount', 10)" class="bg-slate-100 hover:bg-slate-200 py-4 rounded-xl text-xl font-bold text-slate-700 transition">-$10</button>
+        <button onclick="setDiscount('amount', 20)" class="bg-slate-100 hover:bg-slate-200 py-4 rounded-xl text-xl font-bold text-slate-700 transition">-$20</button>
       </div>
+
+      <div class="text-left mb-2 text-sm font-bold text-slate-500"><i class="fa-solid fa-percent mr-1"></i>全單百分比折扣</div>
+      <div class="grid grid-cols-4 gap-3 w-full mb-8">
+        <button onclick="setDiscount('percent', 0.95)" class="bg-blue-50 hover:bg-blue-100 py-4 rounded-xl text-lg font-bold text-blue-700 transition shadow-sm border border-blue-100">95折</button>
+        <button onclick="setDiscount('percent', 0.90)" class="bg-blue-50 hover:bg-blue-100 py-4 rounded-xl text-lg font-bold text-blue-700 transition shadow-sm border border-blue-100">9折</button>
+        <button onclick="setDiscount('percent', 0.85)" class="bg-blue-50 hover:bg-blue-100 py-4 rounded-xl text-lg font-bold text-blue-700 transition shadow-sm border border-blue-100">85折</button>
+        <button onclick="setDiscount('percent', 0.80)" class="bg-blue-50 hover:bg-blue-100 py-4 rounded-xl text-lg font-bold text-blue-700 transition shadow-sm border border-blue-100">8折</button>
+      </div>
+
       <div class="flex space-x-3">
-        <button onclick="closeDiscountModal()" class="flex-1 bg-slate-200 font-bold py-4 rounded-xl">取消</button>
-        <button onclick="applyDiscount()" class="flex-1 bg-rose-500 text-white font-bold py-4 rounded-xl shadow-lg">確認折讓</button>
+        <button onclick="closeDiscountModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-4 rounded-xl">取消返回</button>
+        <button onclick="clearDiscount()" class="flex-1 bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold py-4 rounded-xl border border-rose-200">清除折扣設定</button>
       </div>
     </div>
   </div>
 
-  <div id="product-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+  <!-- ✏️ 單品客製化備註視窗 -->
+  <div id="modifier-modal" class="fixed inset-0 z-[55] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-[400px]">
+      <h2 class="text-2xl font-black mb-2 text-slate-800">添加備註/客製化</h2>
+      <p id="modifier-item-name" class="text-slate-500 font-bold mb-6">商品名稱</p>
+      <input type="hidden" id="modifier-item-index">
+      <div class="space-y-4 mb-6">
+        <div>
+          <label class="text-xs font-bold text-slate-400 block mb-2">快速選項</label>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="appendModifier('去冰')" class="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg text-sm font-bold">去冰</button>
+            <button onclick="appendModifier('少冰')" class="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg text-sm font-bold">少冰</button>
+            <button onclick="appendModifier('半糖')" class="bg-orange-50 text-orange-600 border border-orange-200 px-3 py-1.5 rounded-lg text-sm font-bold">半糖</button>
+            <button onclick="appendModifier('無糖')" class="bg-orange-50 text-orange-600 border border-orange-200 px-3 py-1.5 rounded-lg text-sm font-bold">無糖</button>
+            <button onclick="appendModifier('不加辣')" class="bg-rose-50 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-lg text-sm font-bold">不加辣</button>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-400 block mb-2">手動輸入備註</label>
+          <input type="text" id="modifier-input" class="w-full border-2 border-slate-200 rounded-xl p-3 font-bold text-slate-700 outline-none" placeholder="例如：加珍珠、分開裝...">
+        </div>
+      </div>
+      <div class="flex space-x-3"><button onclick="closeModifierModal()" class="flex-1 bg-slate-200 font-bold py-4 rounded-xl">取消</button><button onclick="saveModifier()" class="flex-1 bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg">確認儲存</button></div>
+    </div>
+  </div>
+
+  <!-- 📝 預購下單視窗 -->
+  <div id="preorder-modal" class="fixed inset-0 z-[65] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-[400px]">
+      <h2 class="text-2xl font-black mb-1 text-slate-800">建立顧客預購單</h2>
+      <p class="text-sm font-bold text-slate-400 mb-6">將依照購物車與實收金額直接結帳</p>
+      <div class="space-y-4 mb-6">
+        <div><label class="text-sm font-bold text-slate-500">顧客姓名 <span class="text-rose-500">*</span></label><input type="text" id="po-name" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold text-lg" placeholder="例：王同學"></div>
+        <div><label class="text-sm font-bold text-slate-500">聯絡電話/班級</label><input type="text" id="po-phone" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold text-lg" placeholder="選填"></div>
+        <div><label class="text-sm font-bold text-slate-500">約定取餐時間 <span class="text-rose-500">*</span></label><input type="datetime-local" id="po-time" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold text-lg"></div>
+      </div>
+      <div class="flex space-x-3">
+        <button onclick="closePreorderModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold py-4 rounded-xl">取消返回</button>
+        <button onclick="submitPreorder()" class="flex-1 bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg">確認付款並建立</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ➕ 上架新商品/套餐視窗 -->
+  <div id="product-modal" class="fixed inset-0 z-[55] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
     <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-[460px] max-h-[90vh] flex flex-col">
       <h2 class="text-2xl font-black mb-4 text-slate-800 border-b pb-2">商品 / 套餐上架系統</h2>
       <div class="space-y-4 mb-6 flex-1 overflow-y-auto pr-2 no-scrollbar">
-        <div><label class="text-sm font-bold text-slate-500">品項類型</label>
-          <select id="new-prod-type" onchange="toggleComboSelection()" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold bg-slate-50">
-            <option value="single">單品商品</option>
-            <option value="combo">套餐組合 (組合多個單品)</option>
-          </select>
+        <div class="flex space-x-2">
+          <div class="flex-1"><label class="text-xs font-bold text-slate-500">類型</label><select id="new-prod-type" onchange="toggleComboSelection()" class="w-full border rounded-lg p-2 font-bold bg-slate-50"><option value="single">單品</option><option value="combo">套餐</option></select></div>
+          <div class="flex-1"><label class="text-xs font-bold text-slate-500">類別</label><select id="new-prod-cat" class="w-full border rounded-lg p-2 font-bold bg-slate-50"><option value="飲料">飲料</option><option value="餐食">餐食</option><option value="點心">點心</option><option value="其他">其他</option></select></div>
         </div>
-        <div><label class="text-sm font-bold text-slate-500">名稱</label><input type="text" id="new-prod-name" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold" placeholder="例：超值雙拼雙人套餐"></div>
+        <div><label class="text-xs font-bold text-slate-500">名稱</label><input type="text" id="new-prod-name" class="w-full border rounded-lg p-2 font-bold"></div>
         <div class="flex space-x-4">
-          <div class="flex-1"><label class="text-sm font-bold text-slate-500">套餐組合/單品定價</label><input type="number" id="new-prod-price" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold" placeholder="$"></div>
-          <div class="flex-1"><label class="text-sm font-bold text-slate-500">初始可售庫存</label><input type="number" id="new-prod-stock" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold" placeholder="數量"></div>
+          <div class="flex-1"><label class="text-xs font-bold text-slate-500">售價</label><input type="number" id="new-prod-price" class="w-full border rounded-lg p-2 font-bold"></div>
+          <div class="flex-1"><label class="text-xs font-bold text-slate-500">庫存</label><input type="number" id="new-prod-stock" class="w-full border rounded-lg p-2 font-bold"></div>
         </div>
-        <div id="combo-items-section" class="hidden border border-slate-200 p-4 rounded-xl bg-slate-50">
-          <label class="text-sm font-bold text-slate-700 block mb-2"><i class="fa-solid fa-list-check mr-1 text-orange-500"></i>勾選套餐內含的單品：</label>
-          <div id="combo-checkboxes-grid" class="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto no-scrollbar"></div>
-        </div>
+        <div id="combo-items-section" class="hidden border p-3 rounded-xl bg-slate-50"><label class="text-xs font-bold text-slate-700 block mb-2">勾選套餐內含單品：</label><div id="combo-checkboxes-grid" class="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto"></div></div>
       </div>
-      <div class="flex space-x-3 shrink-0">
-        <button onclick="closeProductModal()" class="flex-1 bg-slate-200 font-bold py-4 rounded-xl">取消</button>
-        <button onclick="saveNewProduct()" class="flex-1 bg-orange-500 text-white font-bold py-4 rounded-xl shadow-lg">確認上架</button>
-      </div>
+      <div class="flex space-x-3 shrink-0"><button onclick="closeProductModal()" class="flex-1 bg-slate-200 font-bold py-3 rounded-xl">取消</button><button onclick="saveNewProduct()" class="flex-1 bg-orange-500 text-white font-bold py-3 rounded-xl">確認上架</button></div>
     </div>
   </div>
 
-  <nav class="w-24 bg-slate-900 flex flex-col items-center py-6 shadow-xl z-20 shrink-0 relative">
-    <div class="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-white mb-6 shadow-inner"><i class="fa-solid fa-cash-register text-2xl"></i></div>
-    <div class="flex-1 w-full flex flex-col items-center space-y-3">
-      <button onclick="switchTab('pos')" id="nav-pos" class="nav-btn w-16 h-16 rounded-2xl bg-blue-500/20 text-blue-400 flex flex-col items-center justify-center transition"><i class="fa-solid fa-border-all text-2xl mb-1"></i><span class="text-[10px] font-bold">點餐</span></button>
-      <button onclick="switchTab('history')" id="nav-history" class="nav-btn w-16 h-16 rounded-2xl text-slate-500 hover:text-slate-300 flex flex-col items-center justify-center transition"><i class="fa-solid fa-receipt text-2xl mb-1"></i><span class="text-[10px] font-bold">單據</span></button>
-      
-      <div id="admin-menu" class="w-full flex flex-col items-center space-y-3 pt-3 border-t border-slate-700 hidden">
-        <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn w-16 h-16 rounded-2xl text-orange-500 hover:text-orange-300 flex flex-col items-center justify-center transition"><i class="fa-solid fa-boxes-stacked text-2xl mb-1"></i><span class="text-[10px] font-bold">進銷存</span></button>
-        <button onclick="switchTab('employees')" id="nav-employees" class="nav-btn w-16 h-16 rounded-2xl text-purple-500 hover:text-purple-300 flex flex-col items-center justify-center transition"><i class="fa-solid fa-users text-2xl mb-1"></i><span class="text-[10px] font-bold">員工</span></button>
-        <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn w-16 h-16 rounded-2xl text-emerald-500 hover:text-emerald-300 flex flex-col items-center justify-center transition"><i class="fa-solid fa-chart-pie text-2xl mb-1"></i><span class="text-[10px] font-bold">報表</span></button>
-        <button onclick="switchTab('settings')" id="nav-settings" class="nav-btn w-16 h-16 rounded-2xl text-slate-500 hover:text-slate-300 flex flex-col items-center justify-center transition"><i class="fa-solid fa-gear text-2xl mb-1"></i><span class="text-[10px] font-bold">設定</span></button>
+  <!-- 🌟 頂部專屬橫幅 -->
+  <header class="bg-slate-900 text-white h-16 flex justify-between items-center px-6 shrink-0 shadow-md z-30">
+    <div class="flex items-baseline space-x-3">
+      <h1 class="text-xl font-black tracking-widest text-slate-100"><i class="fa-solid fa-cash-register text-blue-500 mr-3"></i>204園遊會POS系統</h1>
+      <span class="text-xs text-blue-400 font-bold tracking-widest uppercase bg-blue-900/50 px-2 py-0.5 rounded border border-blue-800">Designed By 王宥鈞</span>
+    </div>
+    <div class="flex items-center space-x-6">
+      <div id="live-clock" class="text-emerald-400 font-mono text-lg font-bold tracking-widest hidden md:block"></div>
+      <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition" onclick="location.reload()" title="登出">
+        <i class="fa-solid fa-circle-user text-blue-400 text-lg"></i>
+        <span id="current-user-display" class="font-bold text-sm tracking-wider">未登入</span>
+        <span id="role-badge" class="ml-2 text-[10px] font-bold px-1.5 rounded bg-slate-600 text-slate-300"></span>
       </div>
     </div>
-    <div class="w-full flex flex-col items-center">
-      <div id="role-badge" class="text-[10px] font-black tracking-widest mb-2 px-2 py-1 rounded border"></div>
-      <button onclick="location.reload()" class="w-14 h-14 rounded-full bg-slate-800 text-slate-400 hover:text-rose-400 flex items-center justify-center"><i class="fa-solid fa-power-off text-xl"></i></button>
-    </div>
-  </nav>
+  </header>
 
-  <main class="flex-1 bg-slate-100 flex relative overflow-hidden">
+  <!-- 📦 主畫面佈局 -->
+  <div class="flex-1 flex overflow-hidden relative">
     
-    <div id="view-pos" class="w-full h-full flex flex-col absolute inset-0 transition-opacity duration-300 bg-slate-50">
-      <div class="bg-white px-6 py-4 border-b border-slate-200 flex items-center space-x-3 shadow-sm z-10 shrink-0">
-        <div class="relative flex-1 max-w-md">
-          <i class="fa-solid fa-magnifying-glass absolute left-4 top-3 text-slate-400"></i>
-          <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="搜尋單品、套餐關鍵字..." class="w-full bg-slate-100 border border-slate-200 rounded-full py-2 pl-12 pr-4 font-bold outline-none">
+    <!-- 左半邊 (60%)：應收總覽 + 商品方格 -->
+    <section class="w-3/5 md:w-2/3 flex flex-col border-r border-slate-300 bg-slate-100 z-10 transition-transform duration-300" id="main-left-pane">
+      <div class="h-28 bg-white border-b border-slate-200 shrink-0 flex justify-between items-center px-6 py-4 space-x-4 shadow-sm relative z-10">
+        <div class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl h-full flex flex-col justify-center items-center shadow-inner">
+          <span class="text-slate-500 font-bold text-[10px] uppercase tracking-widest mb-0.5">應收總額 Total</span>
+          <span class="text-3xl font-black text-slate-800">$<span id="display-total">0</span></span>
+        </div>
+        <i class="fa-solid fa-minus text-slate-300 text-sm"></i>
+        <div class="flex-1 bg-blue-50 border border-blue-200 rounded-2xl h-full flex flex-col justify-center items-center shadow-inner relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-blue-500"></div>
+          <span class="text-blue-500 font-bold text-[10px] uppercase tracking-widest mb-0.5">實收 Received</span>
+          <span class="text-3xl font-black text-blue-700">$<span id="display-received">0</span></span>
+        </div>
+        <i class="fa-solid fa-equals text-slate-300 text-sm"></i>
+        <div class="flex-1 bg-emerald-50 border border-emerald-200 rounded-2xl h-full flex flex-col justify-center items-center shadow-inner relative overflow-hidden">
+          <div class="absolute top-0 left-0 right-0 h-1 bg-emerald-500"></div>
+          <span class="text-emerald-600 font-bold text-[10px] uppercase tracking-widest mb-0.5">找零 Change</span>
+          <span class="text-3xl font-black text-emerald-600">$<span id="display-change">0</span></span>
         </div>
       </div>
-      <div class="p-6 overflow-y-auto no-scrollbar flex-1"><div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-20"></div></div>
-    </div>
-
-    <div id="view-history" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
-      <div class="p-6 border-b border-slate-200 shrink-0 flex justify-between items-center bg-slate-50">
-        <h2 class="text-2xl font-black text-slate-800 tracking-wider">今日銷售明細</h2>
-        <button onclick="fetchHistory()" class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg font-bold"><i class="fa-solid fa-rotate-right mr-2"></i>重整單據</button>
+      <div class="flex-1 overflow-y-auto no-scrollbar p-5 bg-slate-100/50">
+        <div id="product-grid" class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 pb-10 content-start"></div>
       </div>
-      <div class="flex-1 p-6 overflow-y-auto no-scrollbar"><div id="history-list" class="max-w-4xl mx-auto space-y-3"></div></div>
-    </div>
+    </section>
 
-    <div id="view-inventory" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
-      <div class="p-6 border-b border-slate-200 shrink-0 bg-slate-50 flex justify-between items-center">
-        <h2 class="text-2xl font-black text-orange-600 tracking-wider"><i class="fa-solid fa-boxes-stacked mr-2"></i>菜單與進銷存管理</h2>
-        <button onclick="openProductModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg font-bold shadow-md transition"><i class="fa-solid fa-plus mr-2"></i>上架新品 / 套餐</button>
+    <!-- 右半邊 (40%)：購物清單 + 動態切換面板 -->
+    <section class="w-2/5 md:w-1/3 flex flex-col bg-white z-10" id="main-right-pane">
+      
+      <!-- 結帳成功大字畫面鎖定 -->
+      <div id="checkout-success-overlay" class="absolute inset-0 bg-emerald-500 z-50 flex flex-col items-center justify-center hidden">
+        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-xl"><i class="fa-solid fa-check text-4xl text-emerald-500"></i></div>
+        <h2 class="text-3xl font-black text-white mb-2 tracking-widest">下單成功</h2>
+        <p class="text-emerald-100 font-bold mb-6 text-sm">請將此單號告知顧客，並發放實體號碼牌</p>
+        <div class="bg-white p-6 rounded-3xl text-center w-56 shadow-2xl mb-8">
+          <p class="text-slate-400 font-bold mb-1 text-sm">取餐單號</p>
+          <div class="text-6xl font-black text-slate-800 tracking-tighter">#<span id="success-order-no">000</span></div>
+        </div>
+        <button onclick="nextOrder()" class="bg-slate-900 text-white font-black text-lg py-4 px-12 rounded-2xl shadow-xl active:scale-95 transition">下一單 (Next)</button>
       </div>
-      <div class="flex-1 p-6 overflow-y-auto no-scrollbar">
-        <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <table class="w-full text-left">
-            <thead class="bg-slate-100 border-b border-slate-200">
-              <tr><th class="p-4 font-bold text-slate-600">類型</th><th class="p-4 font-bold text-slate-600">品項名稱/內含單品</th><th class="p-4 font-bold text-slate-600 text-center">售價</th><th class="p-4 font-bold text-slate-600 text-center">當前庫存</th><th class="p-4 font-bold text-slate-600 text-right">管理操作</th></tr>
-            </thead>
-            <tbody id="inventory-list" class="divide-y divide-slate-100"></tbody>
-          </table>
+
+      <!-- 🛒 右上：購物車與支付方式 -->
+      <div class="flex-1 flex flex-col border-b border-slate-200 overflow-hidden relative">
+        <div class="bg-slate-50 p-3 border-b border-slate-200 flex justify-between items-center shrink-0">
+          <h3 class="font-black text-slate-700 tracking-widest">已選商品</h3>
+          <span id="discount-indicator" class="hidden text-xs bg-rose-100 text-rose-600 font-bold px-2 py-0.5 rounded">含折讓 -$<span id="display-discount-amount">0</span></span>
+        </div>
+        <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2 bg-white"></div>
+        <div class="p-2 bg-slate-50 border-t-2 border-dashed border-slate-200 z-10 shrink-0">
+          <div class="flex space-x-2">
+            <button onclick="setPaymentMethod('cash')" id="pay-cash" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm transition shadow-sm border border-blue-700">💵 現金</button>
+            <button onclick="setPaymentMethod('voucher')" id="pay-voucher" class="flex-1 bg-white text-slate-500 hover:bg-orange-50 border border-slate-300 py-2 rounded-lg font-bold text-sm transition">🎟️ 園遊券</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="view-employees" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
-      <div class="p-6 border-b border-slate-200 shrink-0 bg-slate-50">
-        <h2 class="text-2xl font-black text-purple-600 tracking-wider"><i class="fa-solid fa-users mr-2"></i>輪班小組與員工管理</h2>
+      <!-- 🎛️ 右下：動態面板 -->
+      <div class="h-80 shrink-0 bg-slate-50 flex flex-col">
+        <div class="flex border-b border-slate-200 bg-slate-100 px-2 pt-2 space-x-2">
+          <button onclick="switchBottomPanel('numpad')" id="tab-numpad" class="flex-1 py-2 font-black text-sm rounded-t-xl bg-white text-blue-600 border-t border-l border-r border-slate-200 shadow-[0_-2px_5px_rgba(0,0,0,0.02)] transition">收銀數字盤</button>
+          <button onclick="switchBottomPanel('menu')" id="tab-menu" class="flex-1 py-2 font-black text-sm rounded-t-xl bg-slate-200 text-slate-500 border-transparent hover:bg-white/50 transition">功能與管理選單</button>
+        </div>
+        
+        <div id="panel-numpad" class="flex-1 p-3 flex flex-col justify-between">
+          <input type="hidden" id="received-amount">
+          <div class="grid grid-cols-4 gap-2 flex-1 mb-2">
+            <button onclick="numpadInput(1)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">1</button>
+            <button onclick="numpadInput(2)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">2</button>
+            <button onclick="numpadInput(3)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">3</button>
+            <button onclick="setReceived(100)" class="bg-blue-50 border border-blue-200 text-blue-600 rounded-xl font-bold text-base active:scale-95">$100</button>
+            <button onclick="numpadInput(4)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">4</button>
+            <button onclick="numpadInput(5)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">5</button>
+            <button onclick="numpadInput(6)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">6</button>
+            <button onclick="setReceived(500)" class="bg-blue-50 border border-blue-200 text-blue-600 rounded-xl font-bold text-base active:scale-95">$500</button>
+            <button onclick="numpadInput(7)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">7</button>
+            <button onclick="numpadInput(8)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">8</button>
+            <button onclick="numpadInput(9)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">9</button>
+            <button onclick="setReceived(1000)" class="bg-blue-50 border border-blue-200 text-blue-600 rounded-xl font-bold text-base active:scale-95">$1k</button>
+            <button onclick="numpadClear()" class="bg-rose-50 border border-rose-200 text-rose-500 rounded-xl font-bold text-lg active:scale-95">C</button>
+            <button onclick="numpadInput(0)" class="bg-white border border-slate-200 rounded-xl font-bold text-lg active:scale-95">0</button>
+            <button onclick="numpadBackspace()" class="bg-slate-200 text-slate-600 rounded-xl font-bold text-lg active:scale-95"><i class="fa-solid fa-delete-left"></i></button>
+            <button onclick="setExactAmount()" class="bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl font-bold text-sm active:scale-95">剛好</button>
+          </div>
+          <div class="flex space-x-2 w-full shrink-0">
+            <button onclick="checkout()" id="checkout-btn" class="flex-1 bg-emerald-500 text-white py-3.5 rounded-xl text-xl font-black shadow-[0_4px_15px_rgba(16,185,129,0.3)] active:scale-[0.98] disabled:bg-slate-400 transition">收款結帳</button>
+            <button onclick="openPreorderModal()" class="w-24 bg-indigo-500 text-white py-3.5 rounded-xl text-lg font-black shadow-[0_4px_15px_rgba(99,102,241,0.3)] active:scale-[0.98] transition">預購</button>
+          </div>
+        </div>
+
+        <div id="panel-menu" class="flex-1 p-3 hidden grid-cols-2 md:grid-cols-3 gap-2 content-start overflow-y-auto no-scrollbar">
+          <!-- 共用與快捷功能 -->
+          <button onclick="openDiscountModal()" class="bg-white border hover:border-blue-400 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm group"><i class="fa-solid fa-tag text-blue-500 text-xl mb-1 group-hover:scale-110 transition"></i><span class="font-bold text-xs text-slate-600">全單折扣</span></button>
+          <button onclick="clearCart()" class="bg-white border hover:border-rose-400 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm group"><i class="fa-solid fa-trash-can text-rose-500 text-xl mb-1 group-hover:scale-110 transition"></i><span class="font-bold text-xs text-slate-600">清空購物車</span></button>
+          <button onclick="openAdminView('history')" class="bg-white border hover:border-slate-400 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm group"><i class="fa-solid fa-receipt text-slate-500 text-xl mb-1 group-hover:scale-110 transition"></i><span class="font-bold text-xs text-slate-600">歷史/作廢單據</span></button>
+          <button onclick="openAdminView('preorder')" class="bg-white border hover:border-indigo-400 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm group"><i class="fa-solid fa-clipboard-list text-indigo-500 text-xl mb-1 group-hover:scale-110 transition"></i><span class="font-bold text-xs text-slate-600">取單與預購管理</span></button>
+          
+          <div class="col-span-2 md:col-span-3 text-center text-[10px] font-bold text-slate-400 border-b border-slate-200 pb-1 mt-1 mb-1 admin-only hidden">店長專屬後台區</div>
+          <button onclick="openAdminView('inventory')" class="admin-only hidden bg-white border hover:border-orange-400 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm group"><i class="fa-solid fa-boxes-stacked text-orange-500 text-xl mb-1 group-hover:scale-110 transition"></i><span class="font-bold text-xs text-slate-600">菜單進銷存</span></button>
+          <button onclick="openAdminView('reports')" class="admin-only hidden bg-white border hover:border-emerald-400 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm group"><i class="fa-solid fa-chart-pie text-emerald-500 text-xl mb-1 group-hover:scale-110 transition"></i><span class="font-bold text-xs text-slate-600">交班Z單與報表</span></button>
+          <button onclick="openAdminView('employees')" class="admin-only hidden bg-white border hover:border-purple-400 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm group"><i class="fa-solid fa-users text-purple-500 text-xl mb-1 group-hover:scale-110 transition"></i><span class="font-bold text-xs text-slate-600">權限管理</span></button>
+          <button onclick="openAdminView('settings')" class="admin-only hidden bg-white border hover:border-rose-400 rounded-xl p-3 flex flex-col items-center justify-center shadow-sm group"><i class="fa-solid fa-triangle-exclamation text-rose-500 text-xl mb-1 group-hover:scale-110 transition"></i><span class="font-bold text-xs text-slate-600">系統歸零</span></button>
+        </div>
       </div>
-      <div class="flex-1 p-6 flex flex-col lg:flex-row gap-6 overflow-hidden">
-        <div class="w-full lg:w-80 bg-slate-50 border border-slate-200 p-6 rounded-2xl shrink-0 h-fit">
-          <h3 class="font-bold text-lg mb-4 text-slate-700">註冊新員工 / 排班小組</h3>
-          <div class="space-y-4 mb-6">
-            <div><label class="text-xs font-bold text-slate-500 block mb-1">小組/員工代號 (登入帳號)</label><input type="text" id="emp-username" placeholder="例：group2" class="w-full border border-slate-200 p-3 rounded-xl font-bold"></div>
-            <div><label class="text-xs font-bold text-slate-500 block mb-1">顯示名稱</label><input type="text" id="emp-name" placeholder="例：第二組收銀員" class="w-full border border-slate-200 p-3 rounded-xl font-bold"></div>
-            <div><label class="text-xs font-bold text-slate-500 block mb-1">登入密碼 (4位數數字 PIN)</label><input type="text" maxlength="4" id="emp-pin" placeholder="例：5678" class="w-full border border-slate-200 p-3 rounded-xl font-mono font-bold text-center text-xl"></div>
-            <div><label class="text-xs font-bold text-slate-500 block mb-1">系統權限等級</label>
-              <select id="emp-role" class="w-full border border-slate-200 p-3 rounded-xl font-bold bg-white">
-                <option value="cashier">一般收銀員權限</option>
-                <option value="admin">店長最高管理權限</option>
-              </select>
+    </section>
+
+    <!-- 覆蓋層：全螢幕後台管理介面 -->
+    <section id="admin-overlay" class="absolute inset-0 bg-white z-40 flex flex-col transform translate-y-full transition-transform duration-300">
+      <header class="bg-slate-900 text-white h-16 flex justify-between items-center px-6 shrink-0 shadow-md">
+        <div class="flex items-center space-x-4">
+          <button onclick="closeAdminView()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-inner"><i class="fa-solid fa-arrow-left mr-2"></i>返回收銀</button>
+          <h2 class="text-xl font-black tracking-widest text-emerald-400">系統管理站</h2>
+        </div>
+        <div class="flex space-x-2 overflow-x-auto no-scrollbar" id="admin-tabs">
+          <button onclick="switchAdminTab('preorder')" id="atab-preorder" class="px-4 py-2 rounded-lg font-bold text-sm bg-slate-800 text-slate-300 whitespace-nowrap">預購管理</button>
+          <button onclick="switchAdminTab('history')" id="atab-history" class="px-4 py-2 rounded-lg font-bold text-sm bg-slate-800 text-slate-300 whitespace-nowrap">歷史單據</button>
+          <button onclick="switchAdminTab('inventory')" id="atab-inventory" class="admin-only hidden px-4 py-2 rounded-lg font-bold text-sm bg-slate-800 text-slate-300 whitespace-nowrap">進銷存</button>
+          <button onclick="switchAdminTab('reports')" id="atab-reports" class="admin-only hidden px-4 py-2 rounded-lg font-bold text-sm bg-slate-800 text-slate-300 whitespace-nowrap">報表/Z單</button>
+          <button onclick="switchAdminTab('employees')" id="atab-employees" class="admin-only hidden px-4 py-2 rounded-lg font-bold text-sm bg-slate-800 text-slate-300 whitespace-nowrap">員工</button>
+          <button onclick="switchAdminTab('settings')" id="atab-settings" class="admin-only hidden px-4 py-2 rounded-lg font-bold text-sm bg-slate-800 text-slate-300 whitespace-nowrap">設定</button>
+        </div>
+      </header>
+
+      <div class="flex-1 relative bg-slate-50 overflow-hidden">
+        
+        <!-- 📝 預購單管理區 -->
+        <div id="aview-preorder" class="absolute inset-0 flex flex-col p-6 overflow-hidden hidden">
+          <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-xl text-indigo-700"><i class="fa-solid fa-clipboard-list mr-2"></i>預購單接單與取件管理</h3></div>
+          <div class="flex-1 overflow-y-auto no-scrollbar"><div id="preorder-list" class="max-w-4xl mx-auto space-y-3 pb-10"></div></div>
+        </div>
+
+        <div id="aview-history" class="absolute inset-0 flex flex-col p-6 overflow-hidden hidden">
+          <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-xl text-slate-800">今日銷售明細與退單</h3><button onclick="fetchHistory()" class="text-blue-600 bg-blue-100 px-3 py-1 rounded font-bold text-sm"><i class="fa-solid fa-rotate-right"></i> 重整</button></div>
+          <div class="flex-1 overflow-y-auto no-scrollbar"><div id="history-list" class="max-w-4xl mx-auto space-y-3 pb-10"></div></div>
+        </div>
+
+        <div id="aview-inventory" class="absolute inset-0 flex flex-col p-6 overflow-hidden hidden">
+           <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-xl text-slate-800">菜單與進銷存管理</h3><button onclick="openProductModal()" class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold text-sm shadow"><i class="fa-solid fa-plus mr-2"></i>上架新品</button></div>
+           <div class="flex-1 overflow-y-auto no-scrollbar bg-white rounded-2xl border border-slate-200 shadow-sm max-w-5xl mx-auto w-full">
+             <table class="w-full text-left"><thead class="bg-slate-100 border-b"><tr><th class="p-4 font-bold text-slate-600">類別</th><th class="p-4 font-bold text-slate-600">名稱/內容</th><th class="p-4 text-center font-bold text-slate-600">售價</th><th class="p-4 text-center font-bold text-slate-600">庫存</th><th class="p-4 text-right font-bold text-slate-600">操作</th></tr></thead><tbody id="inventory-list" class="divide-y divide-slate-100"></tbody></table>
+           </div>
+        </div>
+
+        <div id="aview-reports" class="absolute inset-0 flex flex-col p-6 overflow-hidden hidden">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-xl text-slate-800">時段營業與交班報表</h3>
+            <div class="space-x-2">
+              <input type="datetime-local" id="report-start" onchange="generateReports()" class="border p-1.5 rounded-lg text-sm font-bold bg-white">
+              <span class="text-slate-400">至</span>
+              <input type="datetime-local" id="report-end" onchange="generateReports()" class="border p-1.5 rounded-lg text-sm font-bold bg-white">
+              <button onclick="printZReport()" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg font-bold text-sm"><i class="fa-solid fa-print"></i> 列印 Z 單</button>
+              <button onclick="exportCSV()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-bold text-sm"><i class="fa-solid fa-file-csv"></i> 匯出 CSV</button>
             </div>
           </div>
-          <button onclick="saveEmployee()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-xl shadow-md transition">建立並配置帳號</button>
-        </div>
-        <div class="flex-1 bg-white border border-slate-200 rounded-2xl overflow-hidden overflow-y-auto no-scrollbar">
-          <table class="w-full text-left">
-            <thead class="bg-slate-50 border-b border-slate-200">
-              <tr><th class="p-4 font-bold text-slate-600">帳號</th><th class="p-4 font-bold text-slate-600">顯示名稱</th><th class="p-4 font-bold text-slate-600 text-center">登入密碼</th><th class="p-4 font-bold text-slate-600 text-center">權限角色</th><th class="p-4 font-bold text-slate-600 text-right">權限移除</th></tr>
-            </thead>
-            <tbody id="employee-list" class="divide-y divide-slate-100"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <div id="view-reports" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-slate-50">
-      <div class="p-6 border-b border-slate-200 shrink-0 flex flex-col md:flex-row md:items-center justify-between bg-white gap-4 shadow-sm z-10">
-        <div>
-          <h2 class="text-2xl font-black text-emerald-600 tracking-wider"><i class="fa-solid fa-chart-pie mr-2"></i>多功能營業時段報表</h2>
-          <p class="text-xs text-slate-400 font-bold mt-1">預設加總整天資料，您可自由指定特定班別時段進行拆帳</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-xl border">
-            <span class="text-xs font-bold text-slate-500">時段：</span>
-            <input type="datetime-local" id="report-start" onchange="generateReports()" class="bg-transparent font-bold text-sm outline-none">
-            <span class="text-slate-400">至</span>
-            <input type="datetime-local" id="report-end" onchange="generateReports()" class="bg-transparent font-bold text-sm outline-none">
-          </div>
-          <button onclick="clearReportFilter()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm">整天</button>
-          <button onclick="printZReport()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl font-bold shadow-md text-sm transition"><i class="fa-solid fa-print mr-2"></i>列印對帳單</button>
-          <button onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl font-bold shadow-md text-sm transition"><i class="fa-solid fa-file-csv mr-2"></i>匯出 CSV</button>
-        </div>
-      </div>
-      <div class="flex-1 p-8 overflow-y-auto no-scrollbar">
-        <div class="max-w-5xl mx-auto grid grid-cols-2 gap-6 mb-6">
-          <div class="bg-white p-6 rounded-3xl border shadow-sm flex items-center justify-between">
-            <div><p class="text-slate-500 font-bold mb-1">該區間淨利 (已扣除作廢)</p><p class="text-5xl font-black text-blue-600">$<span id="report-revenue">0</span></p></div>
-            <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 text-2xl"><i class="fa-solid fa-sack-dollar"></i></div>
-          </div>
-          <div class="bg-white p-6 rounded-3xl border shadow-sm flex items-center justify-between">
-            <div><p class="text-slate-500 font-bold mb-1">該區間有效成交單數</p><p class="text-5xl font-black text-emerald-600"><span id="report-orders">0</span></p></div>
-            <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 text-2xl"><i class="fa-solid fa-receipt"></i></div>
+          <div class="flex-1 overflow-y-auto no-scrollbar max-w-5xl mx-auto w-full">
+             <div class="bg-white p-6 rounded-2xl border shadow-sm flex items-center justify-between gap-6 mb-6">
+                <div class="flex-1"><p class="text-slate-500 font-bold mb-1">開班備用金 (Starting)</p><div class="flex items-center text-xl font-black text-slate-700">$ <input type="number" id="starting-cash" value="0" onkeyup="generateReports()" onchange="generateReports()" class="w-24 border-b-2 border-slate-300 outline-none bg-slate-50 px-1 ml-1"></div></div>
+                <div class="text-slate-300 text-2xl font-black">+</div>
+                <div class="flex-1"><p class="text-slate-500 font-bold mb-1">本區間現金淨營收</p><p class="text-3xl font-black text-blue-600">$<span id="report-method-cash">0</span></p></div>
+                <div class="text-slate-300 text-2xl font-black">=</div>
+                <div class="flex-1 bg-emerald-50 border border-emerald-200 p-4 rounded-xl"><p class="text-emerald-700 font-bold mb-1">抽屜應有結餘現金</p><p class="text-3xl font-black text-emerald-600">$<span id="expected-drawer">0</span></p></div>
+             </div>
+             <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-white p-5 rounded-xl border shadow-sm text-center"><p class="text-slate-500 font-bold text-xs mb-1">總淨營收</p><p class="text-2xl font-black text-slate-800">$<span id="report-revenue">0</span></p></div>
+                <div class="bg-white p-5 rounded-xl border shadow-sm text-center"><p class="text-slate-500 font-bold text-xs mb-1">園遊券營收</p><p class="text-2xl font-black text-orange-600">$<span id="report-method-voucher">0</span></p></div>
+                <div class="bg-white p-5 rounded-xl border shadow-sm text-center"><p class="text-slate-500 font-bold text-xs mb-1">有效單數</p><p class="text-2xl font-black text-slate-800"><span id="report-orders">0</span></p></div>
+             </div>
+             <div class="bg-white rounded-2xl border p-5 shadow-sm"><h4 class="font-bold text-slate-700 mb-3 border-b pb-2">時段銷售流水帳 (正序)</h4><div id="report-table-rows" class="space-y-2"></div></div>
           </div>
         </div>
-        <div class="max-w-5xl mx-auto bg-white rounded-2xl border p-6 shadow-sm">
-          <h3 class="font-bold text-slate-700 mb-4 border-b pb-2"><i class="fa-solid fa-list mr-2"></i>時段銷售流水帳 (按時間正序排序)</h3>
-          <div id="report-table-rows" class="space-y-2"></div>
+
+        <div id="aview-employees" class="absolute inset-0 flex flex-col p-6 overflow-hidden hidden">
+          <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-xl text-slate-800">員工權限管理</h3></div>
+          <div class="flex-1 flex gap-6 overflow-hidden">
+            <div class="w-80 bg-white border p-5 rounded-2xl shrink-0 h-fit space-y-3">
+              <input type="text" id="emp-username" placeholder="登入帳號 (ex: group2)" class="w-full border p-2 rounded-lg font-bold text-sm">
+              <input type="text" id="emp-name" placeholder="顯示名稱" class="w-full border p-2 rounded-lg font-bold text-sm">
+              <input type="text" maxlength="4" id="emp-pin" placeholder="4位數 PIN 碼" class="w-full border p-2 rounded-lg font-bold text-center tracking-widest">
+              <select id="emp-role" class="w-full border p-2 rounded-lg font-bold text-sm"><option value="cashier">收銀員</option><option value="admin">店長</option></select>
+              <button onclick="saveEmployee()" class="w-full bg-purple-600 text-white font-bold py-2 rounded-lg">新增/更新員工</button>
+            </div>
+            <div class="flex-1 bg-white border rounded-2xl overflow-y-auto"><table class="w-full text-left"><thead class="bg-slate-50 border-b"><tr><th class="p-3 font-bold text-slate-600">帳號</th><th class="p-3 font-bold text-slate-600">名稱</th><th class="p-3 text-center font-bold text-slate-600">PIN</th><th class="p-3 text-center font-bold text-slate-600">權限</th><th class="p-3 text-right font-bold text-slate-600">操作</th></tr></thead><tbody id="employee-list" class="divide-y divide-slate-100"></tbody></table></div>
+          </div>
+        </div>
+
+        <div id="aview-settings" class="absolute inset-0 flex flex-col p-6 overflow-hidden hidden">
+          <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-xl text-slate-800">系統歸零與設定</h3></div>
+          <div class="flex-1 max-w-2xl mx-auto w-full space-y-6">
+            <div class="bg-white p-6 rounded-2xl border shadow-sm">
+              <h4 class="font-bold text-rose-600 mb-2">終極資料清空</h4><p class="text-sm text-slate-500 mb-4">刪除所有歷史訂單、叫號暫存，並重置計數器。(保留菜單與員工)</p>
+              <button onclick="factoryResetSystem()" id="btn-factory-reset" class="bg-rose-600 text-white font-bold py-3 px-6 rounded-xl"><i class="fa-solid fa-dumpster-fire mr-2"></i>清空測試資料</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div id="view-settings" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-slate-50">
-      <div class="p-6 border-b border-slate-200 shrink-0 bg-white"><h2 class="text-2xl font-black text-slate-800 tracking-wider"><i class="fa-solid fa-gear mr-2"></i>系統重置與歸零中心</h2></div>
-      <div class="flex-1 p-8 space-y-6">
-        <div class="max-w-2xl bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-          <h3 class="text-xl font-bold text-rose-600 mb-2 border-b pb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>終極測試資料清空 (全部歸零)</h3>
-          <p class="text-slate-500 mb-6 text-sm">此動作將正式刪除雲端上所有的【歷史訂單紀錄】、【叫號暫存】、【單號計數器】，將系統徹底還原至開展前的純淨狀態。<strong>（商品菜單與員工帳號將予以保留，不會被刪除）</strong></p>
-          <button onclick="factoryResetSystem()" id="btn-factory-reset" class="bg-rose-600 hover:bg-rose-700 text-white font-black py-4 px-8 rounded-xl shadow-lg active:scale-95 transition">
-            <i class="fa-solid fa-dumpster-fire mr-2"></i> 清空測試資料・全部歸零
-          </button>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <aside id="checkout-sidebar" class="w-[420px] bg-slate-50 border-l border-slate-200 flex flex-col shadow-2xl z-20 shrink-0 transition-transform duration-300 relative">
-    
-    <div id="checkout-success-overlay" class="absolute inset-0 bg-emerald-600 z-50 flex flex-col items-center justify-center hidden">
-      <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-4 shadow-xl"><i class="fa-solid fa-check text-5xl text-emerald-500"></i></div>
-      <h2 class="text-3xl font-black text-white mb-2">結帳成功</h2>
-      <p class="text-emerald-100 font-bold mb-8">請撕下實體號碼牌給顧客</p>
-      <div class="bg-white p-6 rounded-3xl text-center w-64 shadow-2xl mb-10">
-        <p class="text-slate-400 font-bold mb-1">取餐單號</p>
-        <div class="text-7xl font-black text-slate-800 tracking-tighter">#<span id="success-order-no">000</span></div>
-      </div>
-      <button onclick="nextOrder()" class="bg-slate-900 text-white font-black text-xl py-4 px-12 rounded-xl shadow-xl active:scale-95 transition">下一單 (Next)</button>
-    </div>
-
-    <div class="flex-1 flex flex-col bg-white m-3 rounded-t-xl shadow-sm border border-slate-200 relative overflow-hidden">
-      <div class="absolute -top-3 left-0 right-0 h-4 receipt-edge"></div>
-      <div class="p-4 border-b-2 border-dashed border-slate-300 flex justify-between items-center bg-white z-10 pt-6">
-        <h3 class="font-black text-slate-700 tracking-widest text-lg">購物明細</h3>
-        <div class="space-x-2">
-          <button onclick="openDiscountModal()" id="btn-custom-discount" class="text-slate-500 border border-slate-300 hover:bg-slate-100 font-bold px-3 py-1 rounded-md text-sm transition"><i class="fa-solid fa-tag mr-1"></i>折扣</button>
-          <button onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-3 py-1 rounded-md text-sm">清空</button>
-        </div>
-      </div>
-      <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-3 bg-white z-10"></div>
-      <div class="p-4 bg-white border-t-2 border-dashed border-slate-300 z-10 space-y-2">
-        <div id="discount-row" class="flex justify-between items-end hidden text-rose-500">
-          <span class="font-bold text-sm">折讓扣除</span><span class="text-lg font-bold">- $<span id="display-discount-amount">0</span></span>
-        </div>
-        <div class="flex justify-between items-end">
-          <span class="text-slate-500 font-bold text-sm">應付總額</span><span class="text-4xl font-black text-blue-600 tracking-tighter">NT$ <span id="total-ui">0</span></span>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-slate-800 text-white p-3 pt-0 pb-6 shrink-0">
-      <div class="bg-slate-900 rounded-lg flex justify-between items-center p-3 mb-3 border border-slate-700 mt-2">
-        <span class="font-bold text-slate-400 text-sm">實收 <span id="display-received" class="text-white ml-2 text-xl">$0</span></span>
-        <div class="text-right"><span class="text-xs text-slate-500 block mb-[-4px]">找零</span><span class="text-2xl font-black text-emerald-400" id="change-amount">$0</span></div>
-      </div>
-      <input type="hidden" id="received-amount">
-      <div class="grid grid-cols-4 gap-1 mb-3">
-        <button onclick="numpadInput(1)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">1</button>
-        <button onclick="numpadInput(2)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">2</button>
-        <button onclick="numpadInput(3)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">3</button>
-        <button onclick="setReceived(100)" class="bg-blue-600/30 text-blue-400 rounded-md py-4 text-lg font-bold">$100</button>
-        <button onclick="numpadInput(4)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">4</button>
-        <button onclick="numpadInput(5)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">5</button>
-        <button onclick="numpadInput(6)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">6</button>
-        <button onclick="setReceived(500)" class="bg-blue-600/30 text-blue-400 rounded-md py-4 text-lg font-bold">$500</button>
-        <button onclick="numpadInput(7)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">7</button>
-        <button onclick="numpadInput(8)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">8</button>
-        <button onclick="numpadInput(9)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">9</button>
-        <button onclick="setReceived(1000)" class="bg-blue-600/30 text-blue-400 rounded-md py-4 text-lg font-bold">$1k</button>
-        <button onclick="numpadClear()" class="bg-rose-500/20 text-rose-400 rounded-md py-4 text-xl font-bold">C</button>
-        <button onclick="numpadInput(0)" class="bg-slate-700 rounded-md py-4 text-xl font-bold active:scale-95">0</button>
-        <button onclick="numpadBackspace()" class="bg-slate-600 rounded-md py-4 text-xl font-bold"><i class="fa-solid fa-delete-left"></i></button>
-        <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-500/20 text-emerald-400 rounded-md py-4 text-lg font-bold">剛好</button>
-      </div>
-      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-4 rounded-xl text-2xl font-black shadow-[0_0_20px_rgba(16,185,129,0.3)]">收款結帳</button>
-    </div>
-  </aside>
-
-  <div id="print-z-report" class="hidden">
-    <div style="text-align: center; margin-bottom: 20px;">
-      <h2>南大附中 校慶園遊會</h2><h3>時段對帳單 (Z-Report)</h3>
-      <p id="z-print-time"></p><p>列印核准店長: <span id="z-print-operator"></span></p><p>================================</p>
-    </div>
-    <div style="margin-bottom: 20px;">
-      <p>篩選起點: <span id="z-print-start"></span></p><p>篩選終點: <span id="z-print-end"></span></p>
-      <p>該時段實收淨利: <strong style="font-size: 1.3em;">$<span id="z-print-revenue">0</span></strong></p>
-      <p>該時段成交單數: <span id="z-print-orders">0</span> 筆</p>
-    </div>
-    <div style="text-align: center; margin-top: 30px;"><p>================================</p><p>請核對該時段金庫現金後簽名交回</p></div>
+    </section>
   </div>
 
+  <!-- 🖨️ 列印交接單 -->
+  <div id="print-z-report" class="hidden">
+    <div style="text-align: center; margin-bottom: 20px;"><h2>204園遊會 POS系統</h2><h3>時段結帳交班單 (Z-Report)</h3><p id="z-print-time"></p><p>列印核准人: <span id="z-print-operator"></span></p><p>====================</p></div>
+    <div style="margin-bottom: 20px;">
+      <p>時段起: <span id="z-print-start"></span></p><p>時段迄: <span id="z-print-end"></span></p><br>
+      <p>開班備用金 (A): $<span id="z-print-starting">0</span></p><p>本班現金營收 (B): $<span id="z-print-cash">0</span></p><p>--------------------</p>
+      <p>抽屜應有結餘 (A+B): <strong style="font-size: 1.3em;">$<span id="z-print-drawer">0</span></strong></p><br>
+      <p>園遊券營收: $<span id="z-print-voucher">0</span></p><p>總成交單數: <span id="z-print-orders">0</span> 筆</p>
+    </div>
+    <div style="text-align: center; margin-top: 30px;"><p>====================</p><p>請核對【抽屜應有結餘】現金無誤後簽名</p></div>
+  </div>
+
+  <!-- === 核心邏輯 === -->
   <script type="module">
     import { db, doc, setDoc, onSnapshot, collection, serverTimestamp } from './firebase-config.js';
     import { writeBatch, increment, getDoc, getDocs, runTransaction, query, orderBy, limit, updateDoc, where, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
     let currentUser = null; let products = []; let cart = []; let allOrders = []; let employees = [];
-    let subtotal = 0; let total = 0; let customDiscountAmount = 0;
+    let subtotal = 0; let total = 0; let customDiscountAmount = 0; 
+    let currentPaymentMethod = 'cash'; let modifyingCartIndex = null;
 
-    // --- 介面切換 ---
-    window.switchTab = function(tab) {
-      document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('bg-blue-500/20'); btn.classList.replace('text-blue-400', 'text-slate-500'); btn.classList.replace('text-orange-500', 'text-slate-500'); btn.classList.replace('text-emerald-500', 'text-slate-500'); btn.classList.replace('text-purple-500', 'text-slate-500'); });
-      const activeBtn = document.getElementById(`nav-${tab}`);
-      const cMap = { inventory: 'text-orange-500', reports: 'text-emerald-500', employees: 'text-purple-500' };
-      activeBtn.classList.replace('text-slate-500', cMap[tab] || 'text-blue-400'); activeBtn.classList.add('bg-blue-500/20');
-      
-      ['pos', 'history', 'inventory', 'employees', 'reports', 'settings'].forEach(t => {
-        const v = document.getElementById(`view-${t}`); if(v) v.classList.toggle('opacity-0', t !== tab); if(v) v.classList.toggle('pointer-events-none', t !== tab);
-      });
-      document.getElementById('checkout-sidebar').classList.toggle('translate-x-full', tab !== 'pos');
-      if(tab === 'history') fetchHistory(); if(tab === 'reports') generateReports(); if(tab === 'employees') fetchEmployees();
+    // 時鐘
+    setInterval(() => { const el = document.getElementById('live-clock'); if(el) el.innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
+
+    // --- UI 切換邏輯 ---
+    window.switchBottomPanel = function(panel) {
+      document.getElementById('tab-numpad').className = panel === 'numpad' ? 'flex-1 py-2 font-black text-sm rounded-t-xl bg-white text-blue-600 border-t border-l border-r border-slate-200 transition' : 'flex-1 py-2 font-black text-sm rounded-t-xl bg-slate-200 text-slate-500 border-transparent hover:bg-white/50 transition cursor-pointer';
+      document.getElementById('tab-menu').className = panel === 'menu' ? 'flex-1 py-2 font-black text-sm rounded-t-xl bg-white text-blue-600 border-t border-l border-r border-slate-200 transition' : 'flex-1 py-2 font-black text-sm rounded-t-xl bg-slate-200 text-slate-500 border-transparent hover:bg-white/50 transition cursor-pointer';
+      document.getElementById('panel-numpad').classList.toggle('hidden', panel !== 'numpad'); document.getElementById('panel-numpad').classList.toggle('flex', panel === 'numpad');
+      document.getElementById('panel-menu').classList.toggle('hidden', panel !== 'menu'); document.getElementById('panel-menu').classList.toggle('grid', panel === 'menu');
     };
 
-    // --- 觸控密碼盤登入 ---
+    window.openAdminView = function(tab) { document.getElementById('admin-overlay').classList.remove('translate-y-full'); switchAdminTab(tab); };
+    window.closeAdminView = function() { document.getElementById('admin-overlay').classList.add('translate-y-full'); };
+    window.switchAdminTab = function(tab) {
+      document.querySelectorAll('#admin-tabs button').forEach(btn => { btn.classList.replace('bg-emerald-500', 'bg-slate-800'); btn.classList.replace('text-white', 'text-slate-300'); });
+      const active = document.getElementById(`atab-${tab}`);
+      if(active) { active.classList.replace('bg-slate-800', 'bg-emerald-500'); active.classList.replace('text-slate-300', 'text-white'); }
+      ['preorder', 'history', 'inventory', 'reports', 'employees', 'settings'].forEach(t => {
+        const v = document.getElementById(`aview-${t}`); if(v) { v.classList.toggle('hidden', t !== tab); v.classList.toggle('flex', t === tab); }
+      });
+      if(tab === 'preorder') fetchPreorders(); if(tab === 'history') fetchHistory(); if(tab === 'reports') generateReports(); if(tab === 'employees') fetchEmployees();
+    };
+
+    // --- 登入 ---
     const pinField = document.getElementById('login-pin-value');
     window.loginNumpad = n => { if(pinField.value.length < 4) { pinField.value += n; updPin(); } };
     window.loginBackspace = () => { pinField.value = pinField.value.slice(0, -1); updPin(); };
@@ -342,105 +403,127 @@
 
     window.performLogin = async function() {
       const pin = pinField.value; if(!pin) return;
-      document.getElementById('login-btn').innerText = "驗證權限中...";
+      document.getElementById('login-btn').innerText = "驗證中...";
       try {
         const accRef = collection(db, "accounts");
         const adminDoc = await getDoc(doc(accRef, "admin")); if (!adminDoc.exists()) await setDoc(doc(accRef, "admin"), { pin: "0000", name: "總店長", role: "admin" });
-        const cashierDoc = await getDoc(doc(accRef, "cashier1")); if (!cashierDoc.exists()) await setDoc(doc(accRef, "cashier1"), { pin: "1234", name: "收銀員A", role: "cashier" });
-        
+        const cashierDoc = await getDoc(doc(accRef, "cashier1")); if (!cashierDoc.exists()) await setDoc(doc(accRef, "cashier1"), { pin: "1234", name: "收銀員", role: "cashier" });
         const match = await getDocs(query(accRef, where("pin", "==", pin)));
         if (!match.empty) {
-          currentUser = { id: match.docs[0].id, ...match.docs[0].data() };
-          document.getElementById('admin-menu').classList.toggle('hidden', currentUser.role !== 'admin');
-          document.getElementById('role-badge').innerText = currentUser.role === 'admin' ? '店長' : '收銀';
-          document.getElementById('role-badge').className = currentUser.role === 'admin' ? 'text-[10px] font-black mb-2 px-2 py-1 rounded border border-orange-500 text-orange-400 bg-orange-500/10' : 'text-[10px] font-black mb-2 px-2 py-1 rounded border border-blue-500 text-blue-400 bg-blue-50/10';
+          currentUser = { id: match.docs[0].id, ...match.docs[0].data() }; const isAdmin = currentUser.role === 'admin';
+          document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', !isAdmin));
+          document.getElementById('current-user-display').innerText = currentUser.name;
+          document.getElementById('role-badge').innerText = isAdmin ? '店長' : '收銀';
           document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
+          const pSnap = await getDocs(collection(db, "products"));
+          if(pSnap.empty && isAdmin) {
+            const batch = writeBatch(db);
+            batch.set(doc(collection(db, "products")), { name: '招牌紅茶', category: '飲料', price: 30, stock: 50, isCombo: false });
+            batch.set(doc(collection(db, "products")), { name: '熱狗堡', category: '餐食', price: 60, stock: 30, isCombo: false });
+            batch.set(doc(collection(db, "products")), { name: '超值吃飽套餐', category: '餐食', price: 80, stock: 20, isCombo: true, components: ['招牌紅茶', '熱狗堡'] });
+            await batch.commit();
+          }
           initPOS();
         } else { alert("PIN 碼錯誤！"); loginClear(); document.getElementById('login-btn').innerText = "解鎖系統"; }
       } catch (e) { alert("連線失敗"); document.getElementById('login-btn').innerText = "解鎖系統"; }
     };
 
-    // --- 資料同步中心 ---
+    // --- 資料同步 ---
     function initPOS() {
-      onSnapshot(collection(db, "products"), (snap) => {
-        products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        filterProducts();
-        if(currentUser.role === 'admin') { renderInventory(); updateComboOptions(); }
-      });
-      onSnapshot(collection(db, "orders"), (snap) => { allOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); generateReports(); });
+      onSnapshot(collection(db, "products"), (snap) => { products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); filterProducts(); if(currentUser.role === 'admin') { renderInventory(); updateComboOptions(); } });
+      onSnapshot(collection(db, "orders"), (snap) => { allOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); generateReports(); fetchPreorders(); });
     }
 
     window.filterProducts = function() {
-      const q = document.getElementById('search-input').value.toLowerCase();
+      const q = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
       const filtered = products.filter(p => p.name.toLowerCase().includes(q));
       document.getElementById('product-grid').innerHTML = filtered.map(p => {
-        const isSoldOut = p.stock <= 0;
-        const subLabel = p.isCombo ? `<span class="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold mr-1">套餐</span><span class="text-xs text-slate-400">${p.components?.join('+') || ''}</span>` : '單品';
-        return `<div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="bg-white border border-slate-200 rounded-3xl p-5 flex flex-col justify-between aspect-square ${isSoldOut ? 'opacity-50 grayscale' : 'cursor-pointer hover:-translate-y-1 active:scale-95 hover:shadow-xl transition'} shadow-sm relative overflow-hidden group">
-            ${isSoldOut ? '<div class="absolute inset-0 bg-slate-900/10 z-10 flex items-center justify-center"><span class="bg-slate-800 text-white px-3 py-1 rounded-full font-bold transform -rotate-12">售完</span></div>' : ''}
-            <div><h3 class="font-bold text-slate-700 text-lg leading-tight mb-1">${p.name}</h3><div class="mb-2 h-4 overflow-hidden">${subLabel}</div><p class="text-blue-600 font-black text-2xl">$${p.price}</p></div>
-            <div class="text-right text-sm font-bold text-slate-400">${isSoldOut ? '已售完' : `可售庫存: ${p.stock}`}</div>
-          </div>`;
+        const isSoldOut = p.stock <= 0; const opacity = isSoldOut ? 'opacity-50 grayscale cursor-not-allowed' : 'cursor-pointer hover:shadow-md active:scale-95 transition-transform';
+        const catBadge = p.category ? `<span class="absolute top-2 left-2 text-[10px] font-bold text-white ${p.isCombo ? 'bg-orange-500' : 'bg-slate-500'} px-1.5 py-0.5 rounded shadow-sm">${p.category}</span>` : '';
+        if (p.isCombo) {
+          return `<div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="relative bg-orange-50 border border-orange-200 rounded-2xl p-4 flex flex-col justify-center shadow-sm ${opacity} col-span-2 aspect-[2/1] overflow-hidden">${catBadge}${isSoldOut ? '<div class="absolute inset-0 bg-slate-900/10 z-10 flex items-center justify-center"><span class="bg-slate-800 text-white px-3 py-1 rounded-full font-bold transform -rotate-12">售完</span></div>' : ''}<h3 class="font-black text-orange-900 text-xl leading-tight mt-3 truncate px-1">${p.name}</h3><p class="text-xs text-orange-700/80 mt-1 font-semibold truncate px-1">內含: ${p.components?.join(', ') || ''}</p><span class="absolute bottom-3 right-4 font-black text-orange-600 text-2xl">$${p.price}</span></div>`;
+        } else {
+          return `<div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="relative bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-center items-center text-center shadow-sm ${opacity} aspect-square overflow-hidden">${catBadge}${isSoldOut ? '<div class="absolute inset-0 bg-slate-900/10 z-10 flex items-center justify-center"><span class="bg-slate-800 text-white px-2 py-1 rounded-full text-xs font-bold transform -rotate-12">售完</span></div>' : ''}<h3 class="font-bold text-slate-700 text-lg leading-tight w-full truncate px-1 mt-4">${p.name}</h3><span class="absolute bottom-2 right-3 font-black text-blue-600 text-lg">$${p.price}</span></div>`;
+        }
       }).join('');
     };
 
-    // --- 購物車與折扣折讓 ---
-    window.addToCart = id => { const p = products.find(p => p.id === id); const ex = cart.find(i => i.id === id); if ((ex ? ex.qty : 0) >= p.stock) return; if (ex) ex.qty += 1; else cart.push({ ...p, qty: 1 }); updateCartUI(); };
-    window.changeQty = (id, delta) => { const item = cart.find(i => i.id === id); if (delta > 0 && item.qty >= products.find(p => p.id === id).stock) return; item.qty += delta; if (item.qty <= 0) cart = cart.filter(i => i.id !== id); updateCartUI(); };
-    window.removeCartItem = id => { cart = cart.filter(i => i.id !== id); updateCartUI(); };
-    window.clearCart = () => { cart = []; customDiscountAmount = 0; document.getElementById('received-amount').value = ''; updateCartUI(); };
-
-    // 折扣視窗鍵盤
-    const dF = document.getElementById('discount-input-value'); const dD = document.getElementById('discount-input-display');
-    window.openDiscountModal = () => { if(cart.length===0)return; dF.value='0'; dD.innerText='0'; document.getElementById('discount-modal').classList.remove('hidden'); };
+    // --- 快捷折扣 ---
+    window.setDiscount = function(type, val) {
+      if(cart.length === 0) return;
+      subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      if(type === 'amount') { customDiscountAmount = val; }
+      else if(type === 'percent') { customDiscountAmount = Math.round(subtotal * (1 - val)); }
+      closeDiscountModal(); updateCartUI();
+    };
+    window.clearDiscount = function() { customDiscountAmount = 0; closeDiscountModal(); updateCartUI(); };
+    window.openDiscountModal = () => { if(cart.length>0) document.getElementById('discount-modal').classList.remove('hidden'); };
     window.closeDiscountModal = () => document.getElementById('discount-modal').classList.add('hidden');
-    window.discNumpad = n => { dF.value = dF.value === '0' ? n : dF.value + n; dD.innerText = dF.value; };
-    window.discBackspace = () => { dF.value = dF.value.slice(0, -1) || '0'; dD.innerText = dF.value; };
-    window.discClear = () => { dF.value = '0'; dD.innerText = '0'; };
-    window.applyDiscount = () => { customDiscountAmount = parseInt(dF.value) || 0; closeDiscountModal(); updateCartUI(); };
+
+    // --- 客製化備註 ---
+    window.openModifierModal = function(index) { modifyingCartIndex = index; document.getElementById('modifier-item-name').innerText = cart[index].name; document.getElementById('modifier-input').value = cart[index].note || ''; document.getElementById('modifier-modal').classList.remove('hidden'); };
+    window.closeModifierModal = () => document.getElementById('modifier-modal').classList.add('hidden');
+    window.appendModifier = t => { const i = document.getElementById('modifier-input'); i.value = i.value ? i.value + '、' + t : t; };
+    window.saveModifier = function() { if(modifyingCartIndex !== null) { cart[modifyingCartIndex].note = document.getElementById('modifier-input').value.trim(); updateCartUI(); } closeModifierModal(); };
+
+    // --- 支付與預購 ---
+    window.setPaymentMethod = function(method) {
+      currentPaymentMethod = method;
+      ['cash', 'voucher'].forEach(m => {
+        const btn = document.getElementById(`pay-${m}`);
+        if(m === method) btn.className = "flex-1 bg-blue-600 text-white py-2 rounded-lg font-bold text-sm transition shadow-sm border border-blue-700";
+        else btn.className = "flex-1 bg-white text-slate-500 hover:bg-slate-100 border border-slate-300 py-2 rounded-lg font-bold text-sm transition";
+      });
+    };
+    
+    window.openPreorderModal = function() {
+      if(cart.length === 0) return alert("請先加入商品！");
+      document.getElementById('po-name').value = ''; document.getElementById('po-phone').value = ''; document.getElementById('po-time').value = '';
+      document.getElementById('preorder-modal').classList.remove('hidden');
+    };
+    window.closePreorderModal = () => document.getElementById('preorder-modal').classList.add('hidden');
+
+    // --- 購物車 ---
+    window.addToCart = id => { const p = products.find(p => p.id === id); const ex = cart.find(i => i.id === id && !i.note); if ((ex ? ex.qty : 0) >= p.stock) return; if (ex) ex.qty += 1; else cart.push({ ...p, qty: 1, note: '' }); updateCartUI(); };
+    window.changeQty = (index, delta) => { const item = cart[index]; if (delta > 0 && item.qty >= products.find(p => p.id === item.id).stock) return; item.qty += delta; if (item.qty <= 0) cart.splice(index, 1); updateCartUI(); };
+    window.removeCartItem = index => { cart.splice(index, 1); updateCartUI(); };
+    window.clearCart = () => { cart = []; customDiscountAmount = 0; document.getElementById('received-amount').value = ''; updateCartUI(); };
 
     async function updateCartUI() {
       subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-      if(customDiscountAmount > subtotal) customDiscountAmount = subtotal;
-      total = subtotal - customDiscountAmount;
-      
-      const dRow = document.getElementById('discount-row');
-      dRow.classList.toggle('hidden', customDiscountAmount <= 0);
-      document.getElementById('display-discount-amount').innerText = customDiscountAmount;
-      document.getElementById('total-ui').innerText = total; document.getElementById('btn-exact').innerText = total > 0 ? `剛好 $${total}` : '剛好';
+      if(customDiscountAmount > subtotal) customDiscountAmount = subtotal; total = subtotal - customDiscountAmount;
+      const dRow = document.getElementById('discount-row'); dRow.classList.toggle('hidden', customDiscountAmount <= 0);
+      document.getElementById('display-discount-amount').innerText = customDiscountAmount; document.getElementById('discount-indicator').classList.toggle('hidden', customDiscountAmount <= 0);
+      document.getElementById('display-total').innerText = total; document.getElementById('total-ui').innerText = total; document.getElementById('btn-exact').innerText = total > 0 ? `剛好 $${total}` : '剛好';
       
       document.getElementById('cart-ui').innerHTML = cart.length === 0 ? `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-receipt text-5xl mb-4 opacity-50"></i><p class="font-bold tracking-widest">尚未點餐</p></div>` 
-        : cart.map(item => `<div class="flex flex-col border-b border-slate-100 pb-3 mb-2 relative"><button onclick="removeCartItem('${item.id}')" class="absolute right-0 top-0 text-slate-300 hover:text-rose-500 transition"><i class="fa-solid fa-trash-can"></i></button><div class="flex justify-between font-bold text-slate-700 text-lg mb-1 pr-6"><span>${item.name}</span><span>$${item.price * item.qty}</span></div><div class="text-xs text-slate-400 mb-2">${item.isCombo ? `組合：${item.components?.join(', ')}` : '單品'}</div><div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border"><button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 bg-white rounded font-bold text-slate-600">-</button><span class="w-6 text-center font-bold text-slate-800">${item.qty}</span><button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 bg-slate-200 rounded font-bold text-slate-700">+</button></div></div>`).join('');
+        : cart.map((item, index) => `<div class="flex flex-col border-b border-slate-100 pb-3 mb-2 relative group"><button onclick="removeCartItem(${index})" class="absolute right-0 top-0 text-slate-300 hover:text-rose-500 transition"><i class="fa-solid fa-trash-can"></i></button><div class="flex justify-between font-bold text-slate-700 text-lg mb-1 pr-6 cursor-pointer hover:text-blue-500" onclick="openModifierModal(${index})"><span>${item.name} <i class="fa-solid fa-pen-to-square text-[10px] text-slate-300 ml-1"></i></span><span>$${item.price * item.qty}</span></div><div class="text-xs text-slate-400 mb-2 leading-tight">${item.isCombo ? `組合：${item.components?.join(', ')}<br>` : ''}${item.note ? `<span class="text-orange-500 font-bold bg-orange-50 px-1 rounded border border-orange-200">備註: ${item.note}</span>` : ''}</div><div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border"><button onclick="changeQty(${index}, -1)" class="w-8 h-8 bg-white rounded font-bold text-slate-600">-</button><span class="w-6 text-center font-bold text-slate-800">${item.qty}</span><button onclick="changeQty(${index}, 1)" class="w-8 h-8 bg-slate-200 rounded font-bold text-slate-700">+</button></div></div>`).join('');
       calculateChange();
       try { await setDoc(doc(db, "active_sessions", "station_1"), { cartItems: cart, totalAmount: total, status: "ordering" }); } catch(e){}
     }
 
-    // --- 收銀鍵盤與結帳 ---
-    const iF = document.getElementById('received-amount'); const dR = document.getElementById('display-received');
+    // --- 收銀鍵盤 ---
+    const iF = document.getElementById('received-amount'); const dR = document.getElementById('display-received'); const dC = document.getElementById('display-change');
     window.numpadInput = num => { iF.value = iF.value === '0' ? num : iF.value + num; calculateChange(); };
     window.setReceived = amt => { iF.value = amt; calculateChange(); }; window.setExactAmount = () => { if(total>0) setReceived(total); };
     window.numpadBackspace = () => { iF.value = iF.value.slice(0, -1); calculateChange(); }; window.numpadClear = () => { iF.value = ''; calculateChange(); };
     function calculateChange() {
-      const r = parseInt(iF.value) || 0; dR.innerText = `$${r}`; const d = document.getElementById('change-amount'), b = document.getElementById('checkout-btn');
-      if (cart.length === 0) { d.innerText = '$0'; b.disabled = true; return; }
-      if (iF.value === '') { d.innerText = '$0'; d.className = 'text-2xl font-black text-slate-500'; b.disabled = false; }
-      else if (r >= total) { d.innerText = '$' + (r - total); d.className = 'text-2xl font-black text-emerald-400'; b.disabled = false; }
-      else { d.innerText = '不足'; d.className = 'text-2xl font-black text-rose-400'; b.disabled = true; }
+      const r = parseInt(iF.value) || 0; dR.innerText = `${r}`; const d = document.getElementById('change-amount'), b = document.getElementById('checkout-btn');
+      if (cart.length === 0) { d.innerText = '$0'; dC.innerText = '0'; b.disabled = true; return; }
+      if (iF.value === '') { d.innerText = '$0'; dC.innerText = '0'; d.className = 'text-2xl font-black text-slate-500'; b.disabled = false; }
+      else if (r >= total) { const chg = r - total; d.innerText = '$' + chg; dC.innerText = chg; d.className = 'text-2xl font-black text-emerald-400'; b.disabled = false; }
+      else { d.innerText = '不足'; dC.innerText = '不足'; d.className = 'text-2xl font-black text-rose-400'; b.disabled = true; }
     }
 
+    // --- 結帳與預購提交 ---
     window.checkout = async function() {
       if (cart.length === 0) return; const r = parseInt(iF.value) || total; const c = r - total;
       document.getElementById('checkout-btn').disabled = true;
       try {
-        const orderNoNum = await runTransaction(db, async t => {
-          const cd = await t.get(doc(db, "counters", "daily_order"));
-          let nc = cd.exists() ? cd.data().count + 1 : 1;
-          t.set(doc(db, "counters", "daily_order"), { count: nc }, { merge: true }); return nc;
-        });
-        const orderNo = String(orderNoNum).padStart(3, '0');
-        const batch = writeBatch(db);
+        const orderNoNum = await runTransaction(db, async t => { const cd = await t.get(doc(db, "counters", "daily_order")); let nc = cd.exists() ? cd.data().count + 1 : 1; t.set(doc(db, "counters", "daily_order"), { count: nc }, { merge: true }); return nc; });
+        const orderNo = String(orderNoNum).padStart(3, '0'); const batch = writeBatch(db);
         
-        batch.set(doc(collection(db, "orders")), { orderNumber: orderNo, items: cart, subtotal, discount: customDiscountAmount, total, received: r, change: c, operatorId: currentUser.name, status: "pending", timestamp: serverTimestamp() });
+        batch.set(doc(collection(db, "orders")), { orderNumber: orderNo, items: cart, subtotal, discount: customDiscountAmount, total, received: r, change: c, operatorId: currentUser.name, status: "pending", timestamp: serverTimestamp(), paymentMethod: currentPaymentMethod, isPreorder: false });
         cart.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) }));
         batch.set(doc(db, "active_sessions", "station_1"), { cartItems: [], totalAmount: 0, status: "completed", change: c, orderNumber: orderNo });
         await batch.commit();
@@ -450,246 +533,165 @@
       } catch (e) { alert("結帳失敗！"); document.getElementById('checkout-btn').disabled = false; }
     };
 
-    window.nextOrder = function() {
-      cart = []; total = 0; customDiscountAmount = 0; iF.value = ''; updateCartUI();
-      document.getElementById('checkout-success-overlay').classList.add('hidden');
+    window.submitPreorder = async function() {
+      const name = document.getElementById('po-name').value.trim(); const phone = document.getElementById('po-phone').value.trim(); const pTime = document.getElementById('po-time').value;
+      if(!name || !pTime) return alert("顧客姓名與取餐時間為必填！");
+      const r = parseInt(iF.value) || total; const c = r - total;
+      document.getElementById('preorder-modal').classList.add('hidden'); document.getElementById('checkout-btn').disabled = true;
+      try {
+        const orderNoNum = await runTransaction(db, async t => { const cd = await t.get(doc(db, "counters", "daily_order")); let nc = cd.exists() ? cd.data().count + 1 : 1; t.set(doc(db, "counters", "daily_order"), { count: nc }, { merge: true }); return nc; });
+        const orderNo = String(orderNoNum).padStart(3, '0'); const batch = writeBatch(db);
+        
+        batch.set(doc(collection(db, "orders")), { orderNumber: orderNo, items: cart, subtotal, discount: customDiscountAmount, total, received: r, change: c, operatorId: currentUser.name, status: "preorder_pending", timestamp: serverTimestamp(), paymentMethod: currentPaymentMethod, isPreorder: true, customerName: name, customerPhone: phone, pickupTime: pTime });
+        cart.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) }));
+        await batch.commit();
+        
+        document.getElementById('success-order-no').innerText = orderNo; document.getElementById('checkout-success-overlay').classList.remove('hidden');
+      } catch (e) { alert("預購單建立失敗！"); document.getElementById('checkout-btn').disabled = false; }
     };
 
-    // --- 📄 歷史單據退單回滾 ---
+    window.nextOrder = function() { cart = []; total = 0; customDiscountAmount = 0; iF.value = ''; updateCartUI(); document.getElementById('checkout-success-overlay').classList.add('hidden'); document.getElementById('checkout-btn').disabled = false; setPaymentMethod('cash'); document.getElementById('display-total').innerText = '0'; document.getElementById('display-received').innerText = '0'; document.getElementById('display-change').innerText = '0'; };
+
+    // --- 預購單管理 ---
+    window.fetchPreorders = function() {
+      const preorders = allOrders.filter(o => o.isPreorder && (o.status === 'preorder_pending' || o.status === 'pending')).sort((a,b) => new Date(a.pickupTime).getTime() - new Date(b.pickupTime).getTime());
+      const list = document.getElementById('preorder-list');
+      if(preorders.length === 0) return list.innerHTML = '<div class="text-center text-slate-400 py-10 font-bold">目前無待處理的預購單</div>';
+      list.innerHTML = preorders.map(o => {
+        const timeStr = new Date(o.pickupTime).toLocaleString('zh-TW', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+        const itemsStr = o.items.map(i=>`${i.name}x${i.qty} ${i.note?`(${i.note})`:''}`).join(', ');
+        const actionBtn = o.status === 'preorder_pending' ? `<button onclick="sendPreorderToKDS('${o.id}')" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-bold transition shadow-sm w-full md:w-auto mb-2 md:mb-0 md:mr-2">送至後廚製作</button>` : `<button disabled class="bg-slate-200 text-slate-500 px-4 py-2 rounded-lg font-bold w-full md:w-auto mb-2 md:mb-0 md:mr-2 border">後廚製作中...</button>`;
+        return `<div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex-1 w-full"><div class="flex items-center space-x-3 mb-2"><span class="font-black text-2xl text-indigo-600">#${o.orderNumber}</span><span class="bg-indigo-50 border border-indigo-200 text-indigo-700 px-2 py-0.5 rounded text-sm font-bold"><i class="fa-solid fa-clock mr-1"></i>${timeStr} 取餐</span></div>
+            <div class="font-bold text-slate-700 mb-1"><i class="fa-solid fa-user mr-1 text-slate-400"></i> ${o.customerName} ${o.customerPhone ? `(${o.customerPhone})` : ''}</div><div class="text-sm text-slate-500">${itemsStr}</div></div>
+            <div class="flex flex-col md:flex-row shrink-0 w-full md:w-auto">${actionBtn}<button onclick="completePreorder('${o.id}')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold transition shadow-sm w-full md:w-auto">完成取餐結案</button></div>
+          </div>`;
+      }).join('');
+    };
+    window.sendPreorderToKDS = async id => { try { await updateDoc(doc(db, "orders", id), { status: 'pending' }); alert("已發送至後廚 KDS 看板！"); fetchPreorders(); } catch(e){} };
+    window.completePreorder = async id => { if(confirm("確定顧客已取餐並結案？")) { try { await updateDoc(doc(db, "orders", id), { status: 'completed' }); fetchPreorders(); } catch(e){} } };
+
+    // --- 歷史與作廢 ---
     window.fetchHistory = async function() {
       const list = document.getElementById('history-list'); list.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-spinner fa-spin text-3xl"></i></div>`;
       try {
         const snap = await getDocs(query(collection(db, "orders"), orderBy("timestamp", "desc"), limit(50)));
         list.innerHTML = snap.empty ? `<div class="text-center py-20 font-bold">尚無單據紀錄</div>` : snap.docs.map(docSnap => {
-          const d = docSnap.data(); const t = d.timestamp ? d.timestamp.toDate().toLocaleTimeString('zh-TW') : '';
-          const isVoid = d.status === 'voided';
-          const voidBtn = (currentUser.role === 'admin' && !isVoid) ? `<button onclick="voidOrder('${docSnap.id}')" class="text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-500 px-3 py-1 rounded text-xs font-bold transition">作廢退單(回滾庫存)</button>` : '';
-          return `<div class="bg-white border ${isVoid ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200'} rounded-2xl p-5 flex justify-between items-center shadow-sm">
-              <div><div class="font-black text-xl ${isVoid ? 'text-slate-400 line-through' : 'text-slate-800'} mb-1">#${d.orderNumber} <span class="text-sm font-normal text-slate-400 ml-2">${t}</span></div><div class="text-slate-500 text-sm">${d.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</div></div>
-              <div class="text-right"><div class="text-2xl font-black ${isVoid ? 'text-slate-300' : 'text-blue-600'} mb-2">$${d.total}</div>${voidBtn}</div>
+          const d = docSnap.data(); const t = d.timestamp ? d.timestamp.toDate().toLocaleTimeString('zh-TW') : ''; const isVoid = d.status === 'voided';
+          const voidBtn = (currentUser.role === 'admin' && !isVoid) ? `<button onclick="voidOrder('${docSnap.id}')" class="text-rose-500 border border-rose-500 hover:bg-rose-500 hover:text-white px-3 py-1 rounded text-xs font-bold transition">作廢(回滾庫存)</button>` : '';
+          const payBadge = d.paymentMethod === 'voucher' ? '<span class="bg-orange-100 text-orange-600 text-[10px] px-1.5 py-0.5 rounded font-bold ml-2">園遊券</span>' : '<span class="bg-blue-100 text-blue-600 text-[10px] px-1.5 py-0.5 rounded font-bold ml-2">現金</span>';
+          return `<div class="bg-white border ${isVoid ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200'} rounded-xl p-4 flex justify-between items-center shadow-sm">
+              <div><div class="font-black text-lg ${isVoid ? 'text-slate-400 line-through' : 'text-slate-800'} mb-1">#${d.orderNumber} ${payBadge} <span class="text-xs font-normal text-slate-400 ml-2">${t}</span></div><div class="text-slate-500 text-xs">${d.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</div></div>
+              <div class="text-right flex items-center space-x-4"><div class="text-xl font-black ${isVoid ? 'text-slate-300' : 'text-blue-600'}">$${d.total}</div>${voidBtn}</div>
             </div>`;
         }).join('');
-      } catch (e) { list.innerHTML = `<div class="text-center text-rose-500 py-20 font-bold">讀取失敗</div>`; }
+      } catch (e) { list.innerHTML = `<div class="text-center text-rose-500 py-10 font-bold">讀取失敗</div>`; }
     };
+    window.voidOrder = async id => { if(confirm("確定作廢？系統會自動加回庫存！")) { try { const oDoc = await getDoc(doc(db, "orders", id)); if(oDoc.exists()) { const batch = writeBatch(db); batch.update(doc(db, "orders", id), { status: "voided" }); oDoc.data().items.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(item.qty) })); await batch.commit(); alert("訂單作廢，庫存已回滾！"); fetchHistory(); } } catch(e){} } };
 
-    window.voidOrder = async function(id) {
-      if(!confirm("確定要作廢本張訂單？系統會自動將該訂單所扣除的單品與套餐庫存全數加回！")) return;
-      try {
-        const oDoc = await getDoc(doc(db, "orders", id));
-        if(oDoc.exists()) {
-          const batch = writeBatch(db);
-          batch.update(doc(db, "orders", id), { status: "voided" });
-          oDoc.data().items.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(item.qty) }));
-          await batch.commit(); alert("訂單已作廢，庫存已回滾恢復！"); fetchHistory();
-        }
-      } catch(e) { alert("作廢失敗"); }
-    };
-
-    // --- 📦 進銷存與套餐組合上架 ---
+    // --- 進銷存與套餐 ---
     window.openProductModal = () => document.getElementById('product-modal').classList.remove('hidden');
     window.closeProductModal = () => { document.getElementById('product-modal').classList.add('hidden'); document.getElementById('new-prod-name').value=''; document.getElementById('new-prod-price').value=''; document.getElementById('new-prod-stock').value=''; };
-    
-    window.toggleComboSelection = function() {
-      const type = document.getElementById('new-prod-type').value;
-      document.getElementById('combo-items-section').classList.toggle('hidden', type !== 'combo');
-    };
-
-    function updateComboOptions() {
-      const singles = products.filter(p => !p.isCombo);
-      document.getElementById('combo-checkboxes-grid').innerHTML = singles.map(p => `
-        <label class="flex items-center space-x-2 bg-white p-2 border rounded-lg cursor-pointer text-sm font-bold">
-          <input type="checkbox" name="combo-components" value="${p.name}" class="w-4 h-4 text-orange-500">
-          <span class="truncate">${p.name}</span>
-        </label>
-      `).join('');
-    }
-
+    window.toggleComboSelection = () => document.getElementById('combo-items-section').classList.toggle('hidden', document.getElementById('new-prod-type').value !== 'combo');
+    function updateComboOptions() { document.getElementById('combo-checkboxes-grid').innerHTML = products.filter(p => !p.isCombo).map(p => `<label class="flex items-center space-x-2 bg-white p-2 border rounded-lg cursor-pointer text-xs font-bold"><input type="checkbox" name="combo-components" value="${p.name}" class="text-orange-500"><span class="truncate">${p.name}</span></label>`).join(''); }
     window.saveNewProduct = async function() {
-      const type = document.getElementById('new-prod-type').value;
-      const n = document.getElementById('new-prod-name').value.trim(); 
-      const p = parseInt(document.getElementById('new-prod-price').value); 
-      const s = parseInt(document.getElementById('new-prod-stock').value);
-      if(!n || isNaN(p) || isNaN(s)) return alert("請填寫完整的名稱、定價與初始庫存！");
-
-      let comboComponents = [];
-      if(type === 'combo') {
-        const checked = document.querySelectorAll('input[name="combo-components"]:checked');
-        checked.forEach(cb => comboComponents.push(cb.value));
-        if(comboComponents.length === 0) return alert("套餐組合請至少勾選一項內含單品！");
-      }
-
-      try { 
-        await addDoc(collection(db, "products"), { 
-          name: n, price: p, stock: s, isCombo: (type === 'combo'), components: comboComponents, color: type === 'combo' ? 'bg-orange-50/70' : 'bg-white' 
-        }); 
-        alert("品項上架成功！前台點餐面板已同步。"); closeProductModal(); 
-      } catch(e) { alert("上架失敗"); }
+      const type = document.getElementById('new-prod-type').value; const cat = document.getElementById('new-prod-cat').value;
+      const n = document.getElementById('new-prod-name').value.trim(); const p = parseInt(document.getElementById('new-prod-price').value); const s = parseInt(document.getElementById('new-prod-stock').value);
+      if(!n || isNaN(p) || isNaN(s)) return alert("請填寫完整！");
+      let comps = []; if(type === 'combo') { document.querySelectorAll('input[name="combo-components"]:checked').forEach(cb => comps.push(cb.value)); if(comps.length === 0) return alert("套餐請勾選單品！"); }
+      try { await addDoc(collection(db, "products"), { name: n, category: cat, price: p, stock: s, isCombo: (type === 'combo'), components: comps }); alert("上架成功！"); closeProductModal(); } catch(e) {}
     };
-
     function renderInventory() {
-      document.getElementById('inventory-list').innerHTML = products.map(p => {
-        const typeBadge = p.isCombo ? '<span class="bg-orange-100 text-orange-700 px-2 py-0.5 rounded-md text-xs font-bold">套餐</span>' : '<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-md text-xs font-bold">單品</span>';
-        const detailStr = p.isCombo ? `<div class="text-xs text-slate-400 mt-1 font-semibold">內含: ${p.components?.join(', ')}</div>` : '';
-        return `<tr class="hover:bg-slate-50 border-b border-slate-100">
-          <td class="p-4 text-center">${typeBadge}</td>
-          <td class="p-4 font-bold text-slate-800"><div>${p.name}</div>${detailStr}</td>
-          <td class="p-4 text-center font-mono text-blue-600 font-bold">$${p.price}</td>
-          <td class="p-4 text-center font-bold ${p.stock < 10 ? 'text-rose-500 bg-rose-50/50' : 'text-emerald-600'}">${p.stock}</td>
-          <td class="p-4 text-right space-x-1">
-            <button onclick="addStock('${p.id}', 50)" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white px-2 py-1 rounded text-xs font-bold transition">+50</button>
-            <button onclick="deleteProduct('${p.id}', '${p.name}')" class="bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white px-2 py-1 rounded text-xs font-bold transition"><i class="fa-solid fa-trash-can"></i> 刪除</button>
-          </td>
-        </tr>`;
-      }).join('');
+      document.getElementById('inventory-list').innerHTML = products.map(p => `
+        <tr class="hover:bg-slate-50 border-b border-slate-100"><td class="p-3 text-center"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-bold">${p.category||'無'}</span></td><td class="p-3 font-bold text-slate-800 text-sm"><div>${p.name} ${p.isCombo?'<span class="text-[10px] text-orange-500 ml-1">(套餐)</span>':''}</div>${p.isCombo?`<div class="text-[10px] text-slate-400 font-normal mt-0.5">內含: ${p.components?.join(', ')}</div>`:''}</td><td class="p-3 text-center font-mono text-blue-600 font-bold">$${p.price}</td><td class="p-3 text-center font-bold ${p.stock < 10 ? 'text-rose-500' : 'text-emerald-600'}">${p.stock}</td><td class="p-3 text-right space-x-1"><button onclick="addStock('${p.id}', 10)" class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-xs font-bold">+10</button><button onclick="deleteProduct('${p.id}', '${p.name}')" class="bg-rose-50 text-rose-600 px-2 py-1 rounded text-xs font-bold"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
     }
-    window.addStock = async (id, amt) => { try { await updateDoc(doc(db, "products", id), { stock: increment(amt) }); } catch(e) {} };
-    
-    // ✨ 新增商品刪除功能
-    window.deleteProduct = async function(id, name) {
-      if(!confirm(`確定要下架並完全刪除【${name}】嗎？\n刪除後前台收銀將無法看見此商品。`)) return;
-      try { await deleteDoc(doc(db, "products", id)); alert("品項已成功下架刪除。"); } catch(e) { alert("刪除失敗"); }
-    };
+    window.addStock = async (id, amt) => { try { await updateDoc(doc(db, "products", id), { stock: increment(amt) }); } catch(e){} };
+    window.deleteProduct = async (id, name) => { if(confirm(`確定刪除 ${name}？`)) try { await deleteDoc(doc(db, "products", id)); } catch(e){} };
 
-    // --- 👥 員工/小組帳號管理 (Admin) ---
+    // --- 員工管理 ---
     window.fetchEmployees = async function() {
-      const list = document.getElementById('employee-list');
       try {
         const snap = await getDocs(collection(db, "accounts"));
-        employees = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        list.innerHTML = employees.map(e => {
-          const isRoot = e.id === 'admin';
-          const delBtn = isRoot ? '<span class="text-xs text-slate-400 font-bold">系統內建保護</span>' : `<button onclick="deleteEmployee('${e.id}', '${e.name}')" class="text-rose-600 hover:bg-rose-500 hover:text-white border border-rose-200 px-3 py-1 rounded-lg text-xs font-bold transition">銷戶移除</button>`;
-          return `<tr class="hover:bg-slate-50 border-b">
-            <td class="p-4 font-mono font-bold text-slate-700">${e.id}</td>
-            <td class="p-4 font-bold text-slate-800">${e.name}</td>
-            <td class="p-4 text-center font-mono font-bold text-slate-500">${e.pin}</td>
-            <td class="p-4 text-center"><span class="px-2 py-1 rounded-full text-xs font-bold ${e.role==='admin'?'bg-orange-100 text-orange-700':'bg-blue-100 text-blue-700'}">${e.role==='admin'?'店長最高權限':'一般收銀員'}</span></td>
-            <td class="p-4 text-right">${delBtn}</td>
-          </tr>`;
+        document.getElementById('employee-list').innerHTML = snap.docs.map(d => {
+          const e = { id: d.id, ...d.data() }; const isRoot = e.id === 'admin';
+          return `<tr class="border-b"><td class="p-3 font-mono font-bold text-sm">${e.id}</td><td class="p-3 font-bold text-sm">${e.name}</td><td class="p-3 text-center font-mono text-slate-500">${e.pin}</td><td class="p-3 text-center text-xs font-bold">${e.role==='admin'?'店長':'收銀'}</td><td class="p-3 text-right">${isRoot?'系統保留':`<button onclick="deleteEmployee('${e.id}')" class="text-rose-600 text-xs font-bold">刪除</button>`}</td></tr>`;
         }).join('');
       } catch(e){}
     };
-
     window.saveEmployee = async function() {
       const u = document.getElementById('emp-username').value.trim(); const n = document.getElementById('emp-name').value.trim(); const p = document.getElementById('emp-pin').value.trim(); const r = document.getElementById('emp-role').value;
-      if(!u || !n || p.length !== 4 || isNaN(p)) return alert("請完整填寫代號、名稱與4位數純數字密碼PIN！");
-      try {
-        await setDoc(doc(db, "accounts", u), { pin: p, name: n, role: r });
-        alert(`員工帳號 [${n}] 配置成功！可用 PIN [${p}] 直接解鎖登入。`);
-        document.getElementById('emp-username').value=''; document.getElementById('emp-name').value=''; document.getElementById('emp-pin').value='';
-        fetchEmployees();
-      } catch(e) { alert("配置失敗"); }
+      if(!u || !n || p.length !== 4) return alert("請填寫完整(密碼需4碼)！");
+      try { await setDoc(doc(db, "accounts", u), { pin: p, name: n, role: r }); alert("儲存成功"); fetchEmployees(); } catch(e){}
     };
+    window.deleteEmployee = async id => { if(confirm("確定刪除員工？")) try { await deleteDoc(doc(db, "accounts", id)); fetchEmployees(); } catch(e){} };
 
-    window.deleteEmployee = async function(id, name) {
-      if(!confirm(`確定要註銷並刪除 [${name}] 的登入權限嗎？`)) return;
-      try { await deleteDoc(doc(db, "accounts", id)); alert("該權限帳號已成功註銷。"); fetchEmployees(); } catch(e){}
-    };
-
-    // --- 📊 營業報表篩選與正序排序 (移至前端處理，完美避開複雜索引) ---
+    // --- 報表與抽屜結算 ---
     window.getFilteredOrders = function() {
-      const startVal = document.getElementById('report-start').value;
-      const endVal = document.getElementById('report-end').value;
-      const validOrders = allOrders.filter(o => o.status !== 'voided'); // 排除作廢
-      
-      if(!startVal || !endVal) {
-        // 如果未選擇時段，預設返回整天資料並按時間【正序排列】(舊到新)
-        return validOrders.sort((a,b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
-      }
-      
-      const startMs = new Date(startVal).getTime();
-      const endMs = new Date(endVal).getTime();
-      
-      return validOrders.filter(o => {
-        if(!o.timestamp) return false;
-        const oMs = o.timestamp.toDate().getTime();
-        return oMs >= startMs && oMs <= endMs;
-      }).sort((a,b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0)); // ✨ 完全按照時間正序排序
+      const s = document.getElementById('report-start').value, e = document.getElementById('report-end').value;
+      const valid = allOrders.filter(o => o.status !== 'voided');
+      if(!s || !e) return valid.sort((a,b) => (a.timestamp?.toMillis()||0) - (b.timestamp?.toMillis()||0));
+      const sm = new Date(s).getTime(), em = new Date(e).getTime();
+      return valid.filter(o => o.timestamp && o.timestamp.toMillis() >= sm && o.timestamp.toMillis() <= em).sort((a,b) => (a.timestamp?.toMillis()||0) - (b.timestamp?.toMillis()||0));
     };
 
     window.generateReports = function() {
-      const filtered = window.getFilteredOrders();
-      const totalRev = filtered.reduce((sum, o) => sum + o.total, 0);
-      document.getElementById('report-revenue').innerText = totalRev;
-      document.getElementById('report-orders').innerText = filtered.length;
-
-      // 渲染報表區間細部流水帳
-      document.getElementById('report-table-rows').innerHTML = filtered.length === 0 ? '<p class="text-slate-400 text-center py-6">此選定區間無有效交易單據</p>' : filtered.map(o => {
-        const time = o.timestamp ? o.timestamp.toDate().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit', second:'2-digit'}) : '剛剛';
-        return `<div class="flex justify-between items-center border border-slate-100 p-3 rounded-xl bg-slate-50 text-sm font-medium">
-          <div class="flex items-center space-x-4">
-            <span class="font-black text-slate-800">#${o.orderNumber}</span>
-            <span class="text-xs font-bold text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${time}</span>
-            <span class="text-xs text-slate-500 bg-slate-200/60 px-2 py-0.5 rounded">人員:${o.operatorId||'未記'}</span>
-            <span class="text-slate-600 truncate max-w-md">${o.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</span>
-          </div>
-          <div class="font-bold text-blue-600">$${o.total}</div>
-        </div>`;
+      const f = window.getFilteredOrders();
+      let cCash = 0, cVoucher = 0;
+      f.forEach(o => { if(o.paymentMethod === 'voucher') cVoucher += o.total; else cCash += o.total; });
+      const startingCash = parseInt(document.getElementById('starting-cash').value) || 0;
+      
+      document.getElementById('report-revenue').innerText = f.reduce((sum, o) => sum + o.total, 0);
+      document.getElementById('report-orders').innerText = f.length;
+      document.getElementById('report-method-cash').innerText = cCash;
+      document.getElementById('report-method-voucher').innerText = cVoucher;
+      document.getElementById('expected-drawer').innerText = startingCash + cCash;
+      
+      document.getElementById('report-table-rows').innerHTML = f.length === 0 ? '<p class="text-slate-400 text-sm">無單據</p>' : f.map(o => {
+        const time = o.timestamp ? o.timestamp.toDate().toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'}) : '';
+        const payStr = o.paymentMethod === 'voucher' ? '🎟️券' : '💵現';
+        return `<div class="flex justify-between items-center border-b border-slate-100 py-2 text-sm"><div class="flex space-x-3"><span class="font-bold text-indigo-600">#${o.orderNumber}</span><span class="text-slate-500 font-bold">${payStr}</span><span class="text-slate-400">${time}</span><span class="text-slate-600 truncate w-48">${o.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</span></div><div class="font-bold text-blue-600">$${o.total}</div></div>`;
       }).join('');
     };
 
-    window.clearReportFilter = function() {
-      document.getElementById('report-start').value = '';
-      document.getElementById('report-end').value = '';
-      generateReports();
-    };
+    window.clearReportFilter = function() { document.getElementById('report-start').value = ''; document.getElementById('report-end').value = ''; generateReports(); };
 
     window.printZReport = function() {
-      const filtered = window.getFilteredOrders();
+      const f = window.getFilteredOrders();
+      let cCash = 0, cVoucher = 0; f.forEach(o => { if(o.paymentMethod === 'voucher') cVoucher += o.total; else cCash += o.total; });
+      const startingCash = parseInt(document.getElementById('starting-cash').value) || 0;
+
       document.getElementById('z-print-time').innerText = new Date().toLocaleString('zh-TW');
       document.getElementById('z-print-operator').innerText = currentUser.name;
-      document.getElementById('z-print-start').innerText = document.getElementById('report-start').value || "當日開關帳起點";
-      document.getElementById('z-print-end').innerText = document.getElementById('report-end').value || "當日開關帳終點";
-      document.getElementById('z-print-revenue').innerText = filtered.reduce((sum, o) => sum + o.total, 0);
-      document.getElementById('z-print-orders').innerText = filtered.length;
-      document.getElementById('z-print-voids').innerText = allOrders.filter(o => o.status === 'voided').length;
+      document.getElementById('z-print-start').innerText = document.getElementById('report-start').value || "當日開帳";
+      document.getElementById('z-print-end').innerText = document.getElementById('report-end').value || "當日結帳";
+      document.getElementById('z-print-starting').innerText = startingCash;
+      document.getElementById('z-print-cash').innerText = cCash;
+      document.getElementById('z-print-drawer').innerText = startingCash + cCash;
+      document.getElementById('z-print-voucher').innerText = cVoucher;
+      document.getElementById('z-print-orders').innerText = f.length;
       window.print();
     };
 
     window.exportCSV = function() {
-      const filtered = window.getFilteredOrders();
-      if(filtered.length === 0) return alert("當前篩選時段內無資料可供匯出！");
-      let csvContent = "data:text/csv;charset=utf-8,\uFEFF單號,結帳精確時間,負責收銀員,原單小計,折讓金額,實收淨利,商品明細\n";
-      filtered.forEach(o => {
-        const t = o.timestamp ? o.timestamp.toDate().toLocaleString('zh-TW') : '';
-        const items = o.items.map(i => `${i.name}x${i.qty}`).join(';');
-        csvContent += `${o.orderNumber},${t},${o.operatorId},${o.subtotal||o.total},${o.discount||0},${o.total},${items}\n`;
+      const f = window.getFilteredOrders(); if(f.length === 0) return alert("無資料");
+      let csv = "data:text/csv;charset=utf-8,\uFEFF單號,時間,人員,支付方式,小計,折讓,總計,明細\n";
+      f.forEach(o => {
+        const payStr = o.paymentMethod === 'voucher' ? '園遊券' : '現金';
+        csv += `${o.orderNumber},${o.timestamp?o.timestamp.toDate().toLocaleString('zh-TW'):''},${o.operatorId},${payStr},${o.subtotal||o.total},${o.discount||0},${o.total},${o.items.map(i=>`${i.name}x${i.qty}${i.note?`(${i.note})`:''}`).join(';')}\n`;
       });
-      const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `時段營運銷貨報表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      const link = document.createElement("a"); link.href = encodeURI(csv); link.download = `營業報表.csv`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
     };
 
-    // --- ⚙️ 設定：✨ 全功能測試資料全部歸零 (保留基本架構) ---
+    // --- 系統設定 (歸零) ---
     window.factoryResetSystem = async function() {
-      if(!confirm("⚠️ 警告：這是一個無法復原的操作！\n您確定要將所有的「交易紀錄」、「叫號暫存」、「流水計數器」全部歸零清空嗎？\n\n這通常只在『測試階段結束、準備正式上線』時才會點擊。")) return;
-      
-      const btn = document.getElementById('btn-factory-reset');
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>正在全雲端執行歸零抹除中...`;
-      btn.disabled = true;
-
+      if(!confirm("⚠️ 警告：將清空所有訂單、叫號與單號紀錄，確定嗎？")) return;
+      document.getElementById('btn-factory-reset').innerText = "歸零中...";
       try {
-        // 1. 清空 orders 集合
-        const ordersSnap = await getDocs(collection(db, "orders"));
-        const batch1 = writeBatch(db);
-        ordersSnap.forEach(d => batch1.delete(d.ref));
-        await batch1.commit();
-
-        // 2. 清空 active_sessions 暫存
-        const sessionSnap = await getDocs(collection(db, "active_sessions"));
-        const batch2 = writeBatch(db);
-        sessionSnap.forEach(d => batch2.delete(d.ref));
-        await batch2.commit();
-
-        // 3. 計數器歸零
+        const oSnap = await getDocs(collection(db, "orders")); const b1 = writeBatch(db); oSnap.forEach(d => b1.delete(d.ref)); await b1.commit();
+        const sSnap = await getDocs(collection(db, "active_sessions")); const b2 = writeBatch(db); sSnap.forEach(d => b2.delete(d.ref)); await b2.commit();
         await setDoc(doc(db, "counters", "daily_order"), { count: 0 });
-
-        alert("✅ 資料庫測試數據已全數歸零！系統現已處於純淨狀態，隨時可投入正式營業。");
-        location.reload();
-      } catch(e) {
-        alert("歸零失敗，請檢查權限或雲端網路連線！");
-      } finally {
-        btn.innerHTML = `<i class="fa-solid fa-dumpster-fire mr-2"></i> 清空測試資料・全部歸零`;
-        btn.disabled = false;
-      }
+        alert("資料已歸零！"); location.reload();
+      } catch(e) { alert("歸零失敗"); document.getElementById('btn-factory-reset').innerHTML = `<i class="fa-solid fa-dumpster-fire mr-2"></i>清空測試資料`; }
     };
   </script>
 </body>
