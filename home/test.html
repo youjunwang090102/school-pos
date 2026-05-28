@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>204班 旗艦超商收銀系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { touch-action: none; user-select: none; -webkit-user-select: none; overflow: hidden; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .terminal-text { text-shadow: 0 0 5px rgba(52, 211, 153, 0.5); }
+    @media print {
+      body * { visibility: hidden; }
+      #print-z-report, #print-z-report * { visibility: visible; }
+      #print-z-report { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 20px; font-family: monospace; font-size: 14px; background: white; color: black; }
+    }
+  </style>
+</head>
+<body class="bg-slate-200 h-screen w-screen flex flex-col font-sans text-slate-800">
+
+  <div id="login-modal" class="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300">
+    <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl w-[360px] text-center flex flex-col items-center border border-slate-700">
+      <div class="w-20 h-20 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mb-4"><i class="fa-solid fa-fingerprint text-4xl"></i></div>
+      <h2 class="text-2xl font-black mb-1 text-white tracking-widest">系統解鎖</h2>
+      <p class="text-slate-400 mb-6 font-medium text-xs">店長:0000 | 收銀:1234</p>
+      <div class="w-full bg-slate-900 border-2 border-slate-700 rounded-xl p-4 mb-6 flex justify-center items-center h-16 shadow-inner"><div id="login-pin-display" class="text-4xl font-black tracking-[0.5em] text-emerald-400 flex space-x-2 terminal-text"></div></div>
+      <input type="hidden" id="login-pin-value">
+      <div class="grid grid-cols-3 gap-3 w-full mb-6">
+        <button onclick="loginNumpad(1)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">1</button>
+        <button onclick="loginNumpad(2)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">2</button>
+        <button onclick="loginNumpad(3)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">3</button>
+        <button onclick="loginNumpad(4)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">4</button>
+        <button onclick="loginNumpad(5)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">5</button>
+        <button onclick="loginNumpad(6)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">6</button>
+        <button onclick="loginNumpad(7)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">7</button>
+        <button onclick="loginNumpad(8)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">8</button>
+        <button onclick="loginNumpad(9)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">9</button>
+        <button onclick="loginClear()" class="bg-rose-500/20 text-rose-400 rounded-xl py-4 text-xl font-bold">C</button>
+        <button onclick="loginNumpad(0)" class="bg-slate-700 text-white rounded-xl py-4 text-2xl font-bold active:scale-95 transition">0</button>
+        <button onclick="loginBackspace()" class="bg-slate-600 text-slate-300 rounded-xl py-4 text-xl font-bold active:scale-95 transition"><i class="fa-solid fa-delete-left"></i></button>
+      </div>
+      <button onclick="performLogin()" id="login-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xl py-4 rounded-xl shadow-lg">登入系統</button>
+    </div>
+  </div>
+
+  <div id="discount-modal" class="fixed inset-0 z-[55] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-[360px] text-center">
+      <h2 class="text-2xl font-black mb-4 text-slate-800">全單折讓金額</h2>
+      <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-4 mb-6 text-3xl font-black text-rose-500">- $<span id="discount-input-display">0</span></div>
+      <input type="hidden" id="discount-input-value" value="0">
+      <div class="grid grid-cols-3 gap-3 w-full mb-6">
+        <button onclick="discNumpad(1)" class="bg-slate-100 py-4 text-2xl font-bold">1</button>
+        <button onclick="discNumpad(2)" class="bg-slate-100 py-4 text-2xl font-bold">2</button>
+        <button onclick="discNumpad(3)" class="bg-slate-100 py-4 text-2xl font-bold">3</button>
+        <button onclick="discNumpad(4)" class="bg-slate-100 py-4 text-2xl font-bold">4</button>
+        <button onclick="discNumpad(5)" class="bg-slate-100 py-4 text-2xl font-bold">5</button>
+        <button onclick="discNumpad(6)" class="bg-slate-100 py-4 text-2xl font-bold">6</button>
+        <button onclick="discNumpad(7)" class="bg-slate-100 py-4 text-2xl font-bold">7</button>
+        <button onclick="discNumpad(8)" class="bg-slate-100 py-4 text-2xl font-bold">8</button>
+        <button onclick="discNumpad(9)" class="bg-slate-100 py-4 text-2xl font-bold">9</button>
+        <button onclick="discClear()" class="bg-slate-200 rounded-xl py-4 text-xl font-bold">C</button>
+        <button onclick="discNumpad(0)" class="bg-slate-100 py-4 text-2xl font-bold">0</button>
+        <button onclick="discBackspace()" class="bg-slate-200 py-4 text-xl font-bold"><i class="fa-solid fa-delete-left"></i></button>
+      </div>
+      <div class="flex space-x-3">
+        <button onclick="closeDiscountModal()" class="flex-1 bg-slate-200 font-bold py-4 rounded-xl">取消</button>
+        <button onclick="applyDiscount()" class="flex-1 bg-rose-500 text-white font-bold py-4 rounded-xl shadow-lg">確認折讓</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="hold-modal" class="fixed inset-0 z-[55] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-[480px] max-h-[80vh] flex flex-col">
+      <div class="flex justify-between items-center mb-6 border-b pb-2">
+        <h2 class="text-2xl font-black text-slate-800"><i class="fa-solid fa-pause text-orange-500 mr-2"></i>待結帳掛單清單</h2>
+        <button onclick="closeHoldModal()" class="text-slate-400 hover:text-slate-600 text-2xl"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="hold-list" class="flex-1 overflow-y-auto no-scrollbar space-y-3">
+        </div>
+    </div>
+  </div>
+
+  <header class="bg-slate-950 text-white h-16 flex justify-between items-center px-6 shrink-0 shadow-lg z-30">
+    <div class="flex items-baseline space-x-3">
+      <h1 class="text-xl font-black tracking-widest text-emerald-400"><i class="fa-solid fa-cash-register mr-3"></i>204園遊會 收銀終端</h1>
+      <span class="text-xs text-slate-400 font-bold tracking-widest uppercase border border-slate-600 px-2 py-0.5 rounded">Designed By 王宥鈞</span>
+    </div>
+    <div class="flex items-center space-x-6">
+      <div id="live-clock" class="text-slate-300 font-mono text-lg font-bold tracking-widest hidden md:block"></div>
+      <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 cursor-pointer hover:bg-slate-700 transition" onclick="location.reload()" title="登出">
+        <i class="fa-solid fa-circle-user text-blue-400 text-lg"></i>
+        <span id="current-user-display" class="font-bold text-sm tracking-wider">未登入</span>
+        <span id="role-badge" class="ml-2 text-[10px] font-bold px-1.5 rounded bg-slate-600 text-slate-300"></span>
+      </div>
+    </div>
+  </header>
+
+  <div class="flex-1 flex overflow-hidden relative">
+    
+    <section class="w-3/5 md:w-2/3 flex flex-col border-r border-slate-300 bg-slate-100 z-10 transition-transform duration-300" id="main-left-pane">
+      
+      <div class="bg-white px-6 py-4 border-b border-slate-300 flex items-center space-x-3 shadow-sm z-10 shrink-0">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-barcode absolute left-4 top-3.5 text-slate-400 text-lg"></i>
+          <input type="text" id="search-input" onkeyup="filterProducts(event)" placeholder="輸入關鍵字... (若只剩單一結果按 Enter 快速加入)" class="w-full bg-slate-100 border-2 border-slate-200 rounded-xl py-3 pl-12 pr-4 font-bold outline-none focus:border-blue-500 focus:bg-white transition text-lg">
+        </div>
+      </div>
+      
+      <div class="flex-1 overflow-y-auto no-scrollbar p-5 bg-slate-100/50">
+        <div id="product-grid" class="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-10 content-start"></div>
+      </div>
+    </section>
+
+    <aside class="w-2/5 md:w-1/3 flex flex-col bg-slate-900 z-10 shadow-2xl relative" id="main-right-pane">
+      
+      <div id="checkout-success-overlay" class="absolute inset-0 bg-emerald-500 z-50 flex flex-col items-center justify-center hidden">
+        <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-xl"><i class="fa-solid fa-check text-4xl text-emerald-500"></i></div>
+        <h2 class="text-3xl font-black text-white mb-2 tracking-widest">結帳成功</h2>
+        <div class="bg-white p-6 rounded-3xl text-center w-56 shadow-2xl mb-8 mt-4">
+          <p class="text-slate-400 font-bold mb-1 text-sm">取餐單號</p>
+          <div class="text-6xl font-black text-slate-800 tracking-tighter">#<span id="success-order-no">000</span></div>
+        </div>
+        <button onclick="nextOrder()" class="bg-slate-900 hover:bg-black text-white font-black text-lg py-4 px-12 rounded-2xl shadow-xl active:scale-95 transition">下一單 (Enter)</button>
+      </div>
+
+      <div class="flex-1 flex flex-col border-b border-slate-700 overflow-hidden relative bg-slate-900">
+        <div class="bg-slate-950 p-3 border-b border-slate-800 flex justify-between items-center shrink-0">
+          <h3 class="font-black text-emerald-400 tracking-widest"><i class="fa-solid fa-terminal mr-2"></i>POS 終端機</h3>
+          <div class="space-x-2 flex">
+            <button onclick="holdOrder()" class="text-orange-400 font-bold bg-orange-500/10 hover:bg-orange-500/20 px-3 py-1 rounded-md text-xs border border-orange-500/30 transition">掛單</button>
+            <button onclick="openHoldModal()" class="text-orange-400 font-bold bg-orange-500/10 hover:bg-orange-500/20 px-3 py-1 rounded-md text-xs border border-orange-500/30 transition relative">
+              叫回 <span id="hold-badge" class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+            </button>
+          </div>
+        </div>
+        
+        <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2 bg-slate-900 text-emerald-400 font-mono text-sm"></div>
+        
+        <div class="p-4 bg-slate-950 border-t border-slate-800 z-10 shrink-0">
+          <div id="discount-row" class="flex justify-between items-end hidden text-rose-400 mb-2">
+            <span class="font-bold text-xs uppercase">Discount</span><span class="text-base font-bold">- $<span id="display-discount-amount">0</span></span>
+          </div>
+          <div class="flex justify-between items-end mb-2">
+            <span class="text-slate-500 font-bold text-xs uppercase">Total Due</span><span class="text-4xl font-black text-emerald-400 tracking-tighter terminal-text">NT$ <span id="total-ui">0</span></span>
+          </div>
+          <div class="flex space-x-2 mt-4">
+            <button onclick="setPaymentMethod('cash')" id="pay-cash" class="flex-1 bg-emerald-600 text-white py-2 rounded font-bold text-xs transition shadow-sm border border-emerald-700">💵 現金 (預設)</button>
+            <button onclick="setPaymentMethod('voucher')" id="pay-voucher" class="flex-1 bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700 py-2 rounded font-bold text-xs transition">🎟️ 園遊券</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="h-80 shrink-0 bg-slate-800 flex flex-col p-3 border-t-4 border-slate-950">
+        <div class="flex justify-between items-center mb-3 px-2">
+          <div><span class="text-xs text-slate-400 font-bold block uppercase">Received</span><span class="text-2xl font-black text-white tracking-widest">$<span id="display-received">0</span></span></div>
+          <div class="text-right"><span class="text-xs text-slate-400 font-bold block uppercase">Change</span><span class="text-2xl font-black text-rose-400 terminal-text" id="change-amount">$0</span></div>
+        </div>
+        <input type="hidden" id="received-amount">
+        
+        <div class="grid grid-cols-4 gap-2 flex-1 mb-3">
+          <button onclick="numpadInput(1)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">1</button>
+          <button onclick="numpadInput(2)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">2</button>
+          <button onclick="numpadInput(3)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">3</button>
+          <button onclick="setReceived(100)" class="bg-blue-600/20 text-blue-400 rounded-lg font-bold text-lg active:scale-95 shadow-md border-b-4 border-blue-900 active:border-b-0 active:translate-y-1 transition-all">100</button>
+          
+          <button onclick="numpadInput(4)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">4</button>
+          <button onclick="numpadInput(5)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">5</button>
+          <button onclick="numpadInput(6)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">6</button>
+          <button onclick="setReceived(500)" class="bg-blue-600/20 text-blue-400 rounded-lg font-bold text-lg active:scale-95 shadow-md border-b-4 border-blue-900 active:border-b-0 active:translate-y-1 transition-all">500</button>
+          
+          <button onclick="numpadInput(7)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">7</button>
+          <button onclick="numpadInput(8)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">8</button>
+          <button onclick="numpadInput(9)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">9</button>
+          <button onclick="setReceived(1000)" class="bg-blue-600/20 text-blue-400 rounded-lg font-bold text-lg active:scale-95 shadow-md border-b-4 border-blue-900 active:border-b-0 active:translate-y-1 transition-all">1000</button>
+          
+          <button onclick="numpadClear()" class="bg-rose-600/20 text-rose-500 rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-rose-900 active:border-b-0 active:translate-y-1 transition-all">C</button>
+          <button onclick="numpadInput(0)" class="bg-slate-700 text-white rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">0</button>
+          <button onclick="numpadBackspace()" class="bg-slate-600 text-slate-400 rounded-lg font-black text-xl active:scale-95 shadow-md border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all"><i class="fa-solid fa-delete-left"></i></button>
+          <button onclick="setExactAmount()" class="bg-emerald-600/20 text-emerald-400 rounded-lg font-bold text-sm active:scale-95 shadow-md border-b-4 border-emerald-900 active:border-b-0 active:translate-y-1 transition-all">剛好</button>
+        </div>
+        
+        <div class="flex space-x-2">
+          <button onclick="clearCart()" class="w-16 bg-slate-700 text-rose-400 font-bold rounded-xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition"><i class="fa-solid fa-trash-can"></i></button>
+          <button onclick="openDiscountModal()" class="w-16 bg-slate-700 text-blue-400 font-bold rounded-xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition"><i class="fa-solid fa-tag"></i></button>
+          <button onclick="checkout()" id="checkout-btn" class="flex-1 bg-emerald-500 text-white font-black text-xl py-3 rounded-xl shadow-md border-b-4 border-emerald-700 active:border-b-0 active:translate-y-1 disabled:bg-slate-600 disabled:border-slate-800 disabled:text-slate-400 transition tracking-widest">
+            結帳 (Enter)
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script type="module">
+    import { db, doc, setDoc, onSnapshot, collection, serverTimestamp } from './firebase-config.js';
+    import { writeBatch, increment, getDoc, getDocs, runTransaction, query, orderBy, limit, updateDoc, where, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+    let currentUser = null; let products = []; let cart = []; let heldOrders = [];
+    let subtotal = 0; let total = 0; let customDiscountAmount = 0; 
+    let currentPaymentMethod = 'cash'; 
+
+    // 時鐘
+    setInterval(() => { const el = document.getElementById('live-clock'); if(el) el.innerText = new Date().toLocaleTimeString('en-US', {hour12:false}); }, 1000);
+
+    // --- 實體鍵盤綁定 (Keyboard Shortcuts) ---
+    document.addEventListener('keydown', function(event) {
+      // 確保沒有打開 Modal，且游標不在輸入框內
+      if(document.querySelector('.fixed:not(.hidden)') && event.key !== 'Enter') return; 
+      if(document.activeElement.tagName === 'INPUT' && document.activeElement.id !== 'search-input') return;
+
+      const isSearchFocused = document.activeElement.id === 'search-input';
+
+      if (event.key >= '0' && event.key <= '9' && !isSearchFocused) {
+        numpadInput(event.key);
+      } else if (event.key === 'Backspace' && !isSearchFocused) {
+        numpadBackspace();
+      } else if (event.key === 'Escape') {
+        numpadClear();
+      } else if (event.key === 'Enter') {
+        // 如果結帳成功畫面開啟中，Enter = 下一單
+        if(!document.getElementById('checkout-success-overlay').classList.contains('hidden')) {
+          nextOrder();
+        } 
+        // 如果在搜尋框，且結果只有一個，Enter = 加入購物車
+        else if (isSearchFocused) {
+          const q = document.getElementById('search-input').value.toLowerCase();
+          const filtered = products.filter(p => p.name.toLowerCase().includes(q));
+          if (filtered.length === 1 && filtered[0].stock > 0) {
+            addToCart(filtered[0].id);
+            document.getElementById('search-input').value = '';
+            filterProducts();
+          }
+        } 
+        // 否則 Enter = 結帳
+        else if(total > 0 && !document.getElementById('checkout-btn').disabled) {
+          checkout();
+        }
+      }
+    });
+
+    // --- 登入系統 ---
+    const pinField = document.getElementById('login-pin-value');
+    window.loginNumpad = n => { if(pinField.value.length < 4) { pinField.value += n; updPin(); } };
+    window.loginBackspace = () => { pinField.value = pinField.value.slice(0, -1); updPin(); };
+    window.loginClear = () => { pinField.value = ''; updPin(); };
+    const updPin = () => document.getElementById('login-pin-display').innerHTML = Array(pinField.value.length).fill('<i class="fa-solid fa-asterisk text-2xl mx-1 text-emerald-400"></i>').join('') || '<span class="text-slate-600 text-lg">PIN</span>';
+
+    window.performLogin = async function() {
+      const pin = pinField.value; if(!pin) return;
+      try {
+        const accRef = collection(db, "accounts");
+        const adminDoc = await getDoc(doc(accRef, "admin")); if (!adminDoc.exists()) await setDoc(doc(accRef, "admin"), { pin: "0000", name: "總店長", role: "admin" });
+        const cashierDoc = await getDoc(doc(accRef, "cashier1")); if (!cashierDoc.exists()) await setDoc(doc(accRef, "cashier1"), { pin: "1234", name: "收銀員", role: "cashier" });
+        const match = await getDocs(query(accRef, where("pin", "==", pin)));
+        if (!match.empty) {
+          currentUser = { id: match.docs[0].id, ...match.docs[0].data() }; 
+          document.getElementById('current-user-display').innerText = currentUser.name;
+          document.getElementById('role-badge').innerText = currentUser.role === 'admin' ? '店長' : '收銀';
+          document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
+          initPOS();
+        } else { alert("PIN 碼錯誤！"); loginClear(); }
+      } catch (e) { alert("連線失敗"); }
+    };
+
+    function initPOS() {
+      onSnapshot(collection(db, "products"), (snap) => { products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); filterProducts(); });
+    }
+
+    // --- 商品渲染與條碼快搜 ---
+    window.filterProducts = function(e) {
+      const q = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase() : '';
+      const filtered = products.filter(p => p.name.toLowerCase().includes(q));
+      
+      document.getElementById('product-grid').innerHTML = filtered.map(p => {
+        const isSoldOut = p.stock <= 0; const opacity = isSoldOut ? 'opacity-50 grayscale' : 'cursor-pointer hover:shadow-lg active:scale-95 transition-transform';
+        const catBadge = p.category ? `<span class="absolute top-2 left-2 text-[10px] font-bold text-white ${p.isCombo ? 'bg-orange-500' : 'bg-slate-500'} px-2 py-0.5 rounded shadow-sm">${p.category}</span>` : '';
+        if (p.isCombo) {
+          return `<div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="relative bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 flex flex-col justify-center shadow-sm ${opacity} col-span-2 aspect-[2/1] overflow-hidden">${catBadge}${isSoldOut ? '<div class="absolute inset-0 bg-slate-900/50 z-10 flex items-center justify-center"><span class="bg-slate-800 text-white px-3 py-1 rounded-full font-bold">售完</span></div>' : ''}<h3 class="font-black text-orange-900 text-xl mt-3 truncate px-1">${p.name}</h3><span class="absolute bottom-3 right-4 font-black text-orange-600 text-2xl">$${p.price}</span></div>`;
+        } else {
+          return `<div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="relative bg-white border-2 border-slate-200 rounded-2xl p-3 flex flex-col justify-center items-center text-center shadow-sm ${opacity} aspect-square overflow-hidden">${catBadge}${isSoldOut ? '<div class="absolute inset-0 bg-slate-900/50 z-10 flex items-center justify-center"><span class="bg-slate-800 text-white px-2 py-1 rounded-full text-xs font-bold">售完</span></div>' : ''}<h3 class="font-bold text-slate-700 text-lg w-full truncate px-1 mt-4">${p.name}</h3><span class="absolute bottom-2 right-3 font-black text-blue-600 text-lg">$${p.price}</span></div>`;
+        }
+      }).join('');
+    };
+
+    // --- ✨ 掛單與叫回系統 (Hold & Resume Order) ---
+    window.holdOrder = function() {
+      if(cart.length === 0) return alert("購物車是空的，無法掛單！");
+      heldOrders.push({ cart: [...cart], discount: customDiscountAmount, time: new Date().toLocaleTimeString() });
+      cart = []; customDiscountAmount = 0; document.getElementById('received-amount').value = ''; 
+      updateCartUI(); updateHoldBadge();
+    };
+
+    window.openHoldModal = function() {
+      if(heldOrders.length === 0) return alert("目前沒有暫存的掛單！");
+      const list = document.getElementById('hold-list');
+      list.innerHTML = heldOrders.map((h, index) => `
+        <div class="border border-slate-200 p-4 rounded-xl flex justify-between items-center bg-slate-50">
+          <div><span class="font-bold text-orange-600 mr-2">掛單 #${index+1}</span><span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${h.time}</span><div class="text-sm font-bold text-slate-600 mt-1">${h.cart.map(i=>`${i.name}x${i.qty}`).join(', ')}</div></div>
+          <button onclick="resumeOrder(${index})" class="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold shadow-md hover:bg-orange-600 transition">叫回</button>
+        </div>
+      `).join('');
+      document.getElementById('hold-modal').classList.remove('hidden');
+    };
+    
+    window.closeHoldModal = () => document.getElementById('hold-modal').classList.add('hidden');
+
+    window.resumeOrder = function(index) {
+      if(cart.length > 0) {
+        if(!confirm("目前購物車已有商品，叫回掛單將會覆蓋當前商品。確定要繼續嗎？")) return;
+      }
+      const h = heldOrders.splice(index, 1)[0];
+      cart = h.cart; customDiscountAmount = h.discount; document.getElementById('received-amount').value = '';
+      updateCartUI(); updateHoldBadge(); closeHoldModal();
+    };
+
+    function updateHoldBadge() {
+      const badge = document.getElementById('hold-badge');
+      if(heldOrders.length > 0) { badge.innerText = heldOrders.length; badge.classList.remove('hidden'); } 
+      else { badge.classList.add('hidden'); }
+    }
+
+    // --- 終端機購物車 ---
+    window.setPaymentMethod = function(method) {
+      currentPaymentMethod = method;
+      ['cash', 'voucher'].forEach(m => {
+        const btn = document.getElementById(`pay-${m}`);
+        if(m === method) btn.className = "flex-1 bg-emerald-600 text-white py-2 rounded font-bold text-xs shadow-sm border border-emerald-700";
+        else btn.className = "flex-1 bg-slate-800 text-slate-400 border border-slate-700 py-2 rounded font-bold text-xs";
+      });
+    };
+
+    window.addToCart = id => { const p = products.find(p => p.id === id); const ex = cart.find(i => i.id === id); if ((ex ? ex.qty : 0) >= p.stock) return; if (ex) ex.qty += 1; else cart.push({ ...p, qty: 1 }); updateCartUI(); };
+    window.removeCartItem = index => { cart.splice(index, 1); updateCartUI(); };
+    window.clearCart = () => { cart = []; customDiscountAmount = 0; document.getElementById('received-amount').value = ''; updateCartUI(); };
+
+    // 折扣與金額計算
+    window.openDiscountModal = () => { if(cart.length>0) document.getElementById('discount-modal').classList.remove('hidden'); };
+    window.closeDiscountModal = () => document.getElementById('discount-modal').classList.add('hidden');
+    const dF = document.getElementById('discount-input-value'); const dD = document.getElementById('discount-input-display');
+    window.discNumpad = n => { dF.value = dF.value === '0' ? n : dF.value + n; dD.innerText = dF.value; };
+    window.discBackspace = () => { dF.value = dF.value.slice(0, -1) || '0'; dD.innerText = dF.value; };
+    window.discClear = () => { dF.value = '0'; dD.innerText = '0'; };
+    window.applyDiscount = () => { customDiscountAmount = parseInt(dF.value) || 0; closeDiscountModal(); updateCartUI(); };
+
+    async function updateCartUI() {
+      subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      if(customDiscountAmount > subtotal) customDiscountAmount = subtotal; total = subtotal - customDiscountAmount;
+      
+      const dRow = document.getElementById('discount-row'); dRow.classList.toggle('hidden', customDiscountAmount <= 0);
+      document.getElementById('display-discount-amount').innerText = customDiscountAmount;
+      document.getElementById('total-ui').innerText = total;
+      
+      document.getElementById('cart-ui').innerHTML = cart.length === 0 ? `<div class="h-full flex flex-col items-center justify-center text-slate-700 border-2 border-dashed border-slate-700 rounded-xl m-2"><i class="fa-solid fa-barcode text-3xl mb-2"></i><p class="font-bold text-xs uppercase">Scan Item or Tap</p></div>` 
+        : cart.map((item, index) => `<div class="flex justify-between items-center border-b border-slate-800 pb-2 mb-2 group">
+            <div class="flex items-center w-full"><button onclick="removeCartItem(${index})" class="text-slate-600 hover:text-rose-500 mr-2"><i class="fa-solid fa-xmark"></i></button>
+            <span class="flex-1 truncate">${item.name} <span class="text-slate-500 ml-1">x${item.qty}</span></span></div>
+            <span class="font-bold terminal-text">$${item.price * item.qty}</span>
+          </div>`).join('');
+      calculateChange();
+    }
+
+    // 收銀鍵盤
+    const iF = document.getElementById('received-amount'); const dR = document.getElementById('display-received'); const dC = document.getElementById('change-amount');
+    window.numpadInput = num => { iF.value = iF.value === '0' ? num : iF.value + num; calculateChange(); };
+    window.setReceived = amt => { iF.value = amt; calculateChange(); }; window.setExactAmount = () => { if(total>0) setReceived(total); };
+    window.numpadBackspace = () => { iF.value = iF.value.slice(0, -1); calculateChange(); }; window.numpadClear = () => { iF.value = ''; calculateChange(); };
+    
+    function calculateChange() {
+      const r = parseInt(iF.value) || 0; dR.innerText = `${r}`; const b = document.getElementById('checkout-btn');
+      if (cart.length === 0) { dC.innerText = '$0'; dC.className = 'text-2xl font-black text-slate-600'; b.disabled = true; return; }
+      if (iF.value === '') { dC.innerText = '$0'; dC.className = 'text-2xl font-black text-slate-600'; b.disabled = false; }
+      else if (r >= total) { dC.innerText = '$' + (r - total); dC.className = 'text-2xl font-black text-rose-400 terminal-text'; b.disabled = false; }
+      else { dC.innerText = '不足'; dC.className = 'text-2xl font-black text-rose-600'; b.disabled = true; }
+    }
+
+    window.checkout = async function() {
+      if (cart.length === 0) return; const r = parseInt(iF.value) || total; const c = r - total;
+      document.getElementById('checkout-btn').disabled = true;
+      try {
+        const orderNoNum = await runTransaction(db, async t => {
+          const cd = await t.get(doc(db, "counters", "daily_order"));
+          let nc = cd.exists() ? cd.data().count + 1 : 1;
+          t.set(doc(db, "counters", "daily_order"), { count: nc }, { merge: true }); return nc;
+        });
+        const orderNo = String(orderNoNum).padStart(3, '0');
+        const batch = writeBatch(db);
+        batch.set(doc(collection(db, "orders")), { orderNumber: orderNo, items: cart, subtotal, discount: customDiscountAmount, total, received: r, change: c, operatorId: currentUser.name, status: "pending", timestamp: serverTimestamp(), paymentMethod: currentPaymentMethod });
+        cart.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) }));
+        await batch.commit();
+        document.getElementById('checkout-success-overlay').classList.remove('hidden');
+        document.getElementById('success-order-no').innerText = orderNo;
+      } catch (e) { alert("結帳失敗！"); document.getElementById('checkout-btn').disabled = false; }
+    };
+
+    window.nextOrder = function() {
+      cart = []; total = 0; customDiscountAmount = 0; iF.value = ''; updateCartUI();
+      document.getElementById('checkout-success-overlay').classList.add('hidden');
+      document.getElementById('checkout-btn').disabled = false;
+      setPaymentMethod('cash');
+    };
+  </script>
+</body>
+</html>
