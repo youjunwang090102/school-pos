@@ -76,7 +76,7 @@
 
   <div id="product-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
     <div class="bg-white p-8 rounded-[2rem] shadow-2xl w-[460px] max-h-[90vh] flex flex-col">
-      <h2 class="text-2xl font-black mb-4 text-slate-800 border-b pb-2">商品 / 套餐上架系統</h2>
+      <h2 class="text-2xl font-black mb-4 text-slate-800 border-b pb-2">商品 / 套餐上架</h2>
       <div class="space-y-4 mb-6 flex-1 overflow-y-auto pr-2 no-scrollbar">
         <div><label class="text-sm font-bold text-slate-500">品項類型</label>
           <select id="new-prod-type" onchange="toggleComboSelection()" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold bg-slate-50">
@@ -87,7 +87,7 @@
         <div><label class="text-sm font-bold text-slate-500">名稱</label><input type="text" id="new-prod-name" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold" placeholder="例：超值雙拼雙人套餐"></div>
         <div class="flex space-x-4">
           <div class="flex-1"><label class="text-sm font-bold text-slate-500">套餐組合/單品定價</label><input type="number" id="new-prod-price" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold" placeholder="$"></div>
-          <div class="flex-1"><label class="text-sm font-bold text-slate-500">初始可售庫存</label><input type="number" id="new-prod-stock" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold" placeholder="數量"></div>
+          <div class="flex-1"><label class="text-sm font-bold text-slate-500">可售庫存</label><input type="number" id="new-prod-stock" class="w-full border-2 border-slate-200 rounded-lg p-3 font-bold" placeholder="數量"></div>
         </div>
         <div id="combo-items-section" class="hidden border border-slate-200 p-4 rounded-xl bg-slate-50">
           <label class="text-sm font-bold text-slate-700 block mb-2"><i class="fa-solid fa-list-check mr-1 text-orange-500"></i>勾選套餐內含的單品：</label>
@@ -142,7 +142,7 @@
 
     <div id="view-inventory" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
       <div class="p-6 border-b border-slate-200 shrink-0 bg-slate-50 flex justify-between items-center">
-        <h2 class="text-2xl font-black text-orange-600 tracking-wider"><i class="fa-solid fa-boxes-stacked mr-2"></i>菜單與進銷存管理</h2>
+        <h2 class="text-2xl font-black text-orange-600 tracking-wider"><i class="fa-solid fa-boxes-stacked mr-2"></i>進銷存管理</h2>
         <button onclick="openProductModal()" class="bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-lg font-bold shadow-md transition"><i class="fa-solid fa-plus mr-2"></i>上架新品 / 套餐</button>
       </div>
       <div class="flex-1 p-6 overflow-y-auto no-scrollbar">
@@ -159,7 +159,7 @@
 
     <div id="view-employees" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
       <div class="p-6 border-b border-slate-200 shrink-0 bg-slate-50">
-        <h2 class="text-2xl font-black text-purple-600 tracking-wider"><i class="fa-solid fa-users mr-2"></i>輪班小組與員工管理</h2>
+        <h2 class="text-2xl font-black text-purple-600 tracking-wider"><i class="fa-solid fa-users mr-2"></i>輪班小組管理</h2>
       </div>
       <div class="flex-1 p-6 flex flex-col lg:flex-row gap-6 overflow-hidden">
         <div class="w-full lg:w-80 bg-slate-50 border border-slate-200 p-6 rounded-2xl shrink-0 h-fit">
@@ -192,7 +192,7 @@
       <div class="p-6 border-b border-slate-200 shrink-0 flex flex-col md:flex-row md:items-center justify-between bg-white gap-4 shadow-sm z-10">
         <div>
           <h2 class="text-2xl font-black text-emerald-600 tracking-wider"><i class="fa-solid fa-chart-pie mr-2"></i>多功能營業時段報表</h2>
-          <p class="text-xs text-slate-400 font-bold mt-1">預設加總整天資料，您可自由指定特定班別時段進行拆帳</p>
+          <p class="text-xs text-slate-400 font-bold mt-1">預設加總整天資料，可自由指定特定班別時段進行拆帳</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-xl border">
@@ -228,10 +228,10 @@
       <div class="p-6 border-b border-slate-200 shrink-0 bg-white"><h2 class="text-2xl font-black text-slate-800 tracking-wider"><i class="fa-solid fa-gear mr-2"></i>系統重置與歸零中心</h2></div>
       <div class="flex-1 p-8 space-y-6">
         <div class="max-w-2xl bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-          <h3 class="text-xl font-bold text-rose-600 mb-2 border-b pb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>終極測試資料清空 (全部歸零)</h3>
-          <p class="text-slate-500 mb-6 text-sm">此動作將正式刪除雲端上所有的【歷史訂單紀錄】、【叫號暫存】、【單號計數器】，將系統徹底還原至開展前的純淨狀態。<strong>（商品菜單與員工帳號將予以保留，不會被刪除）</strong></p>
+          <h3 class="text-xl font-bold text-rose-600 mb-2 border-b pb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>系統重置</h3>
+          <p class="text-slate-500 mb-6 text-sm">此動作將刪除雲端上所有的【歷史訂單紀錄】、【叫號暫存】、【單號計數器】，將系統還原。<strong>（商品菜單與員工帳號將予以保留，不會被刪除）</strong></p>
           <button onclick="factoryResetSystem()" id="btn-factory-reset" class="bg-rose-600 hover:bg-rose-700 text-white font-black py-4 px-8 rounded-xl shadow-lg active:scale-95 transition">
-            <i class="fa-solid fa-dumpster-fire mr-2"></i> 清空測試資料・全部歸零
+            <i class="fa-solid fa-dumpster-fire mr-2"></i> 清空資料・全部歸零
           </button>
         </div>
       </div>
@@ -455,7 +455,7 @@
       document.getElementById('checkout-success-overlay').classList.add('hidden');
     };
 
-    // --- 📄 歷史單據退單回滾 ---
+    // --- 歷史單據退單回滾 ---
     window.fetchHistory = async function() {
       const list = document.getElementById('history-list'); list.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-spinner fa-spin text-3xl"></i></div>`;
       try {
@@ -485,7 +485,7 @@
       } catch(e) { alert("作廢失敗"); }
     };
 
-    // --- 📦 進銷存與套餐組合上架 ---
+    // --- 進銷存與套餐組合上架 ---
     window.openProductModal = () => document.getElementById('product-modal').classList.remove('hidden');
     window.closeProductModal = () => { document.getElementById('product-modal').classList.add('hidden'); document.getElementById('new-prod-name').value=''; document.getElementById('new-prod-price').value=''; document.getElementById('new-prod-stock').value=''; };
     
@@ -544,13 +544,13 @@
     }
     window.addStock = async (id, amt) => { try { await updateDoc(doc(db, "products", id), { stock: increment(amt) }); } catch(e) {} };
     
-    // ✨ 新增商品刪除功能
+    // 新增商品刪除功能
     window.deleteProduct = async function(id, name) {
       if(!confirm(`確定要下架並完全刪除【${name}】嗎？\n刪除後前台收銀將無法看見此商品。`)) return;
       try { await deleteDoc(doc(db, "products", id)); alert("品項已成功下架刪除。"); } catch(e) { alert("刪除失敗"); }
     };
 
-    // --- 👥 員工/小組帳號管理 (Admin) ---
+    // --- 員工/小組帳號管理 (Admin) ---
     window.fetchEmployees = async function() {
       const list = document.getElementById('employee-list');
       try {
@@ -586,7 +586,7 @@
       try { await deleteDoc(doc(db, "accounts", id)); alert("該權限帳號已成功註銷。"); fetchEmployees(); } catch(e){}
     };
 
-    // --- 📊 營業報表篩選與正序排序 (移至前端處理，完美避開複雜索引) ---
+    // --- 營業報表篩選與正序排序 (移至前端處理，完美避開複雜索引) ---
     window.getFilteredOrders = function() {
       const startVal = document.getElementById('report-start').value;
       const endVal = document.getElementById('report-end').value;
@@ -604,7 +604,7 @@
         if(!o.timestamp) return false;
         const oMs = o.timestamp.toDate().getTime();
         return oMs >= startMs && oMs <= endMs;
-      }).sort((a,b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0)); // ✨ 完全按照時間正序排序
+      }).sort((a,b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0)); // 完全按照時間正序排序
     };
 
     window.generateReports = function() {
@@ -658,9 +658,9 @@
       const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `時段營運銷貨報表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
     };
 
-    // --- ⚙️ 設定：✨ 全功能測試資料全部歸零 (保留基本架構) ---
+    // --- 設定：全功能測試資料全部歸零 (保留基本架構) ---
     window.factoryResetSystem = async function() {
-      if(!confirm("⚠️ 警告：這是一個無法復原的操作！\n您確定要將所有的「交易紀錄」、「叫號暫存」、「流水計數器」全部歸零清空嗎？\n\n這通常只在『測試階段結束、準備正式上線』時才會點擊。")) return;
+      if(!confirm("警告：這是一個無法復原的操作！\n您確定要將所有的「交易紀錄」、「叫號暫存」、「流水計數器」全部歸零清空嗎？\n\n這通常只在『測試階段結束、準備正式上線』時才會點擊。")) return;
       
       const btn = document.getElementById('btn-factory-reset');
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>正在全雲端執行歸零抹除中...`;
@@ -682,7 +682,7 @@
         // 3. 計數器歸零
         await setDoc(doc(db, "counters", "daily_order"), { count: 0 });
 
-        alert("✅ 資料庫測試數據已全數歸零！系統現已處於純淨狀態，隨時可投入正式營業。");
+        alert("資料庫測試數據已全數歸零！系統現已處於純淨狀態，隨時可投入正式營業。");
         location.reload();
       } catch(e) {
         alert("歸零失敗，請檢查權限或雲端網路連線！");
