@@ -279,55 +279,58 @@
       <button onclick="nextOrder()" class="bg-slate-900 text-white font-black text-lg py-4 w-[80%] rounded-xl shadow-xl active:scale-95 transition">下一單 (Next)</button>
     </div>
 
-    <div class="bg-slate-900 text-white flex justify-between items-center p-4 shrink-0 shadow-md">
-      <span class="font-black text-lg tracking-widest"><i class="fa-solid fa-cart-shopping mr-2"></i>購物明細</span>
-      <button onclick="toggleCart()" class="text-slate-300 hover:text-white px-2 py-1 active:scale-95 transition"><i class="fa-solid fa-chevron-down text-xl"></i></button>
+    <div class="bg-slate-900 text-white flex justify-between items-center p-3 shrink-0 shadow-md">
+      <span class="font-black text-base tracking-widest"><i class="fa-solid fa-cart-shopping mr-2"></i>購物明細</span>
+      <button onclick="toggleCart()" class="text-slate-300 hover:text-white px-2 active:scale-95 transition"><i class="fa-solid fa-chevron-down text-xl"></i></button>
     </div>
 
-    <div class="flex-1 flex flex-col min-h-0 bg-white m-3 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
+    <div class="flex-1 flex flex-col min-h-0 bg-white m-2 mb-0 rounded-t-xl shadow-sm border border-b-0 border-slate-200 relative overflow-hidden">
       <div class="absolute -top-3 left-0 right-0 h-4 receipt-edge"></div>
-      <div class="p-3 border-b-2 border-dashed border-slate-300 flex justify-end items-center bg-white z-10 pt-5 space-x-2 shrink-0">
-        <button onclick="openDiscountModal()" class="text-slate-500 border border-slate-300 font-bold px-3 py-1 rounded text-xs active:scale-95 transition"><i class="fa-solid fa-tag mr-1"></i>折扣</button>
-        <button onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-3 py-1 rounded text-xs active:scale-95 transition">清空</button>
+      <div class="px-3 py-2 border-b border-dashed border-slate-300 flex justify-end items-center bg-white z-10 pt-3 space-x-2 shrink-0">
+        <button onclick="openDiscountModal()" class="text-slate-500 border border-slate-300 font-bold px-2 py-0.5 rounded text-xs active:scale-95 transition"><i class="fa-solid fa-tag mr-1"></i>折扣</button>
+        <button onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded text-xs active:scale-95 transition">清空</button>
       </div>
       
-      <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-3 bg-white z-10 min-h-0"></div>
+      <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2 bg-white z-10 min-h-0"></div>
       
-      <div class="p-4 bg-white border-t-2 border-dashed border-slate-300 z-10 space-y-2 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
+      <div class="p-3 bg-white border-t border-dashed border-slate-300 z-10 space-y-1 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
         <div id="discount-row" class="flex justify-between items-end hidden text-rose-500">
-          <span class="font-bold text-sm">折讓扣除</span><span class="text-lg font-bold">- $<span id="display-discount-amount">0</span></span>
+          <span class="font-bold text-xs">折讓扣除</span><span class="text-base font-bold">- $<span id="display-discount-amount">0</span></span>
         </div>
         <div class="flex justify-between items-end">
-          <span class="text-slate-500 font-bold text-sm">應付總額</span><span class="text-3xl font-black text-blue-600 tracking-tighter">NT$ <span id="total-ui">0</span></span>
+          <span class="text-slate-500 font-bold text-xs">應付總額</span><span class="text-2xl font-black text-blue-600 tracking-tighter">NT$ <span id="total-ui">0</span></span>
         </div>
       </div>
     </div>
 
-    <div class="bg-slate-800 text-white p-3 shrink-0">
-      <div class="bg-slate-900 rounded-lg flex justify-between items-center p-2 mb-2 border border-slate-700">
-        <span class="font-bold text-slate-400 text-xs">實收 <span id="display-received" class="text-white ml-2 text-lg">$0</span></span>
-        <div class="text-right"><span class="text-[10px] text-slate-500 block mb-[-4px]">找零</span><span class="text-xl font-black text-emerald-400" id="change-amount">$0</span></div>
+    <div class="bg-slate-800 text-white p-2 shrink-0">
+      <div class="bg-slate-900 rounded-lg flex justify-between items-center p-1.5 px-3 mb-2 border border-slate-700">
+        <span class="font-bold text-slate-400 text-xs">實收 <span id="display-received" class="text-white ml-1 text-base">$0</span></span>
+        <div class="text-right flex items-center space-x-2">
+           <span class="text-[10px] text-slate-500">找零</span>
+           <span class="text-lg font-black text-emerald-400" id="change-amount">$0</span>
+        </div>
       </div>
       <input type="hidden" id="received-amount">
-      <div class="grid grid-cols-4 gap-1.5 mb-3">
-        <button onclick="numpadInput(1)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">1</button>
-        <button onclick="numpadInput(2)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">2</button>
-        <button onclick="numpadInput(3)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">3</button>
-        <button onclick="setReceived(100)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold active:scale-95 transition">$100</button>
-        <button onclick="numpadInput(4)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">4</button>
-        <button onclick="numpadInput(5)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">5</button>
-        <button onclick="numpadInput(6)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">6</button>
-        <button onclick="setReceived(500)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold active:scale-95 transition">$500</button>
-        <button onclick="numpadInput(7)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">7</button>
-        <button onclick="numpadInput(8)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">8</button>
-        <button onclick="numpadInput(9)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">9</button>
-        <button onclick="setReceived(1000)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold active:scale-95 transition">$1k</button>
-        <button onclick="numpadClear()" class="bg-rose-500/20 text-rose-400 rounded-md py-3 text-lg font-bold active:scale-95 transition">C</button>
-        <button onclick="numpadInput(0)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">0</button>
-        <button onclick="numpadBackspace()" class="bg-slate-600 rounded-md py-3 text-lg font-bold active:scale-95 transition"><i class="fa-solid fa-delete-left"></i></button>
-        <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-500/20 text-emerald-400 rounded-md py-3 text-sm font-bold active:scale-95 transition">剛好</button>
+      <div class="grid grid-cols-4 gap-1 mb-2">
+        <button onclick="numpadInput(1)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">1</button>
+        <button onclick="numpadInput(2)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">2</button>
+        <button onclick="numpadInput(3)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">3</button>
+        <button onclick="setReceived(100)" class="bg-blue-600/30 text-blue-400 rounded-md py-2 text-xs font-bold active:scale-95 transition">$100</button>
+        <button onclick="numpadInput(4)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">4</button>
+        <button onclick="numpadInput(5)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">5</button>
+        <button onclick="numpadInput(6)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">6</button>
+        <button onclick="setReceived(500)" class="bg-blue-600/30 text-blue-400 rounded-md py-2 text-xs font-bold active:scale-95 transition">$500</button>
+        <button onclick="numpadInput(7)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">7</button>
+        <button onclick="numpadInput(8)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">8</button>
+        <button onclick="numpadInput(9)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">9</button>
+        <button onclick="setReceived(1000)" class="bg-blue-600/30 text-blue-400 rounded-md py-2 text-xs font-bold active:scale-95 transition">$1k</button>
+        <button onclick="numpadClear()" class="bg-rose-500/20 text-rose-400 rounded-md py-2 text-base font-bold active:scale-95 transition">C</button>
+        <button onclick="numpadInput(0)" class="bg-slate-700 rounded-md py-2 text-base font-bold active:scale-95 transition">0</button>
+        <button onclick="numpadBackspace()" class="bg-slate-600 rounded-md py-2 text-base font-bold active:scale-95 transition"><i class="fa-solid fa-delete-left"></i></button>
+        <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-500/20 text-emerald-400 rounded-md py-2 text-xs font-bold active:scale-95 transition">剛好</button>
       </div>
-      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl text-xl font-black shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-95 transition">收款結帳</button>
+      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-2.5 rounded-lg text-lg font-black shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-95 transition">收款結帳</button>
     </div>
   </aside>
 
@@ -531,8 +534,8 @@
       const badge = document.getElementById('cart-badge');
       if (badge) badge.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
       
-      document.getElementById('cart-ui').innerHTML = cart.length === 0 ? `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-receipt text-4xl mb-3 opacity-50"></i><p class="font-bold tracking-widest text-sm">尚未點餐</p></div>` 
-        : cart.map(item => `<div class="flex flex-col border-b border-slate-100 pb-2 mb-2 relative"><button onclick="removeCartItem('${item.id}')" class="absolute right-0 top-0 text-slate-300 hover:text-rose-500 transition py-1 px-2"><i class="fa-solid fa-trash-can"></i></button><div class="flex justify-between font-bold text-slate-700 text-sm mb-1 pr-8"><span>${item.name}</span><span>$${item.price * item.qty}</span></div><div class="text-[10px] text-slate-400 mb-2">${item.isCombo ? `組合：${item.components?.join(', ')}` : '單品'}</div><div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border"><button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 bg-white rounded font-bold text-slate-600 active:bg-slate-200 transition">-</button><span class="w-4 text-center font-bold text-slate-800 text-xs">${item.qty}</span><button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 bg-slate-200 rounded font-bold text-slate-700 active:bg-slate-300 transition">+</button></div></div>`).join('');
+      document.getElementById('cart-ui').innerHTML = cart.length === 0 ? `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-receipt text-3xl mb-2 opacity-50"></i><p class="font-bold tracking-widest text-xs">尚未點餐</p></div>` 
+        : cart.map(item => `<div class="flex flex-col border-b border-slate-100 pb-2 mb-2 relative"><button onclick="removeCartItem('${item.id}')" class="absolute right-0 top-0 text-slate-300 hover:text-rose-500 transition py-0.5 px-2"><i class="fa-solid fa-trash-can"></i></button><div class="flex justify-between font-bold text-slate-700 text-sm mb-0.5 pr-8"><span>${item.name}</span><span>$${item.price * item.qty}</span></div><div class="text-[10px] text-slate-400 mb-1.5">${item.isCombo ? `組合：${item.components?.join(', ')}` : '單品'}</div><div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border"><button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 bg-white rounded font-bold text-slate-600 active:bg-slate-200 transition">-</button><span class="w-4 text-center font-bold text-slate-800 text-xs">${item.qty}</span><button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 bg-slate-200 rounded font-bold text-slate-700 active:bg-slate-300 transition">+</button></div></div>`).join('');
       calculateChange();
       try { await setDoc(doc(db, "active_sessions", "station_1"), { cartItems: cart, totalAmount: total, status: "ordering" }); } catch(e){}
     }
@@ -544,9 +547,9 @@
     function calculateChange() {
       const r = parseInt(iF.value) || 0; dR.innerText = `$${r}`; const d = document.getElementById('change-amount'), b = document.getElementById('checkout-btn');
       if (cart.length === 0) { d.innerText = '$0'; b.disabled = true; return; }
-      if (iF.value === '') { d.innerText = '$0'; d.className = 'text-xl font-black text-slate-500'; b.disabled = false; }
-      else if (r >= total) { d.innerText = '$' + (r - total); d.className = 'text-xl font-black text-emerald-400'; b.disabled = false; }
-      else { d.innerText = '不足'; d.className = 'text-xl font-black text-rose-400'; b.disabled = true; }
+      if (iF.value === '') { d.innerText = '$0'; d.className = 'text-lg font-black text-slate-500'; b.disabled = false; }
+      else if (r >= total) { d.innerText = '$' + (r - total); d.className = 'text-lg font-black text-emerald-400'; b.disabled = false; }
+      else { d.innerText = '不足'; d.className = 'text-lg font-black text-rose-400'; b.disabled = true; }
     }
 
     window.checkout = async function() {
@@ -795,7 +798,7 @@
       
       const link = document.createElement("a"); 
       link.setAttribute("href", encodeURI(csvContent)); 
-      link.setAttribute("download", `進階營運銷貨報表.csv`); 
+      link.setAttribute("download", `營運銷貨報表.csv`); 
       document.body.appendChild(link); 
       link.click(); 
       document.body.removeChild(link);
