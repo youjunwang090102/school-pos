@@ -3,9 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ClassPOS - 支援自助點餐</title>
+  <title>ClassPOS - 支援自助點餐與掃碼結帳</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
   <style>
     body { user-select: none; -webkit-user-select: none; overflow: hidden; -webkit-tap-highlight-color: transparent; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -20,6 +24,11 @@
     }
     .badge-bump { animation: badgeBump 0.3s ease-out; }
 
+    /* 覆寫 html5-qrcode 預設樣式使其更美觀 */
+    #reader button { background-color: #4f46e5; color: white; padding: 8px 16px; border-radius: 8px; font-weight: bold; margin-bottom: 10px; border: none; cursor: pointer; }
+    #reader select { padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 10px; font-weight: bold; }
+    #reader a { display: none; }
+
     @media print {
       body * { visibility: hidden; }
       #print-z-report, #print-z-report * { visibility: visible; }
@@ -29,7 +38,6 @@
 </head>
 <body class="bg-slate-100 h-[100dvh] w-screen flex flex-col font-sans text-slate-800">
 
-  <!-- 共用頂部標頭 -->
   <header class="bg-slate-900 w-full h-14 flex items-center justify-between px-4 shrink-0 shadow-md relative z-30">
     <div class="flex items-center text-white">
       <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-2 shadow-inner">
@@ -40,19 +48,16 @@
     <div class="flex items-center space-x-3">
       <div id="role-badge" class="hidden"></div>
       
-      <!-- 自助點餐模式解鎖按鈕 (預設隱藏) -->
       <button id="exit-customer-btn" onclick="exitCustomerMode()" class="hidden w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-95">
         <i class="fa-solid fa-lock"></i>
       </button>
       
-      <!-- 正常系統登出按鈕 -->
       <button id="power-btn" onclick="location.reload()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-rose-400 flex items-center justify-center transition active:scale-95">
         <i class="fa-solid fa-power-off"></i>
       </button>
     </div>
   </header>
 
-  <!-- 登入視窗 -->
   <div id="login-modal" class="fixed inset-0 z-[80] bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300">
     <div class="bg-white p-6 rounded-[2rem] shadow-2xl w-[90%] max-w-[360px] text-center flex flex-col items-center">
       <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-inner"><i class="fa-solid fa-fingerprint text-3xl"></i></div>
@@ -80,12 +85,18 @@
       </div>
       <button onclick="performLogin()" id="login-btn" class="w-full bg-blue-600 text-white font-black text-xl py-4 rounded-xl shadow-lg active:scale-95 transition mb-3">解鎖系統</button>
       
-      <!-- 顧客自助點餐入口 -->
       <button onclick="enterCustomerMode()" class="text-slate-400 font-bold text-sm active:text-blue-600 transition p-2">切換至顧客自助點餐模式</button>
     </div>
   </div>
 
-  <!-- 折扣視窗 -->
+  <div id="scan-modal" class="fixed inset-0 z-[90] bg-slate-900/95 backdrop-blur-sm flex flex-col items-center justify-center hidden">
+    <div class="bg-white p-4 rounded-[2rem] shadow-2xl w-[90%] max-w-[400px] flex flex-col items-center">
+      <h2 class="text-xl font-black mb-4 text-slate-800"><i class="fa-solid fa-qrcode mr-2"></i>掃描顧客訂單條碼</h2>
+      <div id="reader" class="w-full h-auto min-h-[250px] bg-slate-50 rounded-xl overflow-hidden border-2 border-slate-200 p-2"></div>
+      <button onclick="closeScanner()" class="mt-6 w-full bg-slate-200 text-slate-700 font-bold py-3.5 rounded-xl active:scale-95 transition">取消掃描</button>
+    </div>
+  </div>
+
   <div id="discount-modal" class="fixed inset-0 z-[70] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
     <div class="bg-white p-6 rounded-[2rem] shadow-2xl w-[90%] max-w-[360px] text-center">
       <h2 class="text-xl font-black mb-4 text-slate-800">自訂金額折讓</h2>
@@ -112,7 +123,6 @@
     </div>
   </div>
 
-  <!-- 商品上架視窗 -->
   <div id="product-modal" class="fixed inset-0 z-[70] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center hidden">
     <div class="bg-white p-6 rounded-[2rem] shadow-2xl w-[90%] max-w-[400px] max-h-[90vh] flex flex-col">
       <h2 class="text-xl font-black mb-4 text-slate-800 border-b pb-2">商品 / 套餐上架</h2>
@@ -142,7 +152,6 @@
 
   <main class="flex-1 bg-slate-100 flex relative overflow-hidden w-full">
     
-    <!-- 點餐面板 -->
     <div id="view-pos" class="w-full h-full flex flex-col absolute inset-0 transition-opacity duration-300 bg-slate-50">
       <div class="bg-white px-4 py-3 border-b border-slate-200 shadow-sm z-10 shrink-0">
         <div class="relative w-full">
@@ -153,7 +162,6 @@
       <div class="p-4 overflow-y-auto no-scrollbar flex-1 pb-24 relative min-h-0">
         <div id="product-grid" class="grid grid-cols-2 gap-3"></div>
       </div>
-      <!-- 購物車浮動按鈕 -->
       <div class="absolute bottom-6 right-6 z-20">
         <button id="cart-btn-floating" onclick="toggleCart()" class="w-14 h-14 bg-blue-600 rounded-full text-white shadow-xl flex items-center justify-center relative active:scale-95 transition">
           <i class="fa-solid fa-cart-shopping text-xl"></i>
@@ -162,18 +170,19 @@
       </div>
     </div>
 
-    <!-- 歷史單據 -->
     <div id="view-history" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
       <div class="p-4 border-b border-slate-200 shrink-0 flex justify-between items-center bg-slate-50">
         <h2 class="text-xl font-black text-slate-800 tracking-wider">今日銷售明細</h2>
-        <button onclick="fetchHistory()" class="bg-blue-100 text-blue-600 px-3 py-1.5 text-sm rounded-lg font-bold active:scale-95 transition"><i class="fa-solid fa-rotate-right"></i></button>
+        <div class="flex space-x-2">
+          <button onclick="openScanner()" class="bg-indigo-600 text-white px-3 py-1.5 text-sm rounded-lg font-bold active:scale-95 transition shadow-sm"><i class="fa-solid fa-qrcode mr-1"></i>掃碼結帳</button>
+          <button onclick="fetchHistory()" class="bg-blue-100 text-blue-600 px-3 py-1.5 text-sm rounded-lg font-bold active:scale-95 transition"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
       </div>
       <div class="flex-1 p-4 overflow-y-auto no-scrollbar pb-12 min-h-0">
         <div id="history-list" class="w-full space-y-3"></div>
       </div>
     </div>
 
-    <!-- 進銷存 -->
     <div id="view-inventory" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
       <div class="p-4 border-b border-slate-200 shrink-0 bg-slate-50 flex justify-between items-center">
         <h2 class="text-xl font-black text-orange-600 tracking-wider"><i class="fa-solid fa-boxes-stacked mr-2"></i>進銷存</h2>
@@ -193,7 +202,6 @@
       </div>
     </div>
 
-    <!-- 員工管理 -->
     <div id="view-employees" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
       <div class="p-4 border-b border-slate-200 shrink-0 bg-slate-50">
         <h2 class="text-xl font-black text-purple-600 tracking-wider"><i class="fa-solid fa-users mr-2"></i>小組與員工管理</h2>
@@ -228,7 +236,6 @@
       </div>
     </div>
 
-    <!-- 報表 -->
     <div id="view-reports" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-slate-50">
       <div class="p-4 border-b border-slate-200 shrink-0 flex flex-col bg-white gap-3 shadow-sm z-10">
         <div>
@@ -272,7 +279,6 @@
       </div>
     </div>
 
-    <!-- 設定 -->
     <div id="view-settings" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-slate-50">
       <div class="p-4 border-b border-slate-200 shrink-0 bg-white"><h2 class="text-xl font-black text-slate-800 tracking-wider"><i class="fa-solid fa-gear mr-2"></i>系統設定</h2></div>
       <div class="flex-1 p-4 overflow-y-auto no-scrollbar min-h-0">
@@ -287,21 +293,23 @@
     </div>
   </main>
 
-  <!-- 購物車結帳抽屜 (由下往上滑動) -->
   <aside id="checkout-sidebar" class="fixed inset-0 z-[50] bg-slate-50 flex flex-col transition-transform duration-300 translate-y-full pb-safe">
     
     <div id="checkout-success-overlay" class="absolute inset-0 bg-emerald-600 z-[60] flex flex-col items-center justify-center hidden">
-      <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-xl"><i class="fa-solid fa-check text-4xl text-emerald-500"></i></div>
+      <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-3 shadow-xl"><i class="fa-solid fa-check text-3xl text-emerald-500"></i></div>
       <h2 id="success-title" class="text-2xl font-black text-white mb-2">結帳成功</h2>
-      <p id="success-subtitle" class="text-emerald-100 font-bold mb-6 text-sm">請將號碼牌交給顧客</p>
-      <div class="bg-white p-5 rounded-3xl text-center w-56 shadow-2xl mb-8">
+      <p id="success-subtitle" class="text-emerald-100 font-bold mb-4 text-sm">請將號碼牌交給顧客</p>
+      
+      <div class="bg-white p-5 rounded-3xl text-center w-64 shadow-2xl mb-6 flex flex-col items-center">
         <p class="text-slate-400 font-bold mb-1 text-xs">取餐單號</p>
-        <div class="text-6xl font-black text-slate-800 tracking-tighter">#<span id="success-order-no">000</span></div>
+        <div class="text-6xl font-black text-slate-800 tracking-tighter mb-4">#<span id="success-order-no">000</span></div>
+        <div id="qrcode-container" class="bg-white p-2 rounded-lg border-2 border-dashed border-slate-200 flex justify-center items-center w-32 h-32 mb-3"></div>
+        <p id="success-screenshot-hint" class="text-rose-500 font-black text-sm animate-pulse hidden"><i class="fa-solid fa-camera mr-1"></i>請務必截圖此畫面</p>
       </div>
+
       <button onclick="nextOrder()" class="bg-slate-900 text-white font-black text-lg py-4 w-[80%] rounded-xl shadow-xl active:scale-95 transition">下一單 (Next)</button>
     </div>
 
-    <!-- 頂部標題區 -->
     <div class="bg-slate-900 text-white flex justify-between items-center p-3 shrink-0 shadow-md">
       <span class="font-black text-base tracking-widest"><i class="fa-solid fa-cart-shopping mr-2"></i>購物明細</span>
       <button onclick="toggleCart()" class="text-slate-300 hover:text-white px-2 active:scale-95 transition"><i class="fa-solid fa-chevron-down text-xl"></i></button>
@@ -314,10 +322,8 @@
         <button id="clear-cart-btn" onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded text-xs active:scale-95 transition">清空</button>
       </div>
       
-      <!-- 購物車清單列表 -->
       <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2 bg-white z-10 min-h-0"></div>
       
-      <!-- 金額總計區 -->
       <div class="p-3 bg-white border-t border-dashed border-slate-300 z-10 space-y-1 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
         <div id="discount-row" class="flex justify-between items-end hidden text-rose-500">
           <span class="font-bold text-xs">折讓扣除</span><span class="text-base font-bold">- $<span id="display-discount-amount">0</span></span>
@@ -328,10 +334,8 @@
       </div>
     </div>
 
-    <!-- 數字鍵盤與結帳區 -->
     <div class="bg-slate-800 text-white p-2 shrink-0">
       
-      <!-- 收銀專屬數字鍵盤 (自助模式時隱藏) -->
       <div id="cash-numpad-area">
         <div class="bg-slate-900 rounded-lg flex justify-between items-center p-1.5 px-3 mb-2 border border-slate-700">
           <span class="font-bold text-slate-400 text-xs">實收 <span id="display-received" class="text-white ml-1 text-base">$0</span></span>
@@ -365,7 +369,6 @@
     </div>
   </aside>
 
-  <!-- 底部導覽列 -->
   <nav id="bottom-nav" class="w-full bg-white border-t border-slate-200 flex flex-row overflow-x-auto no-scrollbar shadow-[0_-4px_10px_rgba(0,0,0,0.03)] z-20 shrink-0 h-[64px] pb-safe">
     <button onclick="switchTab('pos')" id="nav-pos" class="nav-btn flex-1 min-w-[64px] h-full flex flex-col items-center justify-center text-blue-600 transition active:bg-slate-50">
       <i class="fa-solid fa-border-all text-xl mb-1"></i><span class="text-[10px] font-bold">點餐</span>
@@ -402,6 +405,38 @@
     let pendingOrderId = null; 
     let pendingOrderNo = null;
 
+    // --- HTML5 QR Code Scanner 邏輯 ---
+    let html5QrcodeScanner;
+    
+    window.openScanner = () => {
+      document.getElementById('scan-modal').classList.remove('hidden');
+      html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", 
+        { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, 
+        false
+      );
+      html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    };
+
+    window.closeScanner = () => {
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().catch(error => { console.error("Scanner clear error", error); });
+      }
+      document.getElementById('scan-modal').classList.add('hidden');
+    };
+
+    function onScanSuccess(decodedText, decodedResult) {
+      // 掃描成功，尋找對應單號且狀態為 unpaid 的訂單
+      const order = allOrders.find(o => o.orderNumber === decodedText && o.status === 'unpaid');
+      if (order) {
+        closeScanner();
+        resumePayment(order.id); // 直接帶入結帳畫面
+      } else {
+        alert(`找不到單號為 #${decodedText} 的待付款訂單！可能已結帳或單號錯誤。`);
+      }
+    }
+    function onScanFailure(error) { /* handle silently */ }
+
     // --- 顧客自助點餐模式切換邏輯 ---
     window.enterCustomerMode = function() {
       isCustomerMode = true;
@@ -411,7 +446,6 @@
       document.getElementById('bottom-nav').classList.add('hidden');
       document.getElementById('power-btn').classList.add('hidden');
       document.getElementById('role-badge').classList.add('hidden');
-      document.getElementById('discount-btn').classList.add('hidden'); 
       document.getElementById('exit-customer-btn').classList.remove('hidden');
       
       document.getElementById('cash-numpad-area').classList.add('hidden');
@@ -599,9 +633,9 @@
       
       const isPending = pendingOrderId !== null;
 
-      // 當處理「待付款」訂單時，鎖定部分 UI 功能
+      // 當處理「待付款」訂單時，鎖定部分折扣輸入 (但自助點餐模式本身開放折扣)
       const discBtn = document.getElementById('discount-btn');
-      if(discBtn) discBtn.classList.toggle('hidden', isPending || isCustomerMode); 
+      if(discBtn) discBtn.classList.toggle('hidden', isPending); 
       
       const clearBtn = document.getElementById('clear-cart-btn');
       if(clearBtn) {
@@ -663,7 +697,7 @@
       document.getElementById('checkout-btn').disabled = true;
       try {
         if (pendingOrderId) {
-            // 店員載入自助點餐，進行後續付款結帳 (不重複扣減商品庫存)
+            // 店員載入自助點餐，進行後續付款結帳 (不重複扣減庫存)
             const batch = writeBatch(db);
             batch.update(doc(db, "orders", pendingOrderId), {
                 status: "pending",
@@ -678,6 +712,9 @@
             document.getElementById('success-title').innerText = "結帳收款成功";
             document.getElementById('success-subtitle').innerText = "請將單據與找零交給顧客";
             document.getElementById('success-order-no').innerText = pendingOrderNo;
+            document.getElementById('success-screenshot-hint').classList.add('hidden');
+            document.getElementById('qrcode-container').innerHTML = ''; // 清除 QR Code
+            
             document.getElementById('checkout-success-overlay').classList.remove('hidden');
         } else {
             // 正常結帳 / 顧客自助送出訂單
@@ -694,12 +731,27 @@
             batch.set(doc(db, "active_sessions", "station_1"), { cartItems: [], totalAmount: 0, status: "completed", change: c, orderNumber: orderNo });
             await batch.commit();
             
+            // 處理完成畫面的 UI 與 QR Code 生成
+            document.getElementById('qrcode-container').innerHTML = '';
+            
             if (isCustomerMode) {
               document.getElementById('success-title').innerText = "訂單已送出";
-              document.getElementById('success-subtitle').innerText = "請憑單號至櫃檯付款取餐";
+              document.getElementById('success-subtitle').innerText = "請憑單號或出示條碼至櫃檯付款";
+              document.getElementById('success-screenshot-hint').classList.remove('hidden');
+              
+              // 產生 QRCode (內容為純單號)
+              new QRCode(document.getElementById('qrcode-container'), {
+                  text: orderNo,
+                  width: 112,
+                  height: 112,
+                  colorDark : "#0f172a",
+                  colorLight : "#ffffff",
+                  correctLevel : QRCode.CorrectLevel.M
+              });
             } else {
               document.getElementById('success-title').innerText = "結帳成功";
               document.getElementById('success-subtitle').innerText = "請將號碼牌交給顧客";
+              document.getElementById('success-screenshot-hint').classList.add('hidden');
             }
 
             document.getElementById('checkout-success-overlay').classList.remove('hidden');
@@ -713,7 +765,7 @@
 
     window.nextOrder = function() {
       cart = []; total = 0; customDiscountAmount = 0; iF.value = ''; 
-      pendingOrderId = null; pendingOrderNo = null; // 清除結帳鎖定狀態
+      pendingOrderId = null; pendingOrderNo = null; 
       updateCartUI();
       document.getElementById('checkout-success-overlay').classList.add('hidden');
       document.getElementById('checkout-sidebar').classList.add('translate-y-full');
@@ -728,7 +780,6 @@
       const order = allOrders.find(o => o.id === id);
       if(!order) return;
       
-      // 深度拷貝訂單內容，進入結帳鎖定模式
       cart = JSON.parse(JSON.stringify(order.items)); 
       customDiscountAmount = order.discount || 0;
       pendingOrderId = id;
