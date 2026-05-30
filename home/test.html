@@ -11,6 +11,15 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .receipt-edge { background-image: radial-gradient(circle at 10px 0, transparent 10px, white 11px); background-size: 20px 20px; background-repeat: repeat-x; }
     #admin-menu:not(.hidden) { display: flex; }
+    
+    /* 購物車動畫按鈕縮放 */
+    @keyframes badgeBump {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.4); }
+      100% { transform: scale(1); }
+    }
+    .badge-bump { animation: badgeBump 0.3s ease-out; }
+
     @media print {
       body * { visibility: hidden; }
       #print-z-report, #print-z-report * { visibility: visible; }
@@ -70,18 +79,18 @@
       <div class="bg-slate-50 border-2 border-slate-200 rounded-xl p-3 mb-4 text-3xl font-black text-rose-500">- $<span id="discount-input-display">0</span></div>
       <input type="hidden" id="discount-input-value" value="0">
       <div class="grid grid-cols-3 gap-2 w-full mb-6">
-        <button onclick="discNumpad(1)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">1</button>
-        <button onclick="discNumpad(2)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">2</button>
-        <button onclick="discNumpad(3)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">3</button>
-        <button onclick="discNumpad(4)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">4</button>
-        <button onclick="discNumpad(5)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">5</button>
-        <button onclick="discNumpad(6)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">6</button>
-        <button onclick="discNumpad(7)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">7</button>
-        <button onclick="discNumpad(8)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">8</button>
-        <button onclick="discNumpad(9)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">9</button>
-        <button onclick="discClear()" class="bg-slate-200 rounded-xl py-3 text-lg font-bold">C</button>
-        <button onclick="discNumpad(0)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold">0</button>
-        <button onclick="discBackspace()" class="bg-slate-200 py-3 rounded-xl text-lg font-bold"><i class="fa-solid fa-delete-left"></i></button>
+        <button onclick="discNumpad(1)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">1</button>
+        <button onclick="discNumpad(2)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">2</button>
+        <button onclick="discNumpad(3)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">3</button>
+        <button onclick="discNumpad(4)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">4</button>
+        <button onclick="discNumpad(5)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">5</button>
+        <button onclick="discNumpad(6)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">6</button>
+        <button onclick="discNumpad(7)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">7</button>
+        <button onclick="discNumpad(8)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">8</button>
+        <button onclick="discNumpad(9)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">9</button>
+        <button onclick="discClear()" class="bg-slate-200 rounded-xl py-3 text-lg font-bold active:scale-95 transition">C</button>
+        <button onclick="discNumpad(0)" class="bg-slate-100 py-3 rounded-xl text-xl font-bold active:scale-95 transition">0</button>
+        <button onclick="discBackspace()" class="bg-slate-200 py-3 rounded-xl text-lg font-bold active:scale-95 transition"><i class="fa-solid fa-delete-left"></i></button>
       </div>
       <div class="flex space-x-3">
         <button onclick="closeDiscountModal()" class="flex-1 bg-slate-200 font-bold py-3 rounded-xl">取消</button>
@@ -111,8 +120,8 @@
         </div>
       </div>
       <div class="flex space-x-3 shrink-0">
-        <button onclick="closeProductModal()" class="flex-1 bg-slate-200 font-bold py-3 rounded-xl text-sm">取消</button>
-        <button onclick="saveNewProduct()" class="flex-1 bg-orange-500 text-white font-bold py-3 rounded-xl shadow-lg text-sm">確認上架</button>
+        <button onclick="closeProductModal()" class="flex-1 bg-slate-200 font-bold py-3 rounded-xl text-sm active:scale-95 transition">取消</button>
+        <button onclick="saveNewProduct()" class="flex-1 bg-orange-500 text-white font-bold py-3 rounded-xl shadow-lg text-sm active:scale-95 transition">確認上架</button>
       </div>
     </div>
   </div>
@@ -126,13 +135,13 @@
           <input type="text" id="search-input" onkeyup="filterProducts()" placeholder="搜尋單品、套餐關鍵字..." class="w-full bg-slate-100 border border-slate-200 rounded-full py-2 pl-12 pr-4 font-bold outline-none text-sm">
         </div>
       </div>
-      <div class="p-4 overflow-y-auto no-scrollbar flex-1 pb-24">
+      <div class="p-4 overflow-y-auto no-scrollbar flex-1 pb-24 relative">
         <div id="product-grid" class="grid grid-cols-2 gap-3"></div>
       </div>
       <div class="absolute bottom-6 right-6 z-10">
-        <button onclick="toggleCart()" class="w-14 h-14 bg-blue-600 rounded-full text-white shadow-xl flex items-center justify-center relative active:scale-95 transition">
+        <button id="cart-btn-floating" onclick="toggleCart()" class="w-14 h-14 bg-blue-600 rounded-full text-white shadow-xl flex items-center justify-center relative active:scale-95 transition">
           <i class="fa-solid fa-cart-shopping text-xl"></i>
-          <span id="cart-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-slate-50">0</span>
+          <span id="cart-badge" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-slate-50 transition-transform">0</span>
         </button>
       </div>
     </div>
@@ -168,14 +177,15 @@
 
     <div id="view-employees" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-white">
       <div class="p-4 border-b border-slate-200 shrink-0 bg-slate-50">
-        <h2 class="text-xl font-black text-purple-600 tracking-wider"><i class="fa-solid fa-users mr-2"></i>員工管理</h2>
+        <h2 class="text-xl font-black text-purple-600 tracking-wider"><i class="fa-solid fa-users mr-2"></i>小組與員工管理</h2>
       </div>
       <div class="flex-1 p-4 flex flex-col gap-4 overflow-y-auto no-scrollbar pb-6">
         <div class="w-full bg-slate-50 border border-slate-200 p-4 rounded-2xl shrink-0">
-          <h3 class="font-bold text-sm mb-3 text-slate-700">註冊新帳號</h3>
+          <h3 class="font-bold text-sm mb-3 text-slate-700">註冊新帳號 / 排班</h3>
           <div class="space-y-3 mb-4">
-            <div><input type="text" id="emp-username" placeholder="登入代號 (例: group2)" class="w-full border border-slate-200 p-2.5 text-sm rounded-xl font-bold"></div>
-            <div><input type="text" id="emp-name" placeholder="顯示名稱 (例: 收銀B)" class="w-full border border-slate-200 p-2.5 text-sm rounded-xl font-bold"></div>
+            <div><input type="text" id="emp-username" placeholder="登入代號 (例: user_a)" class="w-full border border-slate-200 p-2.5 text-sm rounded-xl font-bold"></div>
+            <div><input type="text" id="emp-name" placeholder="顯示名稱 (例: 收銀員A)" class="w-full border border-slate-200 p-2.5 text-sm rounded-xl font-bold"></div>
+            <div><input type="text" id="emp-group" placeholder="所屬小組/班別 (例: 上午班 / 第一組)" class="w-full border border-slate-200 p-2.5 text-sm rounded-xl font-bold"></div>
             <div class="flex gap-2">
               <input type="text" maxlength="4" id="emp-pin" placeholder="4位數字PIN" class="flex-1 border border-slate-200 p-2.5 text-sm rounded-xl font-mono font-bold text-center">
               <select id="emp-role" class="flex-1 border border-slate-200 p-2.5 text-sm rounded-xl font-bold bg-white">
@@ -184,13 +194,13 @@
               </select>
             </div>
           </div>
-          <button onclick="saveEmployee()" class="w-full bg-purple-600 text-white font-bold py-3 text-sm rounded-xl shadow-md">建立帳號</button>
+          <button onclick="saveEmployee()" class="w-full bg-purple-600 text-white font-bold py-3 text-sm rounded-xl shadow-md active:scale-95 transition">建立帳號</button>
         </div>
         <div class="w-full bg-white border border-slate-200 rounded-2xl overflow-hidden">
           <div class="overflow-x-auto w-full no-scrollbar">
-            <table class="w-full min-w-[400px] text-left whitespace-nowrap text-sm">
+            <table class="w-full min-w-[500px] text-left whitespace-nowrap text-sm">
               <thead class="bg-slate-50 border-b border-slate-200">
-                <tr><th class="p-3 font-bold text-slate-600">帳號</th><th class="p-3 font-bold text-slate-600">名稱</th><th class="p-3 font-bold text-slate-600">PIN</th><th class="p-3 font-bold text-slate-600">權限</th><th class="p-3 font-bold text-slate-600 text-right">刪除</th></tr>
+                <tr><th class="p-3 font-bold text-slate-600">帳號</th><th class="p-3 font-bold text-slate-600">名稱</th><th class="p-3 font-bold text-slate-600">小組班別</th><th class="p-3 font-bold text-slate-600">PIN</th><th class="p-3 font-bold text-slate-600">權限</th><th class="p-3 font-bold text-slate-600 text-right">刪除</th></tr>
               </thead>
               <tbody id="employee-list" class="divide-y divide-slate-100"></tbody>
             </table>
@@ -202,9 +212,15 @@
     <div id="view-reports" class="w-full h-full flex flex-col absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-300 bg-slate-50">
       <div class="p-4 border-b border-slate-200 shrink-0 flex flex-col bg-white gap-3 shadow-sm z-10">
         <div>
-          <h2 class="text-xl font-black text-emerald-600 tracking-wider"><i class="fa-solid fa-chart-pie mr-2"></i>營業報表</h2>
+          <h2 class="text-xl font-black text-emerald-600 tracking-wider"><i class="fa-solid fa-chart-pie mr-2"></i>營業報表與匯出</h2>
         </div>
         <div class="flex flex-col gap-2">
+          <div class="flex items-center space-x-2 bg-slate-100 p-2 rounded-xl border w-full overflow-hidden">
+             <span class="text-xs font-bold text-slate-500 shrink-0">小組</span>
+             <select id="report-group-filter" onchange="generateReports()" class="bg-transparent font-bold text-xs outline-none w-full border-none">
+                <option value="all">不限小組 (整天全部)</option>
+             </select>
+          </div>
           <div class="flex items-center space-x-2 bg-slate-100 p-2 rounded-xl border w-full overflow-hidden">
             <span class="text-xs font-bold text-slate-500 shrink-0">時段</span>
             <input type="datetime-local" id="report-start" onchange="generateReports()" class="bg-transparent font-bold text-xs outline-none w-full">
@@ -212,16 +228,16 @@
             <input type="datetime-local" id="report-end" onchange="generateReports()" class="bg-transparent font-bold text-xs outline-none w-full">
           </div>
           <div class="flex space-x-2 w-full">
-            <button onclick="clearReportFilter()" class="flex-1 bg-slate-200 text-slate-700 py-2 rounded-xl font-bold text-xs">整天</button>
-            <button onclick="printZReport()" class="flex-1 bg-slate-900 text-white py-2 rounded-xl font-bold text-xs"><i class="fa-solid fa-print mr-1"></i>列印</button>
-            <button onclick="exportCSV()" class="flex-1 bg-emerald-600 text-white py-2 rounded-xl font-bold text-xs"><i class="fa-solid fa-file-csv mr-1"></i>CSV</button>
+            <button onclick="clearReportFilter()" class="flex-1 bg-slate-200 text-slate-700 py-2 rounded-xl font-bold text-xs active:scale-95 transition">重設</button>
+            <button onclick="printZReport()" class="flex-1 bg-slate-900 text-white py-2 rounded-xl font-bold text-xs active:scale-95 transition"><i class="fa-solid fa-print mr-1"></i>列印</button>
+            <button onclick="exportCSV()" class="flex-[2] bg-emerald-600 text-white py-2 rounded-xl font-bold text-xs active:scale-95 transition shadow-sm"><i class="fa-solid fa-file-excel mr-1"></i>匯出進階 Excel</button>
           </div>
         </div>
       </div>
       <div class="flex-1 p-4 overflow-y-auto no-scrollbar pb-6">
         <div class="grid grid-cols-1 gap-3 mb-4">
           <div class="bg-white p-4 rounded-2xl border shadow-sm flex items-center justify-between">
-            <div><p class="text-slate-500 text-xs font-bold mb-1">該區間淨利</p><p class="text-3xl font-black text-blue-600">$<span id="report-revenue">0</span></p></div>
+            <div><p class="text-slate-500 text-xs font-bold mb-1">該區間/小組淨利</p><p class="text-3xl font-black text-blue-600">$<span id="report-revenue">0</span></p></div>
             <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 text-xl"><i class="fa-solid fa-sack-dollar"></i></div>
           </div>
           <div class="bg-white p-4 rounded-2xl border shadow-sm flex items-center justify-between">
@@ -250,7 +266,7 @@
     </div>
   </main>
 
-  <aside id="checkout-sidebar" class="fixed inset-0 z-[50] bg-slate-50 flex flex-col transition-transform duration-300 translate-y-full">
+  <aside id="checkout-sidebar" class="fixed inset-0 z-[50] bg-slate-50 flex flex-col transition-transform duration-300 translate-y-full pb-safe">
     
     <div id="checkout-success-overlay" class="absolute inset-0 bg-emerald-600 z-[60] flex flex-col items-center justify-center hidden">
       <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-xl"><i class="fa-solid fa-check text-4xl text-emerald-500"></i></div>
@@ -268,14 +284,16 @@
       <button onclick="toggleCart()" class="text-slate-300 hover:text-white px-2 py-1"><i class="fa-solid fa-chevron-down text-xl"></i></button>
     </div>
 
-    <div class="flex-1 flex flex-col bg-white m-3 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
+    <div class="flex-1 flex flex-col min-h-0 bg-white m-3 rounded-xl shadow-sm border border-slate-200 relative overflow-hidden">
       <div class="absolute -top-3 left-0 right-0 h-4 receipt-edge"></div>
-      <div class="p-3 border-b-2 border-dashed border-slate-300 flex justify-end items-center bg-white z-10 pt-5 space-x-2">
-        <button onclick="openDiscountModal()" class="text-slate-500 border border-slate-300 font-bold px-3 py-1 rounded text-xs"><i class="fa-solid fa-tag mr-1"></i>折扣</button>
-        <button onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-3 py-1 rounded text-xs">清空</button>
+      <div class="p-3 border-b-2 border-dashed border-slate-300 flex justify-end items-center bg-white z-10 pt-5 space-x-2 shrink-0">
+        <button onclick="openDiscountModal()" class="text-slate-500 border border-slate-300 font-bold px-3 py-1 rounded text-xs active:scale-95 transition"><i class="fa-solid fa-tag mr-1"></i>折扣</button>
+        <button onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-3 py-1 rounded text-xs active:scale-95 transition">清空</button>
       </div>
-      <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-3 bg-white z-10"></div>
-      <div class="p-4 bg-white border-t-2 border-dashed border-slate-300 z-10 space-y-2">
+      
+      <div id="cart-ui" class="flex-1 overflow-y-auto no-scrollbar p-3 space-y-3 bg-white z-10 min-h-0"></div>
+      
+      <div class="p-4 bg-white border-t-2 border-dashed border-slate-300 z-10 space-y-2 shrink-0 shadow-[0_-5px_15px_rgba(0,0,0,0.02)]">
         <div id="discount-row" class="flex justify-between items-end hidden text-rose-500">
           <span class="font-bold text-sm">折讓扣除</span><span class="text-lg font-bold">- $<span id="display-discount-amount">0</span></span>
         </div>
@@ -285,31 +303,31 @@
       </div>
     </div>
 
-    <div class="bg-slate-800 text-white p-3 shrink-0 pb-safe">
+    <div class="bg-slate-800 text-white p-3 shrink-0">
       <div class="bg-slate-900 rounded-lg flex justify-between items-center p-2 mb-2 border border-slate-700">
         <span class="font-bold text-slate-400 text-xs">實收 <span id="display-received" class="text-white ml-2 text-lg">$0</span></span>
         <div class="text-right"><span class="text-[10px] text-slate-500 block mb-[-4px]">找零</span><span class="text-xl font-black text-emerald-400" id="change-amount">$0</span></div>
       </div>
       <input type="hidden" id="received-amount">
       <div class="grid grid-cols-4 gap-1.5 mb-3">
-        <button onclick="numpadInput(1)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">1</button>
-        <button onclick="numpadInput(2)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">2</button>
-        <button onclick="numpadInput(3)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">3</button>
-        <button onclick="setReceived(100)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold">$100</button>
-        <button onclick="numpadInput(4)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">4</button>
-        <button onclick="numpadInput(5)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">5</button>
-        <button onclick="numpadInput(6)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">6</button>
-        <button onclick="setReceived(500)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold">$500</button>
-        <button onclick="numpadInput(7)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">7</button>
-        <button onclick="numpadInput(8)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">8</button>
-        <button onclick="numpadInput(9)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">9</button>
-        <button onclick="setReceived(1000)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold">$1k</button>
-        <button onclick="numpadClear()" class="bg-rose-500/20 text-rose-400 rounded-md py-3 text-lg font-bold">C</button>
-        <button onclick="numpadInput(0)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95">0</button>
-        <button onclick="numpadBackspace()" class="bg-slate-600 rounded-md py-3 text-lg font-bold"><i class="fa-solid fa-delete-left"></i></button>
-        <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-500/20 text-emerald-400 rounded-md py-3 text-sm font-bold">剛好</button>
+        <button onclick="numpadInput(1)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">1</button>
+        <button onclick="numpadInput(2)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">2</button>
+        <button onclick="numpadInput(3)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">3</button>
+        <button onclick="setReceived(100)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold active:scale-95 transition">$100</button>
+        <button onclick="numpadInput(4)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">4</button>
+        <button onclick="numpadInput(5)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">5</button>
+        <button onclick="numpadInput(6)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">6</button>
+        <button onclick="setReceived(500)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold active:scale-95 transition">$500</button>
+        <button onclick="numpadInput(7)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">7</button>
+        <button onclick="numpadInput(8)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">8</button>
+        <button onclick="numpadInput(9)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">9</button>
+        <button onclick="setReceived(1000)" class="bg-blue-600/30 text-blue-400 rounded-md py-3 text-sm font-bold active:scale-95 transition">$1k</button>
+        <button onclick="numpadClear()" class="bg-rose-500/20 text-rose-400 rounded-md py-3 text-lg font-bold active:scale-95 transition">C</button>
+        <button onclick="numpadInput(0)" class="bg-slate-700 rounded-md py-3 text-lg font-bold active:scale-95 transition">0</button>
+        <button onclick="numpadBackspace()" class="bg-slate-600 rounded-md py-3 text-lg font-bold active:scale-95 transition"><i class="fa-solid fa-delete-left"></i></button>
+        <button id="btn-exact" onclick="setExactAmount()" class="bg-emerald-500/20 text-emerald-400 rounded-md py-3 text-sm font-bold active:scale-95 transition">剛好</button>
       </div>
-      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl text-xl font-black shadow-[0_0_20px_rgba(16,185,129,0.3)]">收款結帳</button>
+      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl text-xl font-black shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-95 transition">收款結帳</button>
     </div>
   </aside>
 
@@ -323,10 +341,10 @@
     
     <div id="admin-menu" class="hidden flex-row h-full">
       <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn flex-1 min-w-[64px] h-full flex flex-col items-center justify-center text-slate-400 transition">
-        <i class="fa-solid fa-boxes-stacked text-xl mb-1"></i><span class="text-[10px] font-bold">進銷存</span>
+        <i class="fa-solid fa-boxes-stacked text-xl mb-1"></i><span class="text-[10px] font-bold">庫存</span>
       </button>
       <button onclick="switchTab('employees')" id="nav-employees" class="nav-btn flex-1 min-w-[64px] h-full flex flex-col items-center justify-center text-slate-400 transition">
-        <i class="fa-solid fa-users text-xl mb-1"></i><span class="text-[10px] font-bold">員工</span>
+        <i class="fa-solid fa-users text-xl mb-1"></i><span class="text-[10px] font-bold">小組</span>
       </button>
       <button onclick="switchTab('reports')" id="nav-reports" class="nav-btn flex-1 min-w-[64px] h-full flex flex-col items-center justify-center text-slate-400 transition">
         <i class="fa-solid fa-chart-pie text-xl mb-1"></i><span class="text-[10px] font-bold">報表</span>
@@ -339,14 +357,14 @@
 
   <div id="print-z-report" class="hidden">
     <div style="text-align: center; margin-bottom: 20px;">
-      <h2>南大附中 校慶園遊會</h2><h3>時段對帳單 (Z-Report)</h3>
+      <h2>南大附中 校慶園遊會</h2><h3>時段與小組對帳單</h3>
       <p id="z-print-time"></p><p>列印核准店長: <span id="z-print-operator"></span></p><p>================================</p>
     </div>
     <div style="margin-bottom: 20px;">
+      <p>篩選小組: <span id="z-print-group"></span></p>
       <p>篩選起點: <span id="z-print-start"></span></p><p>篩選終點: <span id="z-print-end"></span></p>
-      <p>該時段實收淨利: <strong style="font-size: 1.3em;">$<span id="z-print-revenue">0</span></strong></p>
-      <p>該時段成交單數: <span id="z-print-orders">0</span> 筆</p>
-      <p>該時段作廢單數: <span id="z-print-voids">0</span> 筆</p>
+      <p>該區間/小組實收淨利: <strong style="font-size: 1.3em;">$<span id="z-print-revenue">0</span></strong></p>
+      <p>該區間成交單數: <span id="z-print-orders">0</span> 筆</p>
     </div>
     <div style="text-align: center; margin-top: 30px;"><p>================================</p><p>請核對該時段金庫現金後簽名交回</p></div>
   </div>
@@ -392,15 +410,14 @@
       document.getElementById('login-btn').innerText = "驗證權限中...";
       try {
         const accRef = collection(db, "accounts");
-        const adminDoc = await getDoc(doc(accRef, "admin")); if (!adminDoc.exists()) await setDoc(doc(accRef, "admin"), { pin: "0000", name: "總店長", role: "admin" });
-        const cashierDoc = await getDoc(doc(accRef, "cashier1")); if (!cashierDoc.exists()) await setDoc(doc(accRef, "cashier1"), { pin: "1234", name: "收銀員A", role: "cashier" });
+        const adminDoc = await getDoc(doc(accRef, "admin")); if (!adminDoc.exists()) await setDoc(doc(accRef, "admin"), { pin: "0000", name: "總店長", role: "admin", group: "管理組" });
         
         const match = await getDocs(query(accRef, where("pin", "==", pin)));
         if (!match.empty) {
           currentUser = { id: match.docs[0].id, ...match.docs[0].data() };
           document.getElementById('admin-menu').classList.toggle('hidden', currentUser.role !== 'admin');
           const badge = document.getElementById('role-badge');
-          badge.innerText = currentUser.role === 'admin' ? '店長' : '收銀';
+          badge.innerText = currentUser.role === 'admin' ? `店長 - ${currentUser.group || '無'}` : `收銀 - ${currentUser.group || '無'}`;
           badge.className = currentUser.role === 'admin' ? 'inline-block text-[10px] font-black px-2 py-1 rounded border border-orange-500 text-orange-400 bg-orange-500/10' : 'inline-block text-[10px] font-black px-2 py-1 rounded border border-blue-500 text-blue-400 bg-blue-50/10';
           document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
           initPOS();
@@ -415,7 +432,25 @@
         filterProducts();
         if(currentUser.role === 'admin') { renderInventory(); updateComboOptions(); }
       });
-      onSnapshot(collection(db, "orders"), (snap) => { allOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); generateReports(); });
+      onSnapshot(collection(db, "orders"), (snap) => { 
+        allOrders = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
+        updateGroupFilterOptions(); // 更新小組選單
+        generateReports(); 
+      });
+    }
+
+    // --- 小組篩選選單動態更新 ---
+    function updateGroupFilterOptions() {
+      const groupSelect = document.getElementById('report-group-filter');
+      const currentVal = groupSelect.value;
+      const groups = new Set();
+      allOrders.forEach(o => { if (o.operatorGroup) groups.add(o.operatorGroup); });
+      
+      let html = '<option value="all">不限小組 (整天全部)</option>';
+      groups.forEach(g => { html += `<option value="${g}">${g}</option>`; });
+      groupSelect.innerHTML = html;
+      
+      if (groups.has(currentVal)) { groupSelect.value = currentVal; }
     }
 
     window.filterProducts = function() {
@@ -424,7 +459,7 @@
       document.getElementById('product-grid').innerHTML = filtered.map(p => {
         const isSoldOut = p.stock <= 0;
         const subLabel = p.isCombo ? `<span class="bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold mr-1">套餐</span><span class="text-[10px] text-slate-400 line-clamp-1">${p.components?.join('+') || ''}</span>` : '單品';
-        return `<div onclick="${isSoldOut ? '' : `addToCart('${p.id}')`}" class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between aspect-square ${isSoldOut ? 'opacity-50 grayscale' : 'cursor-pointer active:scale-95 hover:shadow-xl transition'} shadow-sm relative overflow-hidden">
+        return `<div onclick="${isSoldOut ? '' : `addToCart('${p.id}', event)`}" class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-between aspect-square ${isSoldOut ? 'opacity-50 grayscale' : 'cursor-pointer active:scale-95 hover:shadow-xl transition'} shadow-sm relative overflow-hidden select-none">
             ${isSoldOut ? '<div class="absolute inset-0 bg-slate-900/10 z-10 flex items-center justify-center"><span class="bg-slate-800 text-white px-2 py-1 rounded-full text-xs font-bold transform -rotate-12">售完</span></div>' : ''}
             <div><h3 class="font-bold text-slate-700 text-sm leading-tight mb-1 line-clamp-2">${p.name}</h3><div class="mb-2 h-4 overflow-hidden flex items-center">${subLabel}</div><p class="text-blue-600 font-black text-xl">$${p.price}</p></div>
             <div class="text-right text-[10px] font-bold text-slate-400">${isSoldOut ? '已售完' : `庫存: ${p.stock}`}</div>
@@ -432,8 +467,49 @@
       }).join('');
     };
 
-    // --- 購物車與折扣折讓 ---
-    window.addToCart = id => { const p = products.find(p => p.id === id); const ex = cart.find(i => i.id === id); if ((ex ? ex.qty : 0) >= p.stock) return; if (ex) ex.qty += 1; else cart.push({ ...p, qty: 1 }); updateCartUI(); };
+    // --- 購物車與折扣折讓 (含動畫) ---
+    window.addToCart = (id, e) => { 
+      const p = products.find(p => p.id === id); 
+      const ex = cart.find(i => i.id === id); 
+      if ((ex ? ex.qty : 0) >= p.stock) return; 
+      if (ex) ex.qty += 1; else cart.push({ ...p, qty: 1 }); 
+      
+      // 動畫效果
+      if (e) {
+        const btn = document.getElementById('cart-btn-floating');
+        if (btn) {
+          const btnRect = btn.getBoundingClientRect();
+          // 如果是 touch 事件則取 touch 座標，否則 clientX
+          const startX = e.touches ? e.touches[0].clientX : e.clientX;
+          const startY = e.touches ? e.touches[0].clientY : e.clientY;
+          
+          const fly = document.createElement('div');
+          fly.className = 'fixed z-[100] w-6 h-6 bg-rose-500 rounded-full shadow-lg pointer-events-none transition-all duration-500 ease-in-out flex items-center justify-center text-white text-[12px] font-black';
+          fly.innerText = '+1';
+          fly.style.left = startX + 'px'; 
+          fly.style.top = startY + 'px';
+          document.body.appendChild(fly);
+          
+          requestAnimationFrame(() => {
+            fly.style.left = (btnRect.left + btnRect.width / 2 - 12) + 'px';
+            fly.style.top = (btnRect.top + btnRect.height / 2 - 12) + 'px';
+            fly.style.transform = 'scale(0.3)';
+            fly.style.opacity = '0.2';
+          });
+          
+          setTimeout(() => { 
+            fly.remove(); 
+            const badge = document.getElementById('cart-badge');
+            badge.classList.remove('badge-bump');
+            void badge.offsetWidth; // 觸發重繪
+            badge.classList.add('badge-bump');
+          }, 500);
+        }
+      }
+
+      updateCartUI(); 
+    };
+    
     window.changeQty = (id, delta) => { const item = cart.find(i => i.id === id); if (delta > 0 && item.qty >= products.find(p => p.id === id).stock) return; item.qty += delta; if (item.qty <= 0) cart = cart.filter(i => i.id !== id); updateCartUI(); };
     window.removeCartItem = id => { cart = cart.filter(i => i.id !== id); updateCartUI(); };
     window.clearCart = () => { cart = []; customDiscountAmount = 0; document.getElementById('received-amount').value = ''; updateCartUI(); };
@@ -461,7 +537,7 @@
       if (badge) badge.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
       
       document.getElementById('cart-ui').innerHTML = cart.length === 0 ? `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-receipt text-4xl mb-3 opacity-50"></i><p class="font-bold tracking-widest text-sm">尚未點餐</p></div>` 
-        : cart.map(item => `<div class="flex flex-col border-b border-slate-100 pb-2 mb-2 relative"><button onclick="removeCartItem('${item.id}')" class="absolute right-0 top-0 text-slate-300 hover:text-rose-500 transition py-1 px-2"><i class="fa-solid fa-trash-can"></i></button><div class="flex justify-between font-bold text-slate-700 text-sm mb-1 pr-8"><span>${item.name}</span><span>$${item.price * item.qty}</span></div><div class="text-[10px] text-slate-400 mb-2">${item.isCombo ? `組合：${item.components?.join(', ')}` : '單品'}</div><div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border"><button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 bg-white rounded font-bold text-slate-600 text-xs">-</button><span class="w-4 text-center font-bold text-slate-800 text-xs">${item.qty}</span><button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 bg-slate-200 rounded font-bold text-slate-700 text-xs">+</button></div></div>`).join('');
+        : cart.map(item => `<div class="flex flex-col border-b border-slate-100 pb-2 mb-2 relative"><button onclick="removeCartItem('${item.id}')" class="absolute right-0 top-0 text-slate-300 hover:text-rose-500 transition py-1 px-2"><i class="fa-solid fa-trash-can"></i></button><div class="flex justify-between font-bold text-slate-700 text-sm mb-1 pr-8"><span>${item.name}</span><span>$${item.price * item.qty}</span></div><div class="text-[10px] text-slate-400 mb-2">${item.isCombo ? `組合：${item.components?.join(', ')}` : '單品'}</div><div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border"><button onclick="changeQty('${item.id}', -1)" class="w-8 h-8 bg-white rounded font-bold text-slate-600 active:bg-slate-200 transition">-</button><span class="w-4 text-center font-bold text-slate-800 text-xs">${item.qty}</span><button onclick="changeQty('${item.id}', 1)" class="w-8 h-8 bg-slate-200 rounded font-bold text-slate-700 active:bg-slate-300 transition">+</button></div></div>`).join('');
       calculateChange();
       try { await setDoc(doc(db, "active_sessions", "station_1"), { cartItems: cart, totalAmount: total, status: "ordering" }); } catch(e){}
     }
@@ -491,7 +567,7 @@
         const orderNo = String(orderNoNum).padStart(3, '0');
         const batch = writeBatch(db);
         
-        batch.set(doc(collection(db, "orders")), { orderNumber: orderNo, items: cart, subtotal, discount: customDiscountAmount, total, received: r, change: c, operatorId: currentUser.name, status: "pending", timestamp: serverTimestamp() });
+        batch.set(doc(collection(db, "orders")), { orderNumber: orderNo, items: cart, subtotal, discount: customDiscountAmount, total, received: r, change: c, operatorId: currentUser.name, operatorGroup: currentUser.group || "未分組", status: "pending", timestamp: serverTimestamp() });
         cart.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) }));
         batch.set(doc(db, "active_sessions", "station_1"), { cartItems: [], totalAmount: 0, status: "completed", change: c, orderNumber: orderNo });
         await batch.commit();
@@ -517,7 +593,9 @@
           const isVoid = d.status === 'voided';
           const voidBtn = (currentUser.role === 'admin' && !isVoid) ? `<button onclick="voidOrder('${docSnap.id}')" class="text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-500 px-2 py-1 rounded text-[10px] font-bold transition mt-2">作廢退單</button>` : '';
           return `<div class="bg-white border ${isVoid ? 'border-rose-200 bg-rose-50/30' : 'border-slate-200'} rounded-xl p-4 flex justify-between items-start shadow-sm">
-              <div><div class="font-black text-lg ${isVoid ? 'text-slate-400 line-through' : 'text-slate-800'} mb-1">#${d.orderNumber} <span class="text-xs font-normal text-slate-400 ml-1">${t}</span></div><div class="text-slate-500 text-xs leading-relaxed max-w-[180px]">${d.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</div></div>
+              <div><div class="font-black text-lg ${isVoid ? 'text-slate-400 line-through' : 'text-slate-800'} mb-1">#${d.orderNumber} <span class="text-xs font-normal text-slate-400 ml-1">${t}</span></div>
+              <div class="text-xs text-slate-500 mb-1">人員: ${d.operatorId} (${d.operatorGroup || '無'})</div>
+              <div class="text-slate-600 text-xs leading-relaxed max-w-[180px]">${d.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</div></div>
               <div class="text-right flex flex-col items-end"><div class="text-xl font-black ${isVoid ? 'text-slate-300' : 'text-blue-600'}">$${d.total}</div>${voidBtn}</div>
             </div>`;
         }).join('');
@@ -612,6 +690,7 @@
           return `<tr class="hover:bg-slate-50 border-b">
             <td class="p-3 font-mono font-bold text-slate-700 text-xs">${e.id}</td>
             <td class="p-3 font-bold text-slate-800 text-sm">${e.name}</td>
+            <td class="p-3 text-center font-bold text-slate-600 text-xs">${e.group || '未分組'}</td>
             <td class="p-3 text-center font-mono font-bold text-slate-500 text-xs">${e.pin}</td>
             <td class="p-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${e.role==='admin'?'bg-orange-100 text-orange-700':'bg-blue-100 text-blue-700'}">${e.role==='admin'?'店長':'收銀'}</span></td>
             <td class="p-3 text-right">${delBtn}</td>
@@ -621,12 +700,16 @@
     };
 
     window.saveEmployee = async function() {
-      const u = document.getElementById('emp-username').value.trim(); const n = document.getElementById('emp-name').value.trim(); const p = document.getElementById('emp-pin').value.trim(); const r = document.getElementById('emp-role').value;
+      const u = document.getElementById('emp-username').value.trim(); 
+      const n = document.getElementById('emp-name').value.trim(); 
+      const g = document.getElementById('emp-group').value.trim() || "未分組";
+      const p = document.getElementById('emp-pin').value.trim(); 
+      const r = document.getElementById('emp-role').value;
       if(!u || !n || p.length !== 4 || isNaN(p)) return alert("請填寫代號、名稱與4位數字PIN！");
       try {
-        await setDoc(doc(db, "accounts", u), { pin: p, name: n, role: r });
+        await setDoc(doc(db, "accounts", u), { pin: p, name: n, group: g, role: r });
         alert(`帳號配置成功！`);
-        document.getElementById('emp-username').value=''; document.getElementById('emp-name').value=''; document.getElementById('emp-pin').value='';
+        document.getElementById('emp-username').value=''; document.getElementById('emp-name').value=''; document.getElementById('emp-group').value=''; document.getElementById('emp-pin').value='';
         fetchEmployees();
       } catch(e) { alert("配置失敗"); }
     };
@@ -636,12 +719,20 @@
       try { await deleteDoc(doc(db, "accounts", id)); alert("已註銷。"); fetchEmployees(); } catch(e){}
     };
 
-    // --- 營業報表篩選 ---
+    // --- 營業報表篩選 (加入小組篩選) ---
     window.getFilteredOrders = function() {
+      const groupVal = document.getElementById('report-group-filter').value;
       const startVal = document.getElementById('report-start').value;
       const endVal = document.getElementById('report-end').value;
-      const validOrders = allOrders.filter(o => o.status !== 'voided'); 
       
+      let validOrders = allOrders.filter(o => o.status !== 'voided'); 
+      
+      // 小組篩選
+      if (groupVal !== 'all') {
+        validOrders = validOrders.filter(o => o.operatorGroup === groupVal);
+      }
+      
+      // 時間篩選
       if(!startVal || !endVal) return validOrders.sort((a,b) => (a.timestamp?.toMillis() || 0) - (b.timestamp?.toMillis() || 0));
       
       const startMs = new Date(startVal).getTime();
@@ -660,12 +751,13 @@
       document.getElementById('report-revenue').innerText = totalRev;
       document.getElementById('report-orders').innerText = filtered.length;
 
-      document.getElementById('report-table-rows').innerHTML = filtered.length === 0 ? '<p class="text-slate-400 text-center py-6 text-sm">此選定區間無單據</p>' : filtered.map(o => {
+      document.getElementById('report-table-rows').innerHTML = filtered.length === 0 ? '<p class="text-slate-400 text-center py-6 text-sm">此選定區間/小組無單據</p>' : filtered.map(o => {
         const time = o.timestamp ? o.timestamp.toDate().toLocaleTimeString('zh-TW', {hour: '2-digit', minute:'2-digit'}) : '剛剛';
         return `<div class="flex justify-between items-center border border-slate-100 p-2.5 rounded-xl bg-slate-50 text-xs font-medium">
           <div class="flex items-center space-x-2 overflow-hidden pr-2">
             <span class="font-black text-slate-800 shrink-0">#${o.orderNumber}</span>
             <span class="text-[10px] font-bold text-slate-400 shrink-0">${time}</span>
+            <span class="bg-blue-100 text-blue-700 px-1 py-0.5 rounded text-[10px] shrink-0">${o.operatorGroup || '無'}</span>
             <span class="text-slate-600 truncate">${o.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</span>
           </div>
           <div class="font-bold text-blue-600 shrink-0">$${o.total}</div>
@@ -673,30 +765,54 @@
       }).join('');
     };
 
-    window.clearReportFilter = function() { document.getElementById('report-start').value = ''; document.getElementById('report-end').value = ''; generateReports(); };
+    window.clearReportFilter = function() { 
+      document.getElementById('report-group-filter').value = 'all'; 
+      document.getElementById('report-start').value = ''; 
+      document.getElementById('report-end').value = ''; 
+      generateReports(); 
+    };
 
     window.printZReport = function() {
       const filtered = window.getFilteredOrders();
+      const groupVal = document.getElementById('report-group-filter').value;
+      
       document.getElementById('z-print-time').innerText = new Date().toLocaleString('zh-TW');
       document.getElementById('z-print-operator').innerText = currentUser.name;
+      document.getElementById('z-print-group').innerText = groupVal === 'all' ? '全部小組' : groupVal;
       document.getElementById('z-print-start').innerText = document.getElementById('report-start').value || "當日開關帳起點";
       document.getElementById('z-print-end').innerText = document.getElementById('report-end').value || "當日開關帳終點";
       document.getElementById('z-print-revenue').innerText = filtered.reduce((sum, o) => sum + o.total, 0);
       document.getElementById('z-print-orders').innerText = filtered.length;
-      document.getElementById('z-print-voids').innerText = allOrders.filter(o => o.status === 'voided').length;
       window.print();
     };
 
     window.exportCSV = function() {
       const filtered = window.getFilteredOrders();
       if(filtered.length === 0) return alert("篩選時段內無資料！");
-      let csvContent = "data:text/csv;charset=utf-8,\uFEFF單號,時間,收銀員,小計,折讓,淨利,明細\n";
+      
+      // 更新的 Excel 匯出格式，每列為一個單品項，並紀錄所屬訂單的資訊
+      let csvContent = "data:text/csv;charset=utf-8,\uFEFF單號,結帳時間,負責小組(班別),負責收銀員,商品名稱,單價,售出件數,該項小計,整單折讓(僅列於首筆),整單實收總額(僅列於首筆)\n";
+      
       filtered.forEach(o => {
         const t = o.timestamp ? o.timestamp.toDate().toLocaleString('zh-TW') : '';
-        const items = o.items.map(i => `${i.name}x${i.qty}`).join(';');
-        csvContent += `${o.orderNumber},${t},${o.operatorId},${o.subtotal||o.total},${o.discount||0},${o.total},${items}\n`;
+        const group = o.operatorGroup || '未分組';
+        
+        o.items.forEach((item, index) => {
+          // 只在訂單的第一列顯示整單折扣與總額，保持畫面乾淨利於樞紐分析
+          const discount = index === 0 ? (o.discount || 0) : '';
+          const total = index === 0 ? o.total : '';
+          const itemTotal = item.price * item.qty;
+          
+          csvContent += `${o.orderNumber},${t},${group},${o.operatorId},${item.name},${item.price},${item.qty},${itemTotal},${discount},${total}\n`;
+        });
       });
-      const link = document.createElement("a"); link.setAttribute("href", encodeURI(csvContent)); link.setAttribute("download", `時段營運銷貨報表.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link);
+      
+      const link = document.createElement("a"); 
+      link.setAttribute("href", encodeURI(csvContent)); 
+      link.setAttribute("download", `進階營運銷貨報表.csv`); 
+      document.body.appendChild(link); 
+      link.click(); 
+      document.body.removeChild(link);
     };
 
     // --- 設定：系統歸零 ---
