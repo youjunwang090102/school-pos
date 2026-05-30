@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>ClassPOS - 支援自助點餐與掃碼結帳</title>
+  <title>ClassPOS - 預設自助點餐機</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
@@ -48,21 +48,21 @@
     <div class="flex items-center space-x-3">
       <div id="role-badge" class="hidden"></div>
       
-      <button id="exit-customer-btn" onclick="exitCustomerMode()" class="hidden w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-95">
+      <button id="employee-login-btn" onclick="showLoginModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-95">
         <i class="fa-solid fa-lock"></i>
       </button>
       
-      <button id="power-btn" onclick="location.reload()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-rose-400 flex items-center justify-center transition active:scale-95">
+      <button id="power-btn" onclick="location.reload()" class="hidden w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-rose-400 flex items-center justify-center transition active:scale-95">
         <i class="fa-solid fa-power-off"></i>
       </button>
     </div>
   </header>
 
-  <div id="login-modal" class="fixed inset-0 z-[80] bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300">
+  <div id="login-modal" class="fixed inset-0 z-[80] bg-slate-900/95 backdrop-blur-md flex flex-col items-center justify-center transition-opacity duration-300 opacity-0 pointer-events-none">
     <div class="bg-white p-6 rounded-[2rem] shadow-2xl w-[90%] max-w-[360px] text-center flex flex-col items-center">
       <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4 shadow-inner"><i class="fa-solid fa-fingerprint text-3xl"></i></div>
-      <h2 class="text-2xl font-black mb-1 text-slate-800 tracking-widest">系統解鎖</h2>
-      <p class="text-slate-400 mb-6 font-medium text-xs">請輸入PIN</p>
+      <h2 class="text-2xl font-black mb-1 text-slate-800 tracking-widest">員工身分解鎖</h2>
+      <p class="text-slate-400 mb-6 font-medium text-xs">請輸入授權 PIN 碼</p>
       
       <div class="w-full bg-slate-50 border-2 border-slate-200 rounded-xl p-4 mb-6 flex justify-center items-center h-14 shadow-inner">
         <div id="login-pin-display" class="text-3xl font-black tracking-[0.5em] text-slate-800 flex space-x-2"></div>
@@ -85,7 +85,7 @@
       </div>
       <button onclick="performLogin()" id="login-btn" class="w-full bg-blue-600 text-white font-black text-xl py-4 rounded-xl shadow-lg active:scale-95 transition mb-3">解鎖系統</button>
       
-      <button onclick="enterCustomerMode()" class="text-slate-400 font-bold text-sm active:text-blue-600 transition p-2">切換至顧客自助點餐模式</button>
+      <button onclick="hideLoginModal()" class="text-slate-400 font-bold text-sm active:text-slate-600 transition p-2">取消 / 返回自助點餐</button>
     </div>
   </div>
 
@@ -303,7 +303,7 @@
       <div class="bg-white p-5 rounded-3xl text-center w-64 shadow-2xl mb-6 flex flex-col items-center">
         <p class="text-slate-400 font-bold mb-1 text-xs">取餐單號</p>
         <div class="text-6xl font-black text-slate-800 tracking-tighter mb-4">#<span id="success-order-no">000</span></div>
-        <div id="qrcode-container" class="bg-white p-2 rounded-lg border-2 border-dashed border-slate-200 flex justify-center items-center w-32 h-32 mb-3"></div>
+        <div id="qrcode-container" class="bg-white p-2 rounded-lg border-2 border-dashed border-slate-200 flex justify-center items-center w-32 h-32 mb-3 hidden"></div>
         <p id="success-screenshot-hint" class="text-rose-500 font-black text-sm animate-pulse hidden"><i class="fa-solid fa-camera mr-1"></i>請務必截圖此畫面</p>
       </div>
 
@@ -336,7 +336,7 @@
 
     <div class="bg-slate-800 text-white p-2 shrink-0">
       
-      <div id="cash-numpad-area">
+      <div id="cash-numpad-area" class="hidden">
         <div class="bg-slate-900 rounded-lg flex justify-between items-center p-1.5 px-3 mb-2 border border-slate-700">
           <span class="font-bold text-slate-400 text-xs">實收 <span id="display-received" class="text-white ml-1 text-base">$0</span></span>
           <div class="text-right flex items-center space-x-2">
@@ -365,11 +365,11 @@
         </div>
       </div>
 
-      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-2.5 rounded-lg text-lg font-black shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-95 transition">收款結帳</button>
+      <button onclick="checkout()" id="checkout-btn" class="w-full bg-emerald-500 text-white py-4 rounded-lg text-xl font-black shadow-[0_0_15px_rgba(16,185,129,0.3)] active:scale-95 transition">送出訂單 (前往櫃檯結帳)</button>
     </div>
   </aside>
 
-  <nav id="bottom-nav" class="w-full bg-white border-t border-slate-200 flex flex-row overflow-x-auto no-scrollbar shadow-[0_-4px_10px_rgba(0,0,0,0.03)] z-20 shrink-0 h-[64px] pb-safe">
+  <nav id="bottom-nav" class="hidden w-full bg-white border-t border-slate-200 flex flex-row overflow-x-auto no-scrollbar shadow-[0_-4px_10px_rgba(0,0,0,0.03)] z-20 shrink-0 h-[64px] pb-safe">
     <button onclick="switchTab('pos')" id="nav-pos" class="nav-btn flex-1 min-w-[64px] h-full flex flex-col items-center justify-center text-blue-600 transition active:bg-slate-50">
       <i class="fa-solid fa-border-all text-xl mb-1"></i><span class="text-[10px] font-bold">點餐</span>
     </button>
@@ -397,13 +397,76 @@
     import { db, doc, setDoc, onSnapshot, collection, serverTimestamp } from './firebase-config.js';
     import { writeBatch, increment, getDoc, getDocs, runTransaction, query, orderBy, limit, updateDoc, where, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
-    let currentUser = null; let products = []; let cart = []; let allOrders = []; let employees = [];
+    // 系統預設狀態為「自助點餐機模式」
+    let currentUser = { name: "自助機台", role: "customer", group: "自助機" }; 
+    let isCustomerMode = true;
+
+    let products = []; let cart = []; let allOrders = []; let employees = [];
     let subtotal = 0; let total = 0; let customDiscountAmount = 0;
-    let isCustomerMode = false;
     
     // 儲存正在處理的「待付款」自助訂單 ID 與單號
     let pendingOrderId = null; 
     let pendingOrderNo = null;
+
+    // 開機即自動連線載入商品
+    initPOS();
+
+    // --- 員工登入與登出視窗邏輯 ---
+    window.showLoginModal = function() {
+      loginClear();
+      document.getElementById('login-modal').classList.remove('opacity-0', 'pointer-events-none');
+    };
+
+    window.hideLoginModal = function() {
+      document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
+    };
+
+    const pinField = document.getElementById('login-pin-value');
+    window.loginNumpad = n => { if(pinField.value.length < 4) { pinField.value += n; updPin(); } };
+    window.loginBackspace = () => { pinField.value = pinField.value.slice(0, -1); updPin(); };
+    window.loginClear = () => { pinField.value = ''; updPin(); };
+    const updPin = () => document.getElementById('login-pin-display').innerHTML = Array(pinField.value.length).fill('<i class="fa-solid fa-circle text-2xl mx-1 text-slate-800"></i>').join('') || '<span class="text-slate-300 text-lg">請輸入密碼</span>';
+
+    window.performLogin = async function() {
+      const pin = pinField.value; if(!pin) return;
+      document.getElementById('login-btn').innerText = "驗證權限中...";
+      try {
+        const accRef = collection(db, "accounts");
+        const adminDoc = await getDoc(doc(accRef, "admin")); if (!adminDoc.exists()) await setDoc(doc(accRef, "admin"), { pin: "0000", name: "總店長", role: "admin", group: "管理組" });
+        
+        const match = await getDocs(query(accRef, where("pin", "==", pin)));
+        if (!match.empty) {
+          // 登入成功，轉換為店員模式
+          isCustomerMode = false;
+          currentUser = { id: match.docs[0].id, ...match.docs[0].data() };
+          
+          document.getElementById('admin-menu').classList.toggle('hidden', currentUser.role !== 'admin');
+          const badge = document.getElementById('role-badge');
+          badge.classList.remove('hidden');
+          badge.innerText = currentUser.role === 'admin' ? `店長 - ${currentUser.group || '無'}` : `收銀 - ${currentUser.group || '無'}`;
+          badge.className = currentUser.role === 'admin' ? 'inline-block text-[10px] font-black px-2 py-1 rounded border border-orange-500 text-orange-400 bg-orange-500/10' : 'inline-block text-[10px] font-black px-2 py-1 rounded border border-blue-500 text-blue-400 bg-blue-50/10';
+          
+          // 切換介面 UI
+          document.getElementById('employee-login-btn').classList.add('hidden');
+          document.getElementById('power-btn').classList.remove('hidden');
+          document.getElementById('bottom-nav').classList.remove('hidden');
+          document.getElementById('cash-numpad-area').classList.remove('hidden');
+          
+          const checkoutBtn = document.getElementById('checkout-btn');
+          checkoutBtn.innerText = "收款結帳";
+          checkoutBtn.classList.replace('py-4', 'py-2.5');
+          checkoutBtn.classList.replace('text-xl', 'text-lg');
+
+          hideLoginModal();
+          document.getElementById('login-btn').innerText = "解鎖系統"; 
+          updateCartUI(); 
+          updateGroupFilterOptions();
+          generateReports();
+        } else { 
+          alert("PIN 碼錯誤！"); loginClear(); document.getElementById('login-btn').innerText = "解鎖系統"; 
+        }
+      } catch (e) { alert("連線失敗"); document.getElementById('login-btn').innerText = "解鎖系統"; }
+    };
 
     // --- HTML5 QR Code Scanner 邏輯 ---
     let html5QrcodeScanner;
@@ -437,39 +500,6 @@
     }
     function onScanFailure(error) { /* handle silently */ }
 
-    // --- 顧客自助點餐模式切換邏輯 ---
-    window.enterCustomerMode = function() {
-      isCustomerMode = true;
-      currentUser = { name: "自助機台", role: "customer", group: "自助機" };
-      document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
-      
-      document.getElementById('bottom-nav').classList.add('hidden');
-      document.getElementById('power-btn').classList.add('hidden');
-      document.getElementById('role-badge').classList.add('hidden');
-      document.getElementById('exit-customer-btn').classList.remove('hidden');
-      
-      document.getElementById('cash-numpad-area').classList.add('hidden');
-      const checkoutBtn = document.getElementById('checkout-btn');
-      checkoutBtn.innerText = "送出訂單 (前往櫃檯結帳)";
-      checkoutBtn.classList.replace('py-2.5', 'py-4');
-      checkoutBtn.classList.replace('text-lg', 'text-xl');
-      
-      initPOS();
-    };
-
-    window.exitCustomerMode = async function() {
-      const pin = prompt("【店長/收銀權限】請輸入解鎖 PIN 碼以退出自助模式：");
-      if (!pin) return;
-      try {
-        const match = await getDocs(query(collection(db, "accounts"), where("pin", "==", pin)));
-        if (!match.empty) {
-          location.reload(); 
-        } else {
-          alert("PIN碼錯誤！無法退出。");
-        }
-      } catch (e) { alert("驗證連線失敗"); }
-    };
-
     // --- 介面切換 ---
     window.switchTab = function(tab) {
       if (isCustomerMode) return; 
@@ -492,34 +522,6 @@
 
     window.toggleCart = () => {
       document.getElementById('checkout-sidebar').classList.toggle('translate-y-full');
-    };
-
-    // --- 觸控密碼盤登入 ---
-    const pinField = document.getElementById('login-pin-value');
-    window.loginNumpad = n => { if(pinField.value.length < 4) { pinField.value += n; updPin(); } };
-    window.loginBackspace = () => { pinField.value = pinField.value.slice(0, -1); updPin(); };
-    window.loginClear = () => { pinField.value = ''; updPin(); };
-    const updPin = () => document.getElementById('login-pin-display').innerHTML = Array(pinField.value.length).fill('<i class="fa-solid fa-circle text-2xl mx-1 text-slate-800"></i>').join('') || '<span class="text-slate-300 text-lg">請輸入密碼</span>';
-
-    window.performLogin = async function() {
-      const pin = pinField.value; if(!pin) return;
-      document.getElementById('login-btn').innerText = "驗證權限中...";
-      try {
-        const accRef = collection(db, "accounts");
-        const adminDoc = await getDoc(doc(accRef, "admin")); if (!adminDoc.exists()) await setDoc(doc(accRef, "admin"), { pin: "0000", name: "總店長", role: "admin", group: "管理組" });
-        
-        const match = await getDocs(query(accRef, where("pin", "==", pin)));
-        if (!match.empty) {
-          currentUser = { id: match.docs[0].id, ...match.docs[0].data() };
-          document.getElementById('admin-menu').classList.toggle('hidden', currentUser.role !== 'admin');
-          const badge = document.getElementById('role-badge');
-          badge.classList.remove('hidden');
-          badge.innerText = currentUser.role === 'admin' ? `店長 - ${currentUser.group || '無'}` : `收銀 - ${currentUser.group || '無'}`;
-          badge.className = currentUser.role === 'admin' ? 'inline-block text-[10px] font-black px-2 py-1 rounded border border-orange-500 text-orange-400 bg-orange-500/10' : 'inline-block text-[10px] font-black px-2 py-1 rounded border border-blue-500 text-blue-400 bg-blue-50/10';
-          document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
-          initPOS();
-        } else { alert("PIN 碼錯誤！"); loginClear(); document.getElementById('login-btn').innerText = "解鎖系統"; }
-      } catch (e) { alert("連線失敗"); document.getElementById('login-btn').innerText = "解鎖系統"; }
     };
 
     // --- 資料同步中心 ---
@@ -633,7 +635,7 @@
       
       const isPending = pendingOrderId !== null;
 
-      // 當處理「待付款」訂單時，鎖定部分折扣輸入 (但自助點餐模式本身開放折扣)
+      // 結帳載入訂單時鎖定折扣按鈕 (避免重複扣減)，正常/自助點餐皆開放折扣
       const discBtn = document.getElementById('discount-btn');
       if(discBtn) discBtn.classList.toggle('hidden', isPending); 
       
@@ -713,7 +715,8 @@
             document.getElementById('success-subtitle').innerText = "請將單據與找零交給顧客";
             document.getElementById('success-order-no').innerText = pendingOrderNo;
             document.getElementById('success-screenshot-hint').classList.add('hidden');
-            document.getElementById('qrcode-container').innerHTML = ''; // 清除 QR Code
+            document.getElementById('qrcode-container').classList.add('hidden');
+            document.getElementById('qrcode-container').innerHTML = ''; 
             
             document.getElementById('checkout-success-overlay').classList.remove('hidden');
         } else {
@@ -732,15 +735,17 @@
             await batch.commit();
             
             // 處理完成畫面的 UI 與 QR Code 生成
-            document.getElementById('qrcode-container').innerHTML = '';
+            const qrContainer = document.getElementById('qrcode-container');
+            qrContainer.innerHTML = '';
             
             if (isCustomerMode) {
               document.getElementById('success-title').innerText = "訂單已送出";
               document.getElementById('success-subtitle').innerText = "請憑單號或出示條碼至櫃檯付款";
               document.getElementById('success-screenshot-hint').classList.remove('hidden');
+              qrContainer.classList.remove('hidden');
               
               // 產生 QRCode (內容為純單號)
-              new QRCode(document.getElementById('qrcode-container'), {
+              new QRCode(qrContainer, {
                   text: orderNo,
                   width: 112,
                   height: 112,
@@ -752,6 +757,7 @@
               document.getElementById('success-title').innerText = "結帳成功";
               document.getElementById('success-subtitle').innerText = "請將號碼牌交給顧客";
               document.getElementById('success-screenshot-hint').classList.add('hidden');
+              qrContainer.classList.add('hidden');
             }
 
             document.getElementById('checkout-success-overlay').classList.remove('hidden');
@@ -805,7 +811,7 @@
                             `<span class="text-[10px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded ml-1">已結帳</span>`;
 
           let voidBtn = (currentUser && currentUser.role === 'admin' && !isVoid) ? `<button onclick="voidOrder('${docSnap.id}')" class="text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-500 px-2 py-1 rounded text-[10px] font-bold transition mt-2">作廢</button>` : '';
-          let resumeBtn = (isUnpaid && !isCustomerMode) ? `<button onclick="resumePayment('${docSnap.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-bold transition mt-2 mr-1 active:scale-95 shadow-sm"><i class="fa-solid fa-cash-register mr-1"></i>結帳收款</button>` : '';
+          let resumeBtn = (isUnpaid && !isCustomerMode) ? `<button onclick="resumePayment('${docSnap.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-bold transition mt-2 mr-1 active:scale-95 shadow-sm"><i class="fa-solid fa-cash-register mr-1"></i>結帳</button>` : '';
 
           return `<div class="bg-white border ${isVoid ? 'border-rose-200 bg-rose-50/30' : (isUnpaid ? 'border-orange-300 shadow-md' : 'border-slate-200')} rounded-xl p-4 flex justify-between items-start shadow-sm transition">
               <div><div class="font-black text-lg ${isVoid ? 'text-slate-400 line-through' : 'text-slate-800'} mb-1">#${d.orderNumber} ${statusBadge} <span class="text-xs font-normal text-slate-400 ml-1">${t}</span></div>
@@ -1030,14 +1036,4 @@
       const btn = document.getElementById('btn-factory-reset');
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i>抹除中...`; btn.disabled = true;
       try {
-        const ordersSnap = await getDocs(collection(db, "orders")); const batch1 = writeBatch(db); ordersSnap.forEach(d => batch1.delete(d.ref)); await batch1.commit();
-        const sessionSnap = await getDocs(collection(db, "active_sessions")); const batch2 = writeBatch(db); sessionSnap.forEach(d => batch2.delete(d.ref)); await batch2.commit();
-        await setDoc(doc(db, "counters", "daily_order"), { count: 0 });
-        alert("資料已歸零！"); location.reload();
-      } catch(e) { alert("歸零失敗！"); } finally {
-        btn.innerHTML = `<i class="fa-solid fa-dumpster-fire mr-2"></i> 清空資料・全部歸零`; btn.disabled = false;
-      }
-    };
-  </script>
-</body>
-</html>
+        const ordersSnap = await getDocs(collection(db, "orders")); const batch1 = writeBatch(db); ordersSnap.forEach(d => batch1.delete(d.ref));
