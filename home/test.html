@@ -311,7 +311,7 @@
       <div class="absolute -top-3 left-0 right-0 h-4 receipt-edge"></div>
       <div class="px-3 py-2 border-b border-dashed border-slate-300 flex justify-end items-center bg-white z-10 pt-3 space-x-2 shrink-0">
         <button id="discount-btn" onclick="openDiscountModal()" class="text-slate-500 border border-slate-300 font-bold px-2 py-0.5 rounded text-xs active:scale-95 transition"><i class="fa-solid fa-tag mr-1"></i>折扣</button>
-        <button onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded text-xs active:scale-95 transition">清空</button>
+        <button id="clear-cart-btn" onclick="clearCart()" class="text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded text-xs active:scale-95 transition">清空</button>
       </div>
       
       <!-- 購物車清單列表 -->
@@ -396,7 +396,11 @@
 
     let currentUser = null; let products = []; let cart = []; let allOrders = []; let employees = [];
     let subtotal = 0; let total = 0; let customDiscountAmount = 0;
-    let isCustomerMode = false; // 新增：是否為顧客自助點餐模式
+    let isCustomerMode = false;
+    
+    // 儲存正在處理的「待付款」自助訂單 ID 與單號
+    let pendingOrderId = null; 
+    let pendingOrderNo = null;
 
     // --- 顧客自助點餐模式切換邏輯 ---
     window.enterCustomerMode = function() {
@@ -404,14 +408,12 @@
       currentUser = { name: "自助機台", role: "customer", group: "自助機" };
       document.getElementById('login-modal').classList.add('opacity-0', 'pointer-events-none');
       
-      // 隱藏管理員介面與導覽列
       document.getElementById('bottom-nav').classList.add('hidden');
       document.getElementById('power-btn').classList.add('hidden');
       document.getElementById('role-badge').classList.add('hidden');
-      document.getElementById('discount-btn').classList.add('hidden'); // 自助點餐不開放自訂折扣
+      document.getElementById('discount-btn').classList.add('hidden'); 
       document.getElementById('exit-customer-btn').classList.remove('hidden');
       
-      // 切換結帳面板 UI
       document.getElementById('cash-numpad-area').classList.add('hidden');
       const checkoutBtn = document.getElementById('checkout-btn');
       checkoutBtn.innerText = "送出訂單 (前往櫃檯結帳)";
@@ -427,7 +429,7 @@
       try {
         const match = await getDocs(query(collection(db, "accounts"), where("pin", "==", pin)));
         if (!match.empty) {
-          location.reload(); // 密碼正確直接重整網頁回到正常登入
+          location.reload(); 
         } else {
           alert("PIN碼錯誤！無法退出。");
         }
@@ -436,7 +438,7 @@
 
     // --- 介面切換 ---
     window.switchTab = function(tab) {
-      if (isCustomerMode) return; // 自助模式下禁止切換Tab
+      if (isCustomerMode) return; 
       
       document.querySelectorAll('.nav-btn').forEach(btn => { 
         btn.classList.remove('text-blue-600', 'text-orange-600', 'text-emerald-600', 'text-purple-600', 'text-slate-800'); 
@@ -595,8 +597,39 @@
       const badge = document.getElementById('cart-badge');
       if (badge) badge.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
       
+      const isPending = pendingOrderId !== null;
+
+      // 當處理「待付款」訂單時，鎖定部分 UI 功能
+      const discBtn = document.getElementById('discount-btn');
+      if(discBtn) discBtn.classList.toggle('hidden', isPending || isCustomerMode); 
+      
+      const clearBtn = document.getElementById('clear-cart-btn');
+      if(clearBtn) {
+          if (isPending) {
+              clearBtn.innerText = '取消結帳';
+              clearBtn.onclick = () => { pendingOrderId=null; pendingOrderNo=null; clearCart(); document.getElementById('checkout-sidebar').classList.add('translate-y-full'); };
+              clearBtn.className = "text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded text-xs active:scale-95 transition";
+          } else {
+              clearBtn.innerText = '清空';
+              clearBtn.onclick = clearCart;
+              clearBtn.className = "text-rose-500 font-bold bg-rose-50 px-2 py-0.5 rounded text-xs active:scale-95 transition";
+          }
+      }
+      
       document.getElementById('cart-ui').innerHTML = cart.length === 0 ? `<div class="h-full flex flex-col items-center justify-center text-slate-300"><i class="fa-solid fa-receipt text-3xl mb-2 opacity-50"></i><p class="font-bold tracking-widest text-xs">尚未點餐</p></div>` 
-        : cart.map(item => `<div class="flex flex-col border-b border-slate-100 pb-2 mb-2 relative"><button onclick="removeCartItem('${item.id}')" class="absolute right-0 top-0 text-slate-300 hover:text-rose-500 transition py-0.5 px-2"><i class="fa-solid fa-trash-can"></i></button><div class="flex justify-between font-bold text-slate-700 text-sm mb-0.5 pr-8"><span>${item.name}</span><span>$${item.price * item.qty}</span></div><div class="text-[10px] text-slate-400 mb-1.5">${item.isCombo ? `組合：${item.components?.join(', ')}` : '單品'}</div><div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border"><button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 bg-white rounded font-bold text-slate-600 active:bg-slate-200 transition">-</button><span class="w-4 text-center font-bold text-slate-800 text-xs">${item.qty}</span><button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 bg-slate-200 rounded font-bold text-slate-700 active:bg-slate-300 transition">+</button></div></div>`).join('');
+        : cart.map(item => `
+          <div class="flex flex-col border-b border-slate-100 pb-2 mb-2 relative">
+            ${!isPending ? `<button onclick="removeCartItem('${item.id}')" class="absolute right-0 top-0 text-slate-300 hover:text-rose-500 transition py-0.5 px-2"><i class="fa-solid fa-trash-can"></i></button>` : ''}
+            <div class="flex justify-between font-bold text-slate-700 text-sm mb-0.5 ${!isPending?'pr-8':''}">
+              <span>${item.name}</span><span>$${item.price * item.qty}</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mb-1.5">${item.isCombo ? `組合：${item.components?.join(', ')}` : '單品'}</div>
+            ${isPending 
+              ? `<div class="text-xs font-bold text-slate-600 bg-slate-100 self-start px-2 py-1 rounded">數量: ${item.qty}</div>`
+              : `<div class="flex items-center space-x-3 bg-slate-50 self-start rounded-lg p-1 border"><button onclick="changeQty('${item.id}', -1)" class="w-7 h-7 bg-white rounded font-bold text-slate-600 active:bg-slate-200 transition">-</button><span class="w-4 text-center font-bold text-slate-800 text-xs">${item.qty}</span><button onclick="changeQty('${item.id}', 1)" class="w-7 h-7 bg-slate-200 rounded font-bold text-slate-700 active:bg-slate-300 transition">+</button></div>`
+            }
+          </div>`).join('');
+          
       calculateChange();
       try { await setDoc(doc(db, "active_sessions", "station_1"), { cartItems: cart, totalAmount: total, status: "ordering" }); } catch(e){}
     }
@@ -608,7 +641,6 @@
     function calculateChange() {
       const b = document.getElementById('checkout-btn');
       
-      // 如果是顧客模式，只要有商品就能送出，不用計算找零
       if (isCustomerMode) {
         b.disabled = cart.length === 0;
         return;
@@ -624,54 +656,88 @@
     window.checkout = async function() {
       if (cart.length === 0) return; 
       
-      // 判斷是否為顧客自助模式，自助模式實收預設為0，狀態為 unpaid
       const r = isCustomerMode ? 0 : (parseInt(iF.value) || total); 
       const c = isCustomerMode ? 0 : (r - total);
       const currentStatus = isCustomerMode ? "unpaid" : "pending";
 
       document.getElementById('checkout-btn').disabled = true;
       try {
-        const orderNoNum = await runTransaction(db, async t => {
-          const cd = await t.get(doc(db, "counters", "daily_order"));
-          let nc = cd.exists() ? cd.data().count + 1 : 1;
-          t.set(doc(db, "counters", "daily_order"), { count: nc }, { merge: true }); return nc;
-        });
-        const orderNo = String(orderNoNum).padStart(3, '0');
-        const batch = writeBatch(db);
-        
-        batch.set(doc(collection(db, "orders")), { orderNumber: orderNo, items: cart, subtotal, discount: customDiscountAmount, total, received: r, change: c, operatorId: currentUser.name, operatorGroup: currentUser.group || "未分組", status: currentStatus, timestamp: serverTimestamp() });
-        cart.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) }));
-        batch.set(doc(db, "active_sessions", "station_1"), { cartItems: [], totalAmount: 0, status: "completed", change: c, orderNumber: orderNo });
-        await batch.commit();
-        
-        // 切換完成畫面的文案
-        if (isCustomerMode) {
-          document.getElementById('success-title').innerText = "訂單已送出";
-          document.getElementById('success-subtitle').innerText = "請憑單號至櫃檯付款取餐";
-        } else {
-          document.getElementById('success-title').innerText = "結帳成功";
-          document.getElementById('success-subtitle').innerText = "請將號碼牌交給顧客";
-        }
+        if (pendingOrderId) {
+            // 店員載入自助點餐，進行後續付款結帳 (不重複扣減商品庫存)
+            const batch = writeBatch(db);
+            batch.update(doc(db, "orders", pendingOrderId), {
+                status: "pending",
+                received: r,
+                change: c,
+                operatorId: currentUser.name,
+                operatorGroup: currentUser.group || "未分組"
+            });
+            batch.set(doc(db, "active_sessions", "station_1"), { cartItems: [], totalAmount: 0, status: "completed", change: c, orderNumber: pendingOrderNo });
+            await batch.commit();
 
-        document.getElementById('checkout-success-overlay').classList.remove('hidden');
-        document.getElementById('success-order-no').innerText = orderNo;
-      } catch (e) { alert("結帳失敗！"); document.getElementById('checkout-btn').disabled = false; }
+            document.getElementById('success-title').innerText = "結帳收款成功";
+            document.getElementById('success-subtitle').innerText = "請將單據與找零交給顧客";
+            document.getElementById('success-order-no').innerText = pendingOrderNo;
+            document.getElementById('checkout-success-overlay').classList.remove('hidden');
+        } else {
+            // 正常結帳 / 顧客自助送出訂單
+            const orderNoNum = await runTransaction(db, async t => {
+              const cd = await t.get(doc(db, "counters", "daily_order"));
+              let nc = cd.exists() ? cd.data().count + 1 : 1;
+              t.set(doc(db, "counters", "daily_order"), { count: nc }, { merge: true }); return nc;
+            });
+            const orderNo = String(orderNoNum).padStart(3, '0');
+            const batch = writeBatch(db);
+            
+            batch.set(doc(collection(db, "orders")), { orderNumber: orderNo, items: cart, subtotal, discount: customDiscountAmount, total, received: r, change: c, operatorId: currentUser.name, operatorGroup: currentUser.group || "未分組", status: currentStatus, timestamp: serverTimestamp() });
+            cart.forEach(item => batch.update(doc(db, "products", item.id), { stock: increment(-item.qty) }));
+            batch.set(doc(db, "active_sessions", "station_1"), { cartItems: [], totalAmount: 0, status: "completed", change: c, orderNumber: orderNo });
+            await batch.commit();
+            
+            if (isCustomerMode) {
+              document.getElementById('success-title').innerText = "訂單已送出";
+              document.getElementById('success-subtitle').innerText = "請憑單號至櫃檯付款取餐";
+            } else {
+              document.getElementById('success-title').innerText = "結帳成功";
+              document.getElementById('success-subtitle').innerText = "請將號碼牌交給顧客";
+            }
+
+            document.getElementById('checkout-success-overlay').classList.remove('hidden');
+            document.getElementById('success-order-no').innerText = orderNo;
+        }
+      } catch (e) { 
+        alert("結帳發生錯誤！"); 
+        document.getElementById('checkout-btn').disabled = false; 
+      }
     };
 
     window.nextOrder = function() {
-      cart = []; total = 0; customDiscountAmount = 0; iF.value = ''; updateCartUI();
+      cart = []; total = 0; customDiscountAmount = 0; iF.value = ''; 
+      pendingOrderId = null; pendingOrderNo = null; // 清除結帳鎖定狀態
+      updateCartUI();
       document.getElementById('checkout-success-overlay').classList.add('hidden');
       document.getElementById('checkout-sidebar').classList.add('translate-y-full');
+      document.getElementById('checkout-btn').disabled = false; 
     };
 
-    // --- 收銀員專用：對自助訂單確認收款 ---
-    window.collectPayment = async function(id) {
-      if(!confirm("確認顧客已於櫃檯完成付款？")) return;
-      try {
-        await updateDoc(doc(db, "orders", id), { status: "pending", operatorId: currentUser.name, operatorGroup: currentUser.group || "未分組" });
-        alert("已確認收款並入帳！");
-        fetchHistory();
-      } catch(e) { alert("確認收款失敗"); }
+    // --- 收銀員專用：將自助訂單載入 POS 結帳介面 ---
+    window.resumePayment = function(id) {
+      if (cart.length > 0 && !pendingOrderId) {
+          if(!confirm("目前購物車內有未結帳商品，確定要放棄並載入這筆自助訂單嗎？")) return;
+      }
+      const order = allOrders.find(o => o.id === id);
+      if(!order) return;
+      
+      // 深度拷貝訂單內容，進入結帳鎖定模式
+      cart = JSON.parse(JSON.stringify(order.items)); 
+      customDiscountAmount = order.discount || 0;
+      pendingOrderId = id;
+      pendingOrderNo = order.orderNumber;
+      iF.value = ''; 
+      
+      updateCartUI();
+      switchTab('pos'); 
+      document.getElementById('checkout-sidebar').classList.remove('translate-y-full'); 
     };
 
     window.fetchHistory = async function() {
@@ -688,14 +754,14 @@
                             `<span class="text-[10px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded ml-1">已結帳</span>`;
 
           let voidBtn = (currentUser && currentUser.role === 'admin' && !isVoid) ? `<button onclick="voidOrder('${docSnap.id}')" class="text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-500 px-2 py-1 rounded text-[10px] font-bold transition mt-2">作廢</button>` : '';
-          let collectBtn = (isUnpaid && !isCustomerMode) ? `<button onclick="collectPayment('${docSnap.id}')" class="bg-emerald-500 text-white px-2 py-1 rounded text-[10px] font-bold transition mt-2 mr-1 active:scale-95 shadow-sm">確認收款</button>` : '';
+          let resumeBtn = (isUnpaid && !isCustomerMode) ? `<button onclick="resumePayment('${docSnap.id}')" class="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-bold transition mt-2 mr-1 active:scale-95 shadow-sm"><i class="fa-solid fa-cash-register mr-1"></i>結帳收款</button>` : '';
 
           return `<div class="bg-white border ${isVoid ? 'border-rose-200 bg-rose-50/30' : (isUnpaid ? 'border-orange-300 shadow-md' : 'border-slate-200')} rounded-xl p-4 flex justify-between items-start shadow-sm transition">
               <div><div class="font-black text-lg ${isVoid ? 'text-slate-400 line-through' : 'text-slate-800'} mb-1">#${d.orderNumber} ${statusBadge} <span class="text-xs font-normal text-slate-400 ml-1">${t}</span></div>
               <div class="text-[10px] text-slate-500 mb-1">人員: ${d.operatorId} (${d.operatorGroup || '無'})</div>
               <div class="text-slate-600 text-xs leading-relaxed max-w-[180px]">${d.items.map(i=>`${i.name}x${i.qty}`).join(', ')}</div></div>
               <div class="text-right flex flex-col items-end"><div class="text-xl font-black ${isVoid ? 'text-slate-300' : 'text-blue-600'}">$${d.total}</div>
-              <div class="flex">${collectBtn}${voidBtn}</div></div>
+              <div class="flex">${resumeBtn}${voidBtn}</div></div>
             </div>`;
         }).join('');
       } catch (e) { list.innerHTML = `<div class="text-center text-rose-500 py-10 font-bold text-sm">讀取失敗</div>`; }
